@@ -138,7 +138,8 @@ class Test_invoice_settings(mock_common.MockAppEngineTest):
     def test_invoice_setting(self):
         req = mock_common.MockRequest()
         invoice_setting = models.InvoiceSettings(
-            userinfo=users.get_current_user(), practice_name='Test Practice')
+            userinfo=users.get_current_user(),
+            user_id = users.get_current_user().user_id(), practice_name='Test Practice')
         invoice_setting.put()
         http_response = views.invoice_settings(req)
         self.assertIn('Test Practice', http_response.content)
@@ -147,12 +148,14 @@ class Test_invoice_settings(mock_common.MockAppEngineTest):
 class Test_invoice_display(mock_common.MockAppEngineTest):
     def setUp(self):
         super(Test_invoice_display, self).setUp()
-        self.client = models.ClientInfo(userinfo=users.get_current_user())
+        self.client = models.ClientInfo(userinfo=users.get_current_user(),
+                                        user_id = users.get_current_user().user_id())
         self.client.put()
         self.start = datetime.datetime(2012, 1, 1)
         self.end = datetime.date(2012, 2, 1)
         self.invoice = models.Invoice(clientinfo=self.client,
                                       userinfo=users.get_current_user(),
+                                        user_id = users.get_current_user().user_id(),
                                       start_date=self.start.date(),
                                       end_date=self.end)
         self.invoice.put()
@@ -168,6 +171,7 @@ class Test_invoice_display(mock_common.MockAppEngineTest):
     def test_with_dos(self):
         req = mock_common.MockRequest()
         dos = models.DOS(userinfo=users.get_current_user(),
+                                        user_id = users.get_current_user().user_id(),
                          clientinfo=self.client,
                          dos_datetime=self.start)
         dos.put()
@@ -199,7 +203,9 @@ class Test_calendar_settings(mock_common.MockAppEngineTest):
     def test_calendar_setting(self):
         req = mock_common.MockRequest()
         calendar_setting = models.CalendarSettings(
-            userinfo=users.get_current_user(), calendar_start_time='5 am')
+            userinfo=users.get_current_user(),
+                                        user_id = users.get_current_user().user_id(),
+            calendar_start_time='5 am')
         calendar_setting.put()
         http_response = views.calendar_settings(req)
         self.assertIn('<option value="5 am" selected="selected">5 am</option>',
@@ -231,6 +237,7 @@ class Test_custom_form_settings(mock_common.MockAppEngineTest):
         req = mock_common.MockRequest()
         custom_form_setting = models.CustomFormSettings(
             userinfo=users.get_current_user(),
+                                        user_id = users.get_current_user().user_id(),
             reason_for_visit_choices='Reason1\nReason2')
         custom_form_setting.put()
         http_response = views.custom_form_settings(req)

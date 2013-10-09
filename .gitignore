@@ -5,3 +5,4 @@ datastore
 .coverage
 
 nose_unit_tests.xml
+.coverage.unit_test

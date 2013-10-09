@@ -67,7 +67,8 @@ class Test_show_client(mock_common.MockAppEngineTest):
 class Test_show_specific_client(mock_common.MockAppEngineTest):
     def test_post(self):
         start = datetime.datetime(2012, 1, 1)
-        client = models.ClientInfo(userinfo=users.get_current_user())
+        client = models.ClientInfo(userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id())
         client.put()
         req = mock_common.MockRequest(method='POST',
                                       POST={'amt_due': 100,
@@ -123,7 +124,8 @@ class Test_search_result(mock_common.MockAppEngineTest):
 
 class Test_update_client(mock_common.MockAppEngineTest):
     def test_get(self):
-        client = models.ClientInfo(userinfo=users.get_current_user())
+        client = models.ClientInfo(userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id())
         client.put()
         req = mock_common.MockRequest()
         resp = client_views.update_client(req, client.get_id())
@@ -141,11 +143,13 @@ class Test_update_client(mock_common.MockAppEngineTest):
 class Test_update_dos(mock_common.MockAppEngineTest):
     def test_get(self):
         client = models.ClientInfo(userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id(),
                                    lastname='fake lastname',
                                    firstname='fake firstname')
         client.put()
         start = datetime.datetime(2012, 1, 1)
         dos = models.DOS(userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id(),
                          clientinfo=client,
                          dos_datetime=start)
         dos.put()

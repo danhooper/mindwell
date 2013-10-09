@@ -115,7 +115,8 @@ class Test_calendar_feed(mock_common.MockAppEngineTest):
     def test_with_dos(self):
         self.dos_datetime = datetime.datetime.now()
         self.dos = models.DOS(dos_datetime=self.dos_datetime,
-                              userinfo=users.get_current_user())
+                              userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id())
         self.dos.put()
         resp = calendar_views.calendar_feed(self.req)
         self.assertIsInstance(resp, HttpResponse)
@@ -128,6 +129,7 @@ class Test_calendar_feed(mock_common.MockAppEngineTest):
         self.dos_datetime = datetime.datetime.now()
         self.dos = models.DOS(dos_datetime=self.dos_datetime,
                               userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id(),
                               dos_repeat='One Day')
         self.dos.put()
         resp = calendar_views.calendar_feed(self.req)
@@ -143,6 +145,7 @@ class Test_calendar_update_dos(mock_common.MockAppEngineTest):
         start = datetime.datetime(2012, 1, 1)
         end = datetime.datetime(2012, 2, 1)
         dos = models.DOS(userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id(),
                          dos_datetime=start,
                          dos_enddateime=end)
         dos.put()
@@ -167,6 +170,7 @@ class Test_calendar_delete_dos(mock_common.MockAppEngineTest):
         start = datetime.datetime(2012, 1, 1)
         end = datetime.datetime(2012, 2, 1)
         dos = models.DOS(userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id(),
                          dos_datetime=start,
                          dos_enddateime=end)
         dos.put()
@@ -189,6 +193,7 @@ class Test_calendar_cancel_all_series_dos(mock_common.MockAppEngineTest):
         start = datetime.datetime(2012, 1, 1)
         end = datetime.datetime(2012, 2, 1)
         dos = models.DOS(userinfo=users.get_current_user(),
+                              user_id = users.get_current_user().user_id(),
                          dos_datetime=start,
                          dos_enddateime=end,
                          dos_repeat='One Day')

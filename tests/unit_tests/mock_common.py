@@ -40,20 +40,23 @@ class MockAppEngineTest(unittest.TestCase):
                                overwrite=True)
         self.testbed.init_user_stub()
         self.client = models.ClientInfo(userinfo=users.get_current_user(),
+                                        user_id=users.get_current_user().user_id(),
                                    lastname='fake lastname',
                                    firstname='fake firstname')
         self.client.put()
         self.dos_start_datetime = datetime.datetime(2012, 1, 1)
         self.dos = models.DOS(userinfo=users.get_current_user(),
+                              user_id=users.get_current_user().user_id(),
                               clientinfo=self.client,
                               dos_datetime=self.dos_start_datetime)
         self.dos.put()
         self.secondary_userinfo = models.UserInfo(
-            user_email_address=secondary_user, userid='124')
+            user_email_address=secondary_user, user_id='124')
         self.secondary_userinfo.put()
         self.user_permission = models.UserPermission(
             userinfo=users.get_current_user(),
-            permitteduser=users.User(secondary_user),
+            user_id = users.get_current_user().user_id(),
+            permitted_user_id='124',
             permissionlevel='Read and Write',
             user_approved='Approved')
         self.user_permission.put()
