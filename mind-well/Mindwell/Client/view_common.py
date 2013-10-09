@@ -8,8 +8,9 @@ from django.utils.html import escape
 
 
 def save_entity(request, entity):
-    entity.userinfo = models.pull_current_user_from_request(request)
-    entity.user_id = entity.userinfo.user_id()
+#    entity.userinfo = models.pull_current_user_from_request(request)
+    entity.user_id = models.pull_current_user_id_from_request(request)
+    #entity.userinfo.user_id()
     entity.put()
     return entity
 

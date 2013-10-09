@@ -24,17 +24,17 @@ class Checkbox(object):
         return self.choice
 
 
-def pull_current_user_from_request(request):
+def pull_current_user_id_from_request(request):
     """Gets the current user, which might either be the logged in user
         or the user they are acting as."""
     # first use the logged in user
-    current_user = users.get_current_user()
+    current_user = users.get_current_user().user_id()
     if request is not None:
         if 'current_user' in request.COOKIES:
             current_user = UserPermission().safe_get(
                 str(request.COOKIES['current_user']))
             if current_user is not None:
-                return current_user.permitteduser
+                return current_user.user_id
     return current_user
 
 
@@ -48,8 +48,8 @@ def global_get_all(classname, request=None, keys_only=False):
         This function will filter out all entities that a user owns
         so that no user can see someone else's information."""
     result = classname.all(keys_only=keys_only)
-    current_user = pull_current_user_from_request(request)
-    return result.filter('userinfo =', current_user)
+    current_user = pull_current_user_id_from_request(request)
+    return result.filter('user_id =', current_user)
 
 
 def global_get_by_id(classname, ids, request=None, parent=None):
@@ -61,8 +61,8 @@ def global_get_by_id(classname, ids, request=None, parent=None):
         result = classname.get_by_key_name(str(ids), parent)
     if result is None:
         return None
-    current_user = pull_current_user_from_request(request)
-    if result.userinfo != current_user:
+    current_user_id = pull_current_user_id_from_request(request)
+    if result.user_id != current_user_id:
         return None
     return result
 
@@ -170,7 +170,7 @@ class UserInfo(db.Model):
     """ This class is used to save information about permitted users."""
 
     user_email_address = db.StringProperty()
-    userid = db.StringProperty(default=None)
+    user_id = db.StringProperty(default=None)
 
     @staticmethod
     def CurrentUserAllowed():
@@ -187,19 +187,19 @@ class UserInfo(db.Model):
             memcache.add("userlist", userlist)
         for user in userlist:
             if user.user_email_address == current_user.email().lower():
-                if not user.userid:
+                if not user.user_id:
                     userlist = UserInfo.all().filter(
                         'user_email_address =', current_user.email().lower())
                     user = userlist.get()
                     if user is not None:
-                        if not user.userid:
-                            user.userid = current_user.user_id()
+                        if not user.user_id:
+                            user.user_id = current_user.user_id()
                             user.put()
                             logging.info('Adding user id %s' % (
                                 str(current_user.user_id())))
                     memcache.delete("userlist")
                     return True
-            if user.userid == current_user.user_id():
+            if user.user_id == current_user.user_id():
                 return True
         logging.info('user %s tried to login' % current_user.email())
         return False
@@ -1339,6 +1339,7 @@ class InvoiceForm(forms.Form):
     clientinfo = forms.ChoiceField(label='Client')
     start_date = forms.DateField(widget=SelectDateWidget(years=years))
     end_date = forms.DateField(widget=SelectDateWidget(years=years))
+    user_id = db.StringProperty()
 
     def __init__(self, *args, **kwargs):
 
@@ -1363,6 +1364,7 @@ class InvoiceSettings(db.Model):
     header = db.StringProperty(multiline=True)
     right_header = db.StringProperty(multiline=True)
     footer = db.StringProperty(multiline=True)
+    user_id = db.StringProperty()
 
     def update_model(self, values):
         for k, v in values.iteritems():
@@ -1414,6 +1416,7 @@ class CustomFormSettings(db.Model):
     referrer_choices = db.TextProperty()
     session_type_choices = db.TextProperty()
     new_client_script = db.TextProperty()
+    user_id = db.StringProperty()
 
     def update_model(self, values):
         for k, v in values.iteritems():
@@ -1477,6 +1480,7 @@ class CustomFormSettingsForm(forms.Form):
                                            required=False)
     new_client_script = forms.CharField(widget=forms.Textarea(),
                                         required=False)
+    user_id = db.StringProperty()
 
     @classmethod
     def get_default_form(cls):
