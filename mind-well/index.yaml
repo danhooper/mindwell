@@ -24,6 +24,13 @@ indexes:
   properties:
   - name: clientinfo
   - name: session_result
+  - name: user_id
+  - name: dos_datetime
+
+- kind: DOS
+  properties:
+  - name: clientinfo
+  - name: session_result
   - name: userinfo
   - name: dos_datetime
 
@@ -36,8 +43,24 @@ indexes:
 - kind: DOS
   properties:
   - name: dos_repeat_end_date
+  - name: user_id
+  - name: dos_repeat
+
+- kind: DOS
+  properties:
+  - name: dos_repeat_end_date
   - name: userinfo
   - name: dos_repeat
+
+- kind: DOS
+  properties:
+  - name: user_id
+  - name: dos_datetime
+
+- kind: DOS
+  properties:
+  - name: user_id
+  - name: dos_repeat_end_date
 
 - kind: DOS
   properties:

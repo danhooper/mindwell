@@ -1,3 +1,7 @@
 *.pyc
 secret_info.py
 *.swp
+datastore
+.coverage
+
+nose_unit_tests.xml

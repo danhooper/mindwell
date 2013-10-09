@@ -101,7 +101,6 @@ def get_last_day_of_month(curr_date):
 def generate_invoices_dict(start_date, end_date, request=None):
     dos = models.DOS.safe_all(request=request).filter(
         'dos_datetime >=', start_date).filter('dos_datetime <=', end_date)
-    invoice_list = []
     client_list = []
     for d in dos:
         if d.get_blocked_time():
@@ -116,14 +115,11 @@ def generate_invoices_dict(start_date, end_date, request=None):
                 'start_date =', start_date.date()).filter(
                 'end_date =', end_date.date())
         if find_invoices.count() > 0:
-            invoice_list.append(find_invoices[0])
             continue
         invoice = models.Invoice(clientinfo=d.clientinfo,
             start_date=start_date.date(),
             end_date=end_date.date())
-        invoice.userinfo = models.pull_current_user_from_request(request)
-        invoice = invoice.put()
-        invoice_list.append(invoice)
+        invoice = view_common.save_entity(request, invoice)
     invoices = models.Invoice.safe_all(request=request).filter(
         'start_date =', start_date.date()).filter(
         'end_date =', end_date.date())
@@ -617,12 +613,8 @@ def settings(request):
     return render_to_response('settings_template.html', {},
                               context_instance=RequestContext(request))
 
-
+@view_common.prevent_acting_as
 def permission_settings(request, update=''):
-    # don't let someone change permissions of user they are acting as
-    if (users.get_current_user() !=
-        models.pull_current_user_from_request(request)):
-        return HttpResponseRedirect('/Mindwell/show_client/')
 
     # explicity only allow changing
     user_permissions = models.UserPermission.safe_all(request=None)
@@ -647,6 +639,7 @@ def update_permission_settings(request):
         form = models.UserPermissionForm(request.POST)
         if form.is_valid():
             entity = models.UserPermission(**form.cleaned_data)
+            entity.user_email = users.get_current_user().email()
             view_common.save_entity(request, entity)
     return HttpResponseRedirect(reverse('updated_permission_settings',
                                         kwargs={'update': 'update'}))
@@ -700,6 +693,7 @@ def update_request_settings(request, request_permission_id):
         form = models.UserPermissionRequestsForm(request.POST)
         if form.is_valid():
             request_to_update.update_model(form.cleaned_data)
+            request_to_update.permitted_user_id = users.get_current_user().user_id()
             request_to_update.put()
     return HttpResponseRedirect(reverse('updated_permission_settings',
                                         kwargs={'update': 'update'}))

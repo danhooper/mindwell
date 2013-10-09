@@ -34,7 +34,7 @@ def pull_current_user_id_from_request(request):
             current_user = UserPermission().safe_get(
                 str(request.COOKIES['current_user']))
             if current_user is not None:
-                return current_user.user_id
+                return current_user.permitted_user_id
     return current_user
 
 
@@ -48,8 +48,8 @@ def global_get_all(classname, request=None, keys_only=False):
         This function will filter out all entities that a user owns
         so that no user can see someone else's information."""
     result = classname.all(keys_only=keys_only)
-    current_user = pull_current_user_id_from_request(request)
-    return result.filter('user_id =', current_user)
+    current_user_id = pull_current_user_id_from_request(request)
+    return result.filter('user_id =', current_user_id)
 
 
 def global_get_by_id(classname, ids, request=None, parent=None):
@@ -60,9 +60,11 @@ def global_get_by_id(classname, ids, request=None, parent=None):
     if result is None:
         result = classname.get_by_key_name(str(ids), parent)
     if result is None:
+        logging.info('could not find %s with id %s', classname, ids)
         return None
     current_user_id = pull_current_user_id_from_request(request)
     if result.user_id != current_user_id:
+        logging.info('current_user id is not the same as the result user id')
         return None
     return result
 
@@ -74,7 +76,7 @@ def global_get(classname, keys):
        entities."""
     try:
         result = classname.get(keys)
-        if result.userinfo != users.get_current_user():
+        if result.user_id != users.get_current_user().user_id():
             return None
         return result
     except (db.KindError, AttributeError):
@@ -217,9 +219,11 @@ class UserPermission(db.Model):
     # Not used today, but in the future will be filtered all the time to get a
     # user's Clients
     user_id = db.StringProperty()
-
+    user_email = db.StringProperty()
     # this is the user the current user can act on behalf of
-    permitteduser = db.UserProperty()
+    #permitteduser = db.UserProperty()
+    permitted_user_email = db.StringProperty()
+    permitted_user_id = db.StringProperty()
     PERMISSION_LEVEL_CHOICES = (
         'Read and Write',
         )
@@ -254,8 +258,8 @@ class UserPermission(db.Model):
 
     @staticmethod
     def get_permission_requests():
-        return UserPermission.all().filter('permitteduser = ',
-                                           users.get_current_user())
+        return UserPermission.all().filter('permitted_user_email = ',
+                                           users.get_current_user().email())
 
     @staticmethod
     def unsafe_get(ids, parent=None):
@@ -289,7 +293,7 @@ class UserPermissionForm(forms.Form):
         Omits the user_approved field."""
 
     # this is the user the current user can act on behalf of
-    permitteduser = forms.CharField(max_length=200)
+    permitted_user_email = forms.CharField(max_length=200)
     PERMISSION_LEVEL_CHOICES = (
         ('Read and Write', 'Read and Write'),
         )
@@ -297,11 +301,10 @@ class UserPermissionForm(forms.Form):
                                         choices=PERMISSION_LEVEL_CHOICES)
 
     # Force the user email to be lower case
-    def clean_permitteduser(self):
-        data = self.cleaned_data['permitteduser']
+    def clean_permitted_user_email(self):
+        data = self.cleaned_data['permitted_user_email']
         if data:
             data = str(data).lower()
-            data = users.User(email=data)
         return data
 
 
@@ -1317,7 +1320,7 @@ class Invoice(db.Model):
                 if not invoice:
                     invoice = Invoice(
                         clientinfo=print_receipt_dos.clientinfo,
-                        userinfo=pull_current_user_from_request(request),
+                        user_id=pull_current_user_id_from_request(request),
                         start_date=print_receipt_dos.dos_datetime.date(),
                         end_date=print_receipt_dos.dos_datetime.date(),)
                     invoice.put()

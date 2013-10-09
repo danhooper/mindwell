@@ -92,8 +92,8 @@ def prevent_acting_as(func):
     '''
     def decorator(*args, **kwargs):
         request = args[0]
-        if (users.get_current_user() !=
-            models.pull_current_user_from_request(request)):
+        if (users.get_current_user().user_id() !=
+            models.pull_current_user_id_from_request(request)):
             logging.warning('Access violation %s' % str(func))
             return HttpResponseRedirect('/Mindwell/show_client/')
         else:
