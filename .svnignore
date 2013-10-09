@@ -1,0 +1,10 @@
+.coverage
+.coverage.unit_test
+.coverage.system_test
+.project
+.pydevproject
+nosetests.xml
+nose_unit_tests.xml
+datastore
+htmlcov
+coverage_files

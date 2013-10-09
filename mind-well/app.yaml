@@ -1,0 +1,49 @@
+application: mindwellonline-test
+version: 3-0-0-666
+runtime: python27
+api_version: 1
+threadsafe: false
+
+default_expiration: "12h"
+
+builtins:
+- appstats: on
+- remote_api: on
+
+handlers:
+- url: /favicon.ico
+  static_files: Mindwell/static/images/favicon.ico
+  upload: Mindwell/static/images/favicon.ico
+
+- url: /static
+  static_dir: Mindwell/static
+
+#- url: /test.*
+#  script: Mindwell/gaeunit/gaeunit.py
+
+- url: /administrator.*
+  script: main.app
+  login: admin
+
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
+- url: /_ereporter.*
+  script: $PYTHON_LIB/google/appengine/ext/ereporter/report_generator.py
+  login: admin
+
+- url: /mapreduce(/.*)?
+  script: mapreduce/main.py
+  login: admin
+
+- url: /.*
+  script: main.app
+  login: required
+  secure: always
+
+libraries:
+- name: django
+  version: "1.2"
+- name: pycrypto
+  version: "2.3"

@@ -1,0 +1,242 @@
+{% load choices_modal %}
+{% render_custom_modal referrer_choices curr_client_referrer "Referrer" %}
+{% render_custom_modal reason_for_visit_choices curr_client_reason_for_visit "Reason for Visit" %}
+{% if form %}
+  <table>
+  {% if form.lastname %}
+    {% if form.lastname.errors %}
+      <tr><td>{{form.lastname.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.lastname.html_name}}">Last Name:</label></th>
+    <td>{{form.lastname}}</td>
+    </tr>
+  {% endif %}
+  {% if form.firstname %}
+    {% if form.firsttname.errors %}
+      <tr><td>{{form.firstname.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.firstname.html_name}}">First Name:</label></th>
+    <td>{{form.firstname}}</td>
+    </tr>
+  {% endif %}
+  </table>
+<div class="row-fluid">
+  <div class="span4">
+  <H2>Contact Info</H2>
+  <table>
+  {% if form.cellnumber %}
+    {% if form.cellnumber.errors %}
+      <tr><td>{{form.cellnumber.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th VALIGN="top"><label for="id_{{form.cellnumber.html_name}}">Cell #:</label></th>
+    <td>
+      {{form.cellnumber}}<br/>
+      {{form.cellmessage}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.homenumber %}
+    {% if form.homenumber.errors %}
+      <tr><td>{{form.homenumber.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th VALIGN="top"><label for="id_{{form.homenumber.html_name}}">Home #:</label></th>
+    <td>
+      {{form.homenumber}}<br/>
+      {{form.homemessage}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.worknumber %}
+    {% if form.worknumber.errors %}
+      <tr><td>{{form.worknumber.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th VALIGN="top"><label for="id_{{form.worknumber.html_name}}">Work #:</label></th>
+    <td>
+      {{form.worknumber}}<br/>
+      {{form.workmessage}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.emailaddress %}
+    {% if form.emailaddress.errors %}
+      <tr><td>{{form.emailaddress.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.emailaddress.html_name}}">Email:</label></th>
+    <td>
+      {{form.emailaddress}}
+    </td>
+    </tr>
+  {% endif %}
+  </table>
+  </div>
+  <div class="span4">
+  <H2>Address</H2>
+  <table>  
+  {% if form.address %}
+    {% if form.address.errors %}
+      <tr><td>{{form.address.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.address.html_name}}">Address:</label></th>
+    <td>
+      {{form.address}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.address2 %}
+    {% if form.address2.errors %}
+      <tr><td>{{form.address2.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.address2.html_name}}">Address2:</label></th>
+    <td>
+      {{form.address2}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.city %}
+    {% if form.city.errors %}
+      <tr><td>{{form.city.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.city.html_name}}">City:</label></th>
+    <td>
+      {{form.city}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.state %}
+    {% if form.state.errors %}
+      <tr><td>{{form.state.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.state.html_name}}">State:</label></th>
+    <td>
+      {{form.state}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.zipcode %}
+    {% if form.zipcode.errors %}
+      <tr><td>{{form.zipcode.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.zipcode.html_name}}">ZipCode:</label></th>
+    <td>
+      {{form.zipcode}}
+    </td>
+    </tr>
+  {% endif %}
+  </table>
+  </div>
+  <div class="span4">
+  <H2>Other</H2>
+  <table>
+  {% if form.dob %}
+    {% if form.dob.errors %}
+      <tr><td>{{form.dob.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.dob.html_name}}">DOB:</label></th>
+    <td>
+      {{form.dob}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.referrer %}
+    {% if form.referrer.errors %}
+      <tr><td>{{form.referrer.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.referrer.html_name}}">Referrer:</label></th>
+    <td>
+      {{form.referrer}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.dsm_code %}
+    {% if form.dsm_code.errors %}
+      <tr><td>{{form.dsm_code.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.dsm_code.html_name}}">DSM Code:</label></th>
+    <td>
+      {{form.dsm_code}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.client_status %}
+    {% if form.client_status.errors %}
+      <tr><td>{{form.client_status.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.client_status.html_name}}">Client Status:</label></th>
+    <td>
+      {{form.client_status}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.guardians_name %}
+    {% if form.guardians_name.errors %}
+      <tr><td>{{form.guardians_name.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.guardians_name.html_name}}">Guardian's Name:</label></th>
+    <td>
+      {{form.guardians_name}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.guardians_phone_number %}
+    {% if form..errors %}
+      <tr><td>{{form.guardians_phone_number.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.guardians_phone_number.html_name}}">Guardian's Phone Number:</label></th>
+    <td>
+      {{form.guardians_phone_number}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.emergency_contact %}
+    {% if form.emergency_contact.errors %}
+      <tr><td>{{form.emergency_contact.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.emergency_contact.html_name}}">Emergency Contact:</label></th>
+    <td>
+      {{form.emergency_contact}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.emergency_contact_phone_number %}
+    {% if form.emergency_contact_phone_number.errors %}
+      <tr><td>{{form.emergency_contact_phone_number.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.emergency_contact_phone_number.html_name}}">Emergency Contact Phone #:</label></th>
+    <td>
+      {{form.emergency_contact_phone_number}}
+    </td>
+    </tr>
+  {% endif %}
+  {% if form.reason_for_visit %}
+    {% if form.reason_for_visit.errors %}
+      <tr><td>{{form.reason_for_visit.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{form.reason_for_visit.html_name}}">Reason for Visit:</label></th>
+    <td>
+      {{form.reason_for_visit}}
+    </td>
+    </tr>
+  {% endif %}
+  </table></div>
+</div>
+{% endif %}

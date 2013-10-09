@@ -1,0 +1,13 @@
+{% extends "settings_template.html" %}
+{% block settings %}
+  <h2>Invoice Settings</h2>
+  {% if update %}
+    <strong>Invoice Settings Updated</strong>
+  {% endif %}
+  <table>
+	  <form action="{% url invoice_settings %}" method="post">
+	    {{ form.as_table }}
+        <tr><td><input type="submit" value="Submit" /></td></tr>
+	  </form>
+  </table>
+{% endblock %}

@@ -1,0 +1,25 @@
+<strong>Are you sure you wish to delete {{client}}?  This will delete all dates of service and all records of this client. 
+        This cannot be undone!</strong>
+<div id="message"></div>
+<form id="delete_client_form" onSubmit='return on_delete_client_submit()' action="">
+    <input class="btn" type="submit" value="Delete Client"/>
+    <input class="btn" type="button" onclick="return on_cancel_delete()" value="Cancel"/>
+</form>
+<script>
+
+function on_delete_client_submit() {
+  $.post("{% url delete_client client.get_id %}",
+    $('#delete_client_form').serialize(),
+    function(data) {
+      $('#message').html("<h2>Client {{client}} deleted!</h2>");
+      $("#delete_client_form").html('');
+      $( "#dialog-modal" ).dialog( "close" );
+      $("tr#client_{{ client.get_id}}").remove();
+    }
+  );
+  return false;
+};
+function on_cancel_delete() {
+	$( "#dialog-modal" ).dialog( "close" );
+}
+</script>

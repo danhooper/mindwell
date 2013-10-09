@@ -1,0 +1,105 @@
+
+
+{% if dos_form %}
+
+{% if dos_form.blocked_time %}
+    {% if dos_form.blocked_time.errors %}
+      <tr><td>{{dos_form.blocked_time.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{dos_form.blocked_time.html_name}}">Blocked Time:</label></th>
+    <td>{{dos_form.blocked_time}}</td>
+    </tr>
+  {% endif %}
+  {% if dos_form.clientinfo %}
+    {% if dos_form.clientinfo.errors %}
+      <tr><td>{{dos_form.clientinfo.errors }}</td></tr>
+    {% endif %}
+    <tr>
+    <th><label for="id_{{dos_form.clientinfo.html_name}}">Client:</label></th>
+    <td>{{dos_form.clientinfo}}</td>
+    </tr>
+  {% endif %}
+  {% if dos_form.session_type.errors %}
+    <tr><td>{{dos_form.session_type.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.session_type.html_name}}">Session Type:</label></th>
+  <td>{{dos_form.session_type}}</td>
+  </tr>
+  {% if dos_form.session_result.errors %}
+    <tr><td>{{dos_form.session_result.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.session_result.html_name}}">Session Result:</label></th>
+  <td>{{dos_form.session_result}}</td>
+  </tr>
+  {% if dos_form.dsm_code.errors %}
+    <tr><td>{{dos_form.dsm_code.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.dsm_code.html_name}}">DSM Code:</label></th>
+  <td>{{dos_form.dsm_code}}</td>
+  </tr>
+  {% if dos_form.type_pay.errors %}
+    <tr><td>{{dos_form.type_pay.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.type_pay.html_name}}">Type of Payment:</label></th>
+  <td>{{dos_form.type_pay}}</td>
+  </tr>
+  {% if dos_form.amt_due.errors %}
+    <tr><td>{{dos_form.amt_due.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.amt_due.html_name}}">Amount Due:</label></th>
+  <td>{{dos_form.amt_due}}</td>
+  </tr>
+  {% if dos_form.amt_paid.errors %}
+    <tr><td>{{dos_form.amt_paid.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.amt_paid.html_name}}">Amount Paid:</label></th>
+  <td>{{dos_form.amt_paid}}</td>
+  </tr>
+  {% if dos_form.note.errors %}
+    <tr><td>{{dos_form.note.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.note.html_name}}">Note:</label></th>
+  <td>{{dos_form.note}}</td>
+  </tr>
+  {% if dos_form.dos_datetime.errors %}
+    <tr><td>{{dos_form.dos_datetime.errors }}</td></tr>
+  {% endif %}
+  {% if dos_form.dos_endtime.errors %}
+    <tr><td>{{dos_form.dos_endtime.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.dos_datetime.html_name}}">DOS Date and Time:</label></th>
+  <td>{{dos_form.dos_datetime}} - {{dos_form.dos_endtime}}</td>
+  </tr>
+  {% if dos_form.dos_repeat.errors %}
+    <tr><td>{{dos_form.dos_repeat.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.dos_repeat.html_name}}">DOS Repeat:</label></th>
+  <td>{{dos_form.dos_repeat}}</td>
+  </tr>
+  {% if dos_form.dos_repeat_end_date.errors %}
+    <tr><td>{{dos_form.dos_repeat_end_date.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.dos_repeat_end_date.html_name}}">Repeat End Date:</label></th>
+  <td>{{dos_form.dos_repeat_end_date}}</td>
+  </tr>
+  {% if dos_form.print_receipt.errors %}
+    <tr><td>{{dos_form.print_receipt.errors }}</td></tr>
+  {% endif %}
+  {% if dos_form.print_receipt %}
+    <tr>
+    <th><label for="id_{{dos_form.print_receipt.html_name}}">Print Receipt:</label></th>
+    <td>{{dos_form.print_receipt}}</td>
+    </tr>
+  {% endif %}
+{% endif %}

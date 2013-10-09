@@ -1,0 +1,84 @@
+{% extends "settings_template.html" %}
+{% block document_ready_javascript %}
+  // call the tablesorter plugin
+  $(".tablesorter").tablesorter({
+      sortList: [[1,0]],
+      textExtraction: "complex",
+    widgets : [ "uitheme", "filter", "zebra" ], 
+ 
+    widgetOptions : { 
+ 
+      // set the uitheme widget to use the bootstrap theme class names 
+      uitheme : "bootstrap" 
+ 
+    } 
+  });
+{% endblock document_ready_javascript %}
+{% block settings %}
+  <h2>Permission Settings</h2>
+  {% if update %}
+    <strong>Permission Settings Updated</strong>
+  {% endif %}
+  <h2>My User Permissions</h2>
+  The following is a list of users you may act as (assuming they have approved you).
+  <table id="invoice_table" cellspacing="1" class="tablesorter">
+    <thead>
+      <tr>
+        <th>Permitted User</th>
+        <th>Permission Level</th>
+        <th>User Approved</th>
+        <th>Delete this Request</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for permission in user_permissions %}
+      <tr>
+        <td>{{permission.permitteduser}}</td>
+        <td>{{permission.permissionlevel}}</td>
+        <td>{{permission.user_approved}}</td>
+        <td><a href="{{permission.get_delete_absolute_url}}">Delete</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  Fill out the following to make a request:
+  <table>
+  <form action="/Mindwell/settings/update_permission/" method="post">
+    {{ form }}
+    <tr><td><input type="submit" value="Submit" /></td></tr>
+  </form>
+  </table>
+  <h2>Permission Requests</h2>
+  The following is a list of users asking you for permission to act as you.
+  <table id="request_table" cellspacing="1" class="tablesorter">
+    <thead>
+      <tr>
+        <th>Make Changes</th>
+        <th>Requesting User</th>
+        <th>Permission Level</th>
+        <th>User Approved</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for permission in permission_requests %}
+      {% ifequal request_permission_id permission.get_id %}
+      <tr class="curr_row">
+      {% else %}
+      <tr>
+      {% endifequal %}
+        <td><a href="{{permission.get_absolute_url}}">Change</a></td>
+        <td>{{permission.userinfo}}</td>
+        <td>{{permission.permissionlevel}}</td>
+        <td>{{permission.user_approved}}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if request_to_update %}
+  User {{request_to_update.userinfo}} has requested {{request_to_update.permissionlevel}} access.
+  <form action="/Mindwell/settings/{{request_permission_id}}/update_request/" method="post">
+    {{ request_form }}
+    <tr><input id="id_submit_update_request" type="submit" value="Submit" /></td></tr>
+  </form>
+  {% endif %}
+{% endblock %}

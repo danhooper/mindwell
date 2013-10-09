@@ -1,0 +1,9 @@
+mapreduce:
+- name: Update all ClientInfo
+  mapper:
+    input_reader: mapreduce.input_readers.DatastoreInputReader
+    handler: Mindwell.Client.my_mapreduce.update_entity
+    params:
+    - name: entity_kind
+      default: Mindwell.Client.models.ClientInfo
+      

@@ -1,0 +1,11 @@
+{% extends "reports_template.html" %}
+{% block title %}Provider Invoices{% endblock %}
+{% block invoice_content %}
+  <h2>Provider Invoices</h2>
+  <table>
+  <form action="/Mindwell/provider_invoices/" method="post">
+    {{ form.as_table }}
+    <tr><td><input type="submit" value="Submit" /></td></tr>
+  </form>
+  </table>
+{% endblock %}

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://dhoops.gotdns.com:8081/" />
+<title>sel_add_client2a</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">sel_add_client2a</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/_ah/login?continue=http%3A//dhoops.gotdns.com%3A8081/</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>submit-login</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Add Client</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_lastname</td>
+	<td>test_last_name2a</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_firstname</td>
+	<td>test_first_name2a</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_cellnumber</td>
+	<td>test_cell</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_homenumber</td>
+	<td>test_home</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_worknumber</td>
+	<td>test_work</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_emailaddress</td>
+	<td>test_email</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_address</td>
+	<td>test_addr</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_address2</td>
+	<td>test_addr2</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_city</td>
+	<td>test_city</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_zipcode</td>
+	<td>test_zip</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id_dob_month</td>
+	<td>label=January</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id_dob_day</td>
+	<td>label=1</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id_dob_year</td>
+	<td>label=1915</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_guardians_name</td>
+	<td>test_guardian</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_guardians_phone_number</td>
+	<td>test_guardian_phone</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_emergency_contact</td>
+	<td>test_emerg_cont</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_emergency_contact_phone_number</td>
+	<td>test_emerg_cont_phone</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_referrer</td>
+	<td>test_refer</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id_dsm_code</td>
+	<td>test_dsm</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=submit]</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

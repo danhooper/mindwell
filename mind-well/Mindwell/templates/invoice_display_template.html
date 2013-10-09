@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="stylesheet" href="/static/css/invoice.css" />
+    <title>{{ invoice_settings.practice_name}}</title>
+</head>
+<body>
+    <div id="invoice_container">
+    <style type="text/css" media="print">
+    .printbutton {
+      visibility: hidden;
+      display: none;
+    }
+    </style>
+    <script>
+    document.write("<input type='button' " +
+    "onClick='window.print()' " +
+    "class='printbutton' " +
+    "value='Print This Page'/>");
+    </script>
+        <div id="invoice_header">
+            <h2>{{invoice_settings.practice_name|linebreaks}}</h2>
+            <h3>
+                {{invoice_settings.header|linebreaks}}
+            </h3>
+        </div>
+        <div id="invoice_header_bottom">
+            <strong>
+                {{invoice_settings.right_header|linebreaks}}
+            </strong>
+        </div>
+        <strong>
+            <br/><br/>
+            Invoice Number: {{invoice.key.id}}<br/><br/>
+            Date: {{invoice.get_invoice_gen_date}}<br/><br/>
+            Name: {{invoice.clientinfo.firstname}} {{invoice.clientinfo.lastname}}<br/><br/>
+            {% if invoice.clientinfo.address %}
+                Address: {{invoice.clientinfo.address}}
+            {% endif %}
+            {% if invoice.clientinfo.address2 %}
+                {{invoice.clientinfo.address2}}<br/>
+            {% else %}
+                <br/>
+            {% endif %}
+            {{invoice.clientinfo.city}}, {{invoice.clientinfo.state}} {{ invoice.clientinfo.zipcode}}<br/><br/>
+            DSM IV Code: {{dsm_code}}<br/><br/>
+            <table border=1>
+                <tr>
+                    <td>Date of Service</td>
+                    <td>CPT Code</td>
+                    <td>Length of Session</td>
+                    <td>Amount Due</td>
+                    <td>Amount Paid</td>
+                    <td>Type of Payment</td>
+                </tr>
+                {%for individual_dos in dos %}
+                    <tr>
+                        <td>{{individual_dos.get_dos_date_display}}</td>
+                        <td>{{individual_dos.session_type}}</td>
+                        <td>{{individual_dos.get_duration}}</td>
+                        <td>{{individual_dos.amt_due}}</td>
+                        <td>{{individual_dos.amt_paid}}</td>
+                        <td>{{individual_dos.type_pay}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            Balance: {{dos_balance}}
+            <br/>
+        </strong>
+    <div id="invoice_footer">
+        {{invoice_settings.footer|linebreaks}}
+    </div>
+    </div>
+</body>
+</html>

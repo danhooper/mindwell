@@ -1,0 +1,41 @@
+select#permitted_user {margin-top: 0px; width:180px;};
+select#id_dob_month {width:100px;}
+ul.errorlist {color:red; font-weight:bold}
+#id_dob_month{width:110px;}
+#id_dob_day{width:55px;}
+#id_dob_year{width:70px;}
+#id_dos_datetime_1_time{width:110px;}
+#id_dos_endtime_time{width:180px;}
+label.multicheckbox_other_label{text-align:right; min-width:200px; min-height:30px; font-weight: bold;}
+label.multicheckbox_label{text-align:left; min-width:200px; min-height:30px;}
+input.multicheckbox_other_input{min-width:180px; margin-bottom: 20px;}
+.curr_row{background-color:#99bbff}
+#cal_table{width:100%;height:100%;position:absolute;}
+#cal_form{vertical-align:top;height:100%;min-height:100%;}
+#client_info_block{}
+.client_info{border-color:white;border:1px;top:0px;position:relative;}
+.client_info_category{font-size:20px;position:relative;}
+.client_info_fields{position:relative;}
+#client_info_header{font-size:20px;border-color:white;}
+#client_info_table tr{padding:0px;}
+#client_info_table td{vertical-align:top;top:0px;padding-right:20px;}
+table.tablesorter{background-color:#CDCDCD;margin:10px 0pt 15px;text-align:left;width:auto}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th{background-color:#e6EEEE;border:1px solid #FFF;padding:4px 20px 4px 4px;}
+table.tablesorter thead tr .header{background-image:url(/static/images/bg.gif);background-repeat:no-repeat;background-position:center right;cursor:pointer;}
+table.tablesorter tbody td{color:#3D3D3D;padding:4px 20px 4px 4px;background-color:#FFF;vertical-align:top;}
+table.tablesorter tbody tr.odd td{background-color:#F0F0F6;}
+table.tablesorter thead tr .headerSortUp{background-image:url(/static/images/asc.gif);}
+table.tablesorter thead tr .headerSortDown{background-image:url(/static/images/desc.gif);}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp{background-color:#8dbdd8;}
+table.tablesorter tbody tr.curr_row td{background-color:#99bbff;}
+
+.scheduleClient,.recurrClient{background-color:#ffaaaa;}
+.attendedClient{background-color:#aaffaa;}
+.blocked_time{background-color:blue;border-color:blue;color:white;}
+.attendedClient{background-color:green;border-color:green;color:white;}
+.scheduleClient{background-color:yellow;border-color:yellow;color:blue;}
+.recurrClient{background-color:yellow;border-color:yellow;color:blue;}
+.noShow{background-color:red;border-color:red;color:white;}
+.cancel{background-color:gray;border-color:gray;color:white;}
+.payment_rx{background-color:lightgreen;border-color:lightgreen;color:blue;}
+div#content{padding-left:5px;}

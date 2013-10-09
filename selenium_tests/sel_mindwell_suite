@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="sel_add_user">sel_add_user</a></td></tr>
+<tr><td><a href="sel_login_user">sel_login_user</a></td></tr>
+<tr><td><a href="sel_add_client">sel_add_client</a></td></tr>
+<tr><td><a href="sel_add_dos">sel_add_dos</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_1_day">sel_add_dos_rep_1_day</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_1_week">sel_add_dos_rep_1_week</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_2_week">sel_add_dos_rep_2_week</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_3_week">sel_add_dos_rep_3_week</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_4_week">sel_add_dos_rep_4_week</a></td></tr>
+<tr><td><a href="sel_update_balance">sel_update_balance</a></td></tr>
+<tr><td><a href="sel_search">sel_search</a></td></tr>
+<tr><td><a href="sel_generate_invoices">sel_generate_invoices</a></td></tr>
+<tr><td><a href="logout">logout</a></td></tr>
+<tr><td><a href="sel_add_user2">sel_add_user2</a></td></tr>
+<tr><td><a href="sel_login_user2">sel_login_user2</a></td></tr>
+<tr><td><a href="sel_add_client2">sel_add_client2</a></td></tr>
+<tr><td><a href="logout">logout</a></td></tr>
+<tr><td><a href="sel_login_user">sel_login_user</a></td></tr>
+<tr><td><a href="sel_ask_permission">sel_ask_permission</a></td></tr>
+<tr><td><a href="logout">logout</a></td></tr>
+<tr><td><a href="sel_login_user2">sel_login_user2</a></td></tr>
+<tr><td><a href="sel_grant_permission">sel_grant_permission</a></td></tr>
+<tr><td><a href="logout">logout</a></td></tr>
+<tr><td><a href="sel_login_user">sel_login_user</a></td></tr>
+<tr><td><a href="sel_act_as_user2">sel_act_as_user2</a></td></tr>
+<tr><td><a href="sel_add_dos_client2">sel_add_dos_client2</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_1_day_client2">sel_add_dos_rep_1_day_client2</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_1_week_client2">sel_add_dos_rep_1_week_client2</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_2_week_client2">sel_add_dos_rep_2_week_client2</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_3_week_client2">sel_add_dos_rep_3_week_client2</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_4_week_client2">sel_add_dos_rep_4_week_client2</a></td></tr>
+<tr><td><a href="sel_update_balance_client2">sel_update_balance_client2</a></td></tr>
+<tr><td><a href="sel_run_reports">sel_run_reports</a></td></tr>
+<tr><td><a href="sel_mark_dos_attended2">sel_mark_dos_attended2</a></td></tr>
+<tr><td><a href="sel_generate_invoices_2">sel_generate_invoices_2</a></td></tr>
+<tr><td><a href="sel_login_user2">sel_login_user2</a></td></tr>
+<tr><td><a href="sel_add_client2a">sel_add_client2a</a></td></tr>
+<tr><td><a href="sel_add_dos_client2a">sel_add_dos_client2a</a></td></tr>
+<tr><td><a href="sel_add_dos_rep_1_day_client2a">sel_add_dos_rep_1_day_client2a</a></td></tr>
+<tr><td><a href="sel_provier_stats_all_time">sel_test_provier_stats_all_time</a></td></tr>
+<tr><td><a href="sel_running_balance">sel_running_balance</a></td></tr>
+<tr><td><a href="sel_dos_receipt">sel_dos_receipt</a></td></tr>
+</tbody></table>
+</body>
+</html>

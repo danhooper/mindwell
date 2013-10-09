@@ -1,0 +1,83 @@
+{% extends "base_mindwell.html" %}
+{% block title %}Show Clients{% endblock %}
+{% block document_ready_javascript %}
+  // call the tablesorter plugin
+  $("table").tablesorter({
+      sortList: [[0,0]],
+      textExtraction: "complex",
+      
+    widgets : [ "uitheme", "filter", "zebra" ], 
+ 
+    widgetOptions : { 
+ 
+      // set the uitheme widget to use the bootstrap theme class names 
+      uitheme : "bootstrap" 
+ 
+    } 
+  });
+  $('#content a[tooltip]').each(function()
+  {
+    $(this).qtip({content: $(this).attr('tooltip'), style: 'cream'});
+  });
+  $("#dialog-modal").dialog({autoOpen: false,
+    width:450,     
+    modal: true,
+    hide: { effect: 'fade',
+            duration: 1000
+    },
+  });
+  $('a.uimodal').bind('click', function() {
+    var $this = $(this);
+    $("#dialog-modal").dialog('open');
+    $("#dialog-modal").load($this.attr("href"), null, function() {
+    });
+    return false;
+  });
+  function getBalanceSuccessFunc(client_obj) {
+    var client_td = client_obj;
+    // create a closure so we can access the client_td in the callback
+    return function(data) {
+        $(client_td).text(data['balance']);
+    };
+  };
+  $('#calc_balances').click(function(event) {
+    event.preventDefault();
+    $('.client_balance').each(function(index) {
+      client_td = $(this);
+      $.getJSON($(this).data('balance-url'), getBalanceSuccessFunc(client_td));
+    });
+  });
+{% endblock document_ready_javascript %}
+{% block show_client_link %}class="active"{% endblock show_client_link%}
+{% block content %}
+
+  <h2>Clients</h2>
+  <a class="btn" href="{% url add_client %}"><i class="icon-plus"></i> Add New Client</a>
+  <a class="btn" href="{% url show_client %}">Show All</a>
+  <a id="calc_balances" class="btn" href="{% url show_client %}">Calculate Balances</a><br/>
+  {% for found,letter in letters %}
+    {% if found %}
+      <a href="/Mindwell/{{ letter }}/show_client_letter/">{{letter}}</a>
+    {% else %}
+      {{letter}}
+    {% endif %}
+  {% endfor %}
+  <table cellspacing="1" class="tablesorter">
+    <thead>
+      <tr><th>Client Name</th><th id="actions">Actions</th><th id="balances">Balance</th></tr>
+    </thead>
+    <tbody>
+      {% for client in client_list %}
+        <tr client-id={{client.get_id}} id="client_{{client.get_id}}"><td>
+          <a href="{{ client.get_absolute_url}}" tooltip="{{client.get_hover_tip}}">{{client}}</a>
+        </td>
+        <td><a title="Edit Client" class="btn btn-success btn-small" href="{{client.get_update_url}}"><i class="icon-edit icon-white" ></i></a>
+        <a title="Delete Client" class="btn btn-danger btn-small uimodal" href="{{client.get_delete_url}}"><i class="icon-white icon-trash" ></i></a></td>
+        <td data-balance-url="{%url client_balance client_id=client.get_id %}" class="client_balance"></td>
+        
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+<div id="dialog-modal" title="Delete Client"></div>
+{% endblock %}

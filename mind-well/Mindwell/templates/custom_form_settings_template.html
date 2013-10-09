@@ -1,0 +1,16 @@
+{% extends "settings_template.html" %}
+{% block settings %}
+  <h2>Custom Form Settings</h2>
+  {% if update %}
+    <strong>Custom Form Settings Updated</strong>
+  {% endif %}
+  {% if form.errors %}
+    <strong>Please correct the errors below</strong>
+  {% endif %}
+  <table>
+    <form action="{% url custom_form_settings %}" method="post">
+      {{ form.as_table }}
+      <tr><td><input type="submit" value="Submit" /></td></tr>
+    </form>
+  </table>
+{% endblock %}

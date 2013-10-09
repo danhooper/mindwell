@@ -1,0 +1,31 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
+import unittest, time, re
+
+class SelMarkDosAttended2(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Firefox()
+        self.driver.implicitly_wait(30)
+        self.base_url = "http://dhoops.gotdns.com:8081/"
+        self.verificationErrors = []
+    
+    def test_sel_mark_dos_attended2(self):
+        driver = self.driver
+        driver.get(self.base_url + "/Mindwell/2011/05/23/calendar/")
+        driver.find_element_by_link_text("test_last_name2, test_first_name2").click()
+        Select(driver.find_element_by_id("id_session_result")).select_by_visible_text("Attended")
+        driver.find_element_by_css_selector("input[type=submit]").click()
+    
+    def is_element_present(self, how, what):
+        try: self.driver.find_element(by=how, value=what)
+        except NoSuchElementException, e: return False
+        return True
+    
+    def tearDown(self):
+        self.driver.quit()
+        self.assertEqual([], self.verificationErrors)
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,14 @@
+
+  function sort_clientinfo_dropdown() {
+    // Keep track of the selected option.
+    var selectedValue = $("#id_clientinfo").val();
+    // sort the client info drop down.  Easier to sort in javascript.
+    $("#id_clientinfo").html(
+          $("#id_clientinfo option").sort(function (a, b) {
+          return a.text == b.text ? 0 : a.text < b.text ? -1 : 1
+        })
+    )
+    // reselect option
+    $("#id_clientinfo").val(selectedValue);
+  }
+  sort_clientinfo_dropdown();

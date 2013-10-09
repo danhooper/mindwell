@@ -1,0 +1,25 @@
+{% load choices_modal %}
+{% render_custom_modal referrer_choices curr_client_referrer "Referrer" %}
+{% render_custom_modal reason_for_visit_choices curr_client_reason_for_visit "Reason for Visit" %}
+<form id="add_client_form" onSubmit="return on_add_client_form_submit()" action="">
+<table>
+	{{form}}
+    <tr><td><input class="btn" type="submit" value="Add Client"/></td></tr>
+</table>
+</form>
+<script>
+    {% include "client_form_js.js" %}
+function on_add_client_form_submit() {
+  $.post("{{ submit_link}}",
+    $('#add_client_form').serialize(),
+    function(data) {
+      $('#add_client_form').html("<div id='message'></div>");  
+      $("select#id_clientinfo").append('<option value="' + data['key'] + '">'+ data['name'] + "</option>");
+      $("select#id_clientinfo option:contains(" + data['name'] + ")").attr('selected', true);
+      
+      $('#message').html("<h2>New Client Added!</h2>" + "<p>" + data['name'] + "</p>{% for script_line in new_client_script %}{{script_line|escapejs}}<br/>{% endfor %}");
+    }
+  );
+  return false;
+}
+</script>

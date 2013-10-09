@@ -1,0 +1,16 @@
+<div id="{{form_prefix}}_dlg" title="{{title}}">
+  <table>
+  <tr>
+  {% for choice in choices %}
+      <td valign="center">
+      <label class="multicheckbox_label" for="choice_{{forloop.counter}}">
+        <input type="checkbox" id="choice_{{forloop.counter}}" " value="{{choice}}" 
+         {%if choice.selected %}checked="checked"{%endif %} class="multicheckbox"/>
+        {{choice}}
+      </label></td>
+    {% if forloop.counter|divisibleby:"3" %}</tr><tr>{% endif %}
+  {% endfor %}
+  <tr><td valign="right"><label class="multicheckbox_other_label" for="other_choice">Other:</label></td>
+  <td><input class="multicheckbox_other_input" type="text" id="{{form_prefix}}_choice_other" value="{{other_choice}}"/></td></tr>
+  </tr></table>
+ </div>

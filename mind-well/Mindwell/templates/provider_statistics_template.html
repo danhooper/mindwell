@@ -1,0 +1,11 @@
+{% extends "reports_template.html" %}
+{% block title %}Provider Statistics{% endblock %}
+{% block invoice_content %}
+  <h2>Provider Statistics</h2>
+  Pick a year:
+  {% for year in years %}
+    <a href="/Mindwell/{{year}}/provider_statistics/">{{year}}</a>
+  {% endfor %}
+  <br/>
+  <a href="/Mindwell/provider_stats_all_time/">View All Time Stats</a>
+{% endblock %}

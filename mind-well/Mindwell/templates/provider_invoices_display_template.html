@@ -1,0 +1,43 @@
+{% extends "base_mindwell.html" %}
+{% block document_ready_javascript %}
+        // call the tablesorter plugin
+        $("table").tablesorter({
+            sortList: [[0,0]],
+            textExtraction: "complex",
+    widgets : [ "uitheme", "filter", "zebra" ], 
+ 
+    widgetOptions : { 
+ 
+      // set the uitheme widget to use the bootstrap theme class names 
+      uitheme : "bootstrap" 
+ 
+    } 
+    });
+{% endblock document_ready_javascript %}
+{% block content %}
+    <h2>Provider Invoice</h2>
+    <table cellspacing="1" class="tablesorter">
+        <thead>
+            <tr>
+                <th>Date of Service</th>
+                <th>Client Name</th>
+                <th>Type of Payment</th>
+                <th>Amt Due</th>
+                <th>Amt Paid</th>
+            </tr>
+        </thead>
+        {%for d in dos%}
+        <tr>
+            <td>{{d.get_dos_date_display}}</td>
+            <td>{{d.clientinfo}}</td>
+            <td>{{d.type_pay}}</td>
+            <td>{{d.amt_due}}</td>
+            <td>{{d.amt_paid}}</td>
+        </tr>
+        {%endfor%}
+    </table>
+    Check Total: {{check_total}}<br/>
+    Cash Total: {{cash_total}}<br/>
+    Other Total: {{other_total}}<br/>
+    Total: {{total}}
+{% endblock %}

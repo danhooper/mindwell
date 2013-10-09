@@ -1,0 +1,11 @@
+{% extends "base_mindwell.html" %}
+{% block reports_link %}class="active"{% endblock reports_link%}
+{% block content %}
+  <h2>Reports</h2>
+  <a href="/Mindwell/invoices/">Customer Invoices</a><br/>
+  <a href="/Mindwell/provider_invoices/">Provider Invoices</a><br/>
+  <a href="/Mindwell/provider_statistics/">Provider Statistics</a><br/>
+  <a href="/Mindwell/export_provider_data/">Export Data</a><br/>
+  {%block invoice_content %}
+  {% endblock %}
+{% endblock %}

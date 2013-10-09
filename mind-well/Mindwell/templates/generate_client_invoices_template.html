@@ -1,0 +1,27 @@
+{% extends "invoices_template.html" %}
+{% block title %}Generated Invoices{% endblock %}
+{% block generated_invoices %}
+  <h2>Generated Invoices for {{start_date.date}} - {{end_date.date}}</h2>
+  <table id="generated_invoice_table" cellspacing="1" class="tablesorter">
+    <thead>
+      <tr>
+        <th>Client Name</th>
+        <th>Invoice (Attended DOS Only)</th>
+        <th>Invoice (All DOS)</th>
+        <th>Invoice Start Date</th>
+        <th>Invoice End Date</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for invoice in invoices %}
+        <tr>
+          <td><a href="{{invoice.clientinfo.get_absolute_url}}">{{invoice.clientinfo}}</a></td>
+          <td><a href="{{invoice.get_attended_only_absolute_url}}">[View in PDF]</a>&nbsp&nbsp&nbsp<a href="{{invoice.get_attended_only_absolute_url_html}}">[View in MindWell]</a></td>
+          <td><a href="{{invoice.get_all_dos_absolute_url}}">[View in PDF]</a>&nbsp&nbsp&nbsp<a href="{{invoice.get_all_dos_absolute_url_html}}">[View in MindWell]</a></td>
+          <td>{{invoice.get_start_date}}</td>
+          <td>{{invoice.get_end_date}}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
