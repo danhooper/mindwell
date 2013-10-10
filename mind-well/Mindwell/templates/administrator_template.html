@@ -1,13 +1,21 @@
 {% extends "base_mindwell.html" %}
 
 {% block content %}
-    <h2>Add new authorized user</h2>
-    <form action="/administrator/" method="post">
-        {{ form.as_p }}
-        <input type="submit" value="Submit" />
-    </form>
+    {% if form %}
+        <h2>Add new authorized user</h2>
+        <form action="/administrator/" method="post">
+             {{ form.as_p }}
+             <input type="submit" value="Submit" />
+         </form>
+    {% endif %}
     <br/>
+    <a href="/administrator/">Add a new user</a><br/>
     <a href="/administrator/clear_memcache/">Clear UserInfo memcache</a><br/>
     <a href="/administrator/update_all_dos/">Update All DOS</a><br/>
     <a href="/administrator/admin_update_some_dos/">Update Some DOS</a><br/>
+
+    {% if num_dos_updated %}
+      <br/>
+      Updated {{num_dos_updated}}
+    {% endif %}
 {% endblock %}

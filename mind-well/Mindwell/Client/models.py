@@ -224,7 +224,7 @@ class UserPermission(db.Model):
     # this is the user the current user can act on behalf of
     permitteduser = db.UserProperty()
     permitted_user_email = db.StringProperty()
-    permitted_user_id = db.StrignProperty()
+    permitted_user_id = db.StringProperty()
     PERMISSION_LEVEL_CHOICES = (
         'Read and Write',
         )

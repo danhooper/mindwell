@@ -1,5 +1,5 @@
-application: mindwellonline-test
-version: 3-0-0-1828dc0
+application: mindwellonline
+version: 3-0-0-1828dc0-2
 runtime: python27
 api_version: 1
 threadsafe: false
@@ -9,6 +9,7 @@ default_expiration: "12h"
 builtins:
 - appstats: on
 - remote_api: on
+- deferred: on
 
 handlers:
 - url: /favicon.ico
@@ -24,6 +25,11 @@ handlers:
 - url: /administrator.*
   script: main.app
   login: admin
+
+- url: /update_schema.*
+  script: update_schema_handler.app  # path to webapp2 application definition.
+  login: admin
+  secure: always
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
