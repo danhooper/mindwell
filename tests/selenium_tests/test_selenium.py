@@ -348,8 +348,8 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/show_client/")
         driver.find_element_by_link_text("Settings").click()
         driver.find_element_by_link_text("Permission Settings").click()
-        driver.find_element_by_id("id_permitteduser").clear()
-        driver.find_element_by_id("id_permitteduser").send_keys("test2@example.com")
+        driver.find_element_by_id("id_permitted_user_email").clear()
+        driver.find_element_by_id("id_permitted_user_email").send_keys("test2@example.com")
         driver.find_element_by_css_selector("input[type=submit]").click()
 
     def test_zz_02_grant_permission(self):
@@ -424,7 +424,7 @@ class SeleniumTests(unittest.TestCase):
 #    def test_zz_07_mark_dos_attended_client2(self):
 #        self.add_login_steps_user1()
 #        self.act_as_user2()
-#        driver = self.driver        
+#        driver = self.driver
 #        driver.get(self.base_url + "/Mindwell/2011/05/23/calendar/")
 #        driver.find_element_by_link_text("test_last_name2, test_first_name2").click()
 #        Select(driver.find_element_by_id("id_session_result")).select_by_visible_text("Attended")
@@ -503,7 +503,7 @@ class SeleniumTests(unittest.TestCase):
 #        driver.find_element_by_link_text("test_last_name2, test_first_name2").click()
 ##        driver.find_element_by_xpath("//div[@id='content']/table/tbody/tr[4]/td/a").click()
 #        driver.find_element_by_xpath("/html/body/div[2]/table/tbody/tr[4]/td/a").click()
-#        
+#
 #        driver.find_element_by_id("id_amt_due").clear()
 #        driver.find_element_by_id("id_amt_due").send_keys("150")
 #        driver.find_element_by_css_selector("input[type=submit]").click()
