@@ -71,7 +71,7 @@
                 {% ifequal user.user_id current_user.user_id %}
                   <option selected="selected" value="{{user.key}}">{{ user.permitted_user_email }}</option>
                 {% else %}
-                <option value="{{user.key}}">{{ user.permitted_user_email }}/option>
+                <option value="{{user.key}}">{{ user.permitted_user_email }}</option>
                 {% endifequal %}
               {% endfor %}
             </select>
