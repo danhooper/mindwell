@@ -1,0 +1,9 @@
+*.pyc
+secret_info.py
+*.swp
+datastore
+.coverage
+bulkloader-log-*
+bulkloader-progress-*
+nose_unit_tests.xml
+.coverage.unit_test
