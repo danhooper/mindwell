@@ -1,5 +1,5 @@
-application: mindwellonline
-version: 3-0-0-1828dc0-2
+application: mindwellonline-test
+version: 3-0-0-372213d
 runtime: python27
 api_version: 1
 threadsafe: false
