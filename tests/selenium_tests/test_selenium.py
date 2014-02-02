@@ -1,3 +1,6 @@
+'''
+Runs selenium based unit/system tests.
+'''
 import time
 import datetime
 import getpass
@@ -7,8 +10,10 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from pyvirtualdisplay import Display
 
-
 class SeleniumTests(unittest.TestCase):
+    '''
+    Runs the selenium tests.
+    '''
     @classmethod
     def setUpClass(cls):
         if 'jenkins' in getpass.getuser():
@@ -19,7 +24,8 @@ class SeleniumTests(unittest.TestCase):
         cls.display = Display(visible=vis, size=(1024, 768))
         cls.display.start()
         cls.driver = webdriver.Firefox()
-        cls.driver.implicitly_wait(60)
+        cls.driver.set_window_size(1000, 700)
+        cls.driver.implicitly_wait(30)
         cls.base_url = 'http://localhost:9000'
         cls.add_users()
 
@@ -60,17 +66,34 @@ class SeleniumTests(unittest.TestCase):
         print(self.driver.page_source)
         return False
 
-    def retry_select_id(self, id, text):
+    def retry_click_link(self, link_text, text):
         start_time = datetime.datetime.now()
         curr_time = datetime.datetime.now()
         while curr_time < (start_time + datetime.timedelta(seconds=30)):
             try:
-                Select(self.driver.find_element_by_id(id)).select_by_visible_text(text)
+                self.driver.find_element_by_link_text(link_text).click()
                 return True
             except NoSuchElementException:
                 print('current url %s' % self.driver.current_url)
                 print('failed to find %s. curr_time %s start_time %s' % (
-                    id, curr_time, start_time))
+                    link_text, curr_time, start_time))
+                time.sleep(1)
+                curr_time = datetime.datetime.now()
+
+        print(self.driver.page_source)
+        return False
+
+    def retry_select_id(self, select_id, text):
+        start_time = datetime.datetime.now()
+        curr_time = datetime.datetime.now()
+        while curr_time < (start_time + datetime.timedelta(seconds=30)):
+            try:
+                Select(self.driver.find_element_by_id(select_id)).select_by_visible_text(text)
+                return True
+            except NoSuchElementException:
+                print('current url %s' % self.driver.current_url)
+                print('failed to find %s. curr_time %s start_time %s' % (
+                    select_id, curr_time, start_time))
                 time.sleep(1)
                 curr_time = datetime.datetime.now()
 
@@ -338,9 +361,7 @@ class SeleniumTests(unittest.TestCase):
         self.add_login_steps_user1()
         driver = self.driver
         driver.get(self.base_url + "/Mindwell/2011/05/26/calendar/")
-        driver.find_element_by_xpath("//div[@id='calendar']/table/tbody/tr/td[3]/span/span/span[2]/span").click()
-        Select(driver.find_element_by_id("generate_report")).select_by_visible_text("Current Month")
-
+        driver.find_element_by_class_name('fc-button-month').click()
 
     def test_zz_01_ask_permission(self):
         self.add_login_steps_user1()
@@ -403,7 +424,7 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_link_text("Provider Invoices").click()
         Select(driver.find_element_by_id("id_start_invoice_date_month")).select_by_visible_text("January")
         Select(driver.find_element_by_id("id_start_invoice_date_day")).select_by_visible_text("1")
-        Select(driver.find_element_by_id("id_start_invoice_date_year")).select_by_visible_text("2008")
+        Select(driver.find_element_by_id("id_start_invoice_date_year")).select_by_visible_text("2009")
         Select(driver.find_element_by_id("id_end_invoice_date_month")).select_by_visible_text("January")
         Select(driver.find_element_by_id("id_end_invoice_date_day")).select_by_visible_text("1")
         Select(driver.find_element_by_id("id_end_invoice_date_year")).select_by_visible_text("2020")
