@@ -66,7 +66,7 @@ class SeleniumTests(unittest.TestCase):
         print(self.driver.page_source)
         return False
 
-    def retry_click_link(self, link_text, text):
+    def retry_click_link(self, link_text):
         start_time = datetime.datetime.now()
         curr_time = datetime.datetime.now()
         while curr_time < (start_time + datetime.timedelta(seconds=30)):
@@ -379,7 +379,7 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/show_client/")
         driver.find_element_by_link_text("Settings").click()
         driver.find_element_by_link_text("Permission Settings").click()
-        driver.find_element_by_link_text("Change").click()
+        self.retry_click_link('Change')
         Select(driver.find_element_by_id("id_user_approved")).select_by_visible_text("Approved")
         driver.find_element_by_id('id_submit_update_request').click()
 
