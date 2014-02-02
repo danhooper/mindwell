@@ -784,15 +784,18 @@ def admin_update_some_dos(request, num_entities=100):
     update_list = []
     counter = 0
     for dos in entity_list:
-        counter += 1
-        if counter > num_entities:
+        if counter >= num_entities:
             break
         dos.meta_version = models.dos_meta_version
         if not dos.user_id:
             dos.user_id = dos.userinfo.user_id()
         update_list.append(dos)
+        counter += 1
     db.put(update_list)
-    return HttpResponseRedirect('/administrator/')
+    return render_to_response('administrator_template.html',
+                              {'num_dos_updated': counter},
+                               context_instance=RequestContext(request))
+#    return HttpResponseRedirect('/administrator/')
 
 
 def admin_change_email(request, old_email, new_email, num_entities=100):

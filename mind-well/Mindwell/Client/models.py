@@ -173,6 +173,7 @@ class UserInfo(db.Model):
 
     user_email_address = db.StringProperty()
     user_id = db.StringProperty(default=None)
+    userid = db.StringProperty(default=None)
 
     @staticmethod
     def CurrentUserAllowed():
@@ -189,13 +190,15 @@ class UserInfo(db.Model):
             memcache.add("userlist", userlist)
         for user in userlist:
             if user.user_email_address == current_user.email().lower():
-                if not user.user_id:
+                if not user.userid or not user.user_id:
                     userlist = UserInfo.all().filter(
                         'user_email_address =', current_user.email().lower())
                     user = userlist.get()
                     if user is not None:
-                        if not user.user_id:
-                            user.user_id = current_user.user_id()
+                        if not user.userid or not user.user_id:
+                            user.userid = current_user.user_id()
+                            if not user.user_id:
+                                user.user_id = current_user.user_id()
                             user.put()
                             logging.info('Adding user id %s' % (
                                 str(current_user.user_id())))
@@ -221,7 +224,6 @@ class UserPermission(db.Model):
     user_id = db.StringProperty()
     user_email = db.StringProperty()
     # this is the user the current user can act on behalf of
-    #permitteduser = db.UserProperty()
     permitted_user_email = db.StringProperty()
     permitted_user_id = db.StringProperty()
     PERMISSION_LEVEL_CHOICES = (
