@@ -447,6 +447,8 @@ class SeleniumTests(unittest.TestCase):
         Select(driver.find_element_by_id("id_end_invoice_date_day")).select_by_visible_text("1")
         Select(driver.find_element_by_id("id_end_invoice_date_year")).select_by_visible_text("2020")
         driver.find_element_by_css_selector("input[type=submit]").click()
+        time.sleep(5)
+        driver.refresh()
         self.verifyTextPresent('test_last_name2, test_first_name2')
         self.verifyTextPresent('100')
         self.verifyTextPresent('95')
