@@ -100,6 +100,22 @@ class SeleniumTests(unittest.TestCase):
         print(self.driver.page_source)
         return False
 
+    def retry_click_id(self, item_id):
+        start_time = datetime.datetime.now()
+        curr_time = datetime.datetime.now()
+        while curr_time < (start_time + datetime.timedelta(seconds=30)):
+            try:
+                self.driver.find_element_by_id(item_id).click()
+                return True
+            except NoSuchElementException:
+                print('current url %s' % self.driver.current_url)
+                print('failed to find %s. curr_time %s start_time %s' % (
+                    item_id, curr_time, start_time))
+                time.sleep(1)
+                curr_time = datetime.datetime.now()
+
+        print(self.driver.page_source)
+        return False
 
     @classmethod
     def add_users(cls):
@@ -381,7 +397,8 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_link_text("Permission Settings").click()
         self.retry_click_link('Change')
         self.retry_select_id('id_user_approved', 'Approved')
-        driver.find_element_by_id('id_submit_update_request').click()
+        self.retry_click_id('id_submit_update_request')
+        #driver.find_element_by_id('id_submit_update_request').click()
 
 
     def act_as_user2(self):
