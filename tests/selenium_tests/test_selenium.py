@@ -398,6 +398,7 @@ class SeleniumTests(unittest.TestCase):
         self.retry_click_link('Change')
         self.retry_select_id('id_user_approved', 'Approved')
         self.retry_click_id('id_submit_update_request')
+        time.sleep(5)
         #driver.find_element_by_id('id_submit_update_request').click()
 
 
