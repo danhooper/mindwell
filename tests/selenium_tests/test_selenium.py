@@ -380,7 +380,7 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_link_text("Settings").click()
         driver.find_element_by_link_text("Permission Settings").click()
         self.retry_click_link('Change')
-        Select(driver.find_element_by_id("id_user_approved")).select_by_visible_text("Approved")
+        self.retry_select_id('id_user_approved', 'Approved')
         driver.find_element_by_id('id_submit_update_request').click()
 
 
