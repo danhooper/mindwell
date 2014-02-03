@@ -24,7 +24,7 @@ system_test: secret_passphrase
 	-kill `ps | grep python | sed 's/pts\/*\w*.*//'`
 	/usr/bin/python2.7 /usr/lib/python2.7/dist-packages/coverage/__main__.py run /var/lib/jenkins/google_appengine/dev_appserver.py mind-well --port 9000 --clear_datastore --datastore_path=./datastore --skip_sdk_update_check &
 	sleep 5
-	/usr/bin/nosetests-2.7 -v --with-xunit -w tests/selenium_tests
+	/usr/bin/nosetests-2.7 -v --with-xunit -w tests/selenium_tests --stop
 	-kill `ps | grep python | sed 's/pts\/*\w*.*//'`
 	sleep 5
 	mv .coverage .coverage.system_test
