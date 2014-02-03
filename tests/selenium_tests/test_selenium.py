@@ -395,12 +395,10 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/show_client/")
         driver.find_element_by_link_text("Settings").click()
         driver.find_element_by_link_text("Permission Settings").click()
-        self.retry_click_link('Change')
-        self.retry_select_id('id_user_approved', 'Approved')
-        self.retry_click_id('id_submit_update_request')
+        self.assertTrue(self.retry_click_link('Change'))
+        self.assertTrue(self.retry_select_id('id_user_approved', 'Approved'))
+        self.assertTrue(self.retry_click_id('id_submit_update_request'))
         time.sleep(5)
-        #driver.find_element_by_id('id_submit_update_request').click()
-
 
     def act_as_user2(self):
         driver = self.driver
