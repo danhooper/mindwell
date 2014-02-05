@@ -520,6 +520,7 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_id("id_dsm_code").clear()
         driver.find_element_by_id("id_dsm_code").send_keys("test_dsm")
         driver.find_element_by_css_selector("input[type=submit]").click()
+        time.sleep(5)
 
     def test_zz_10_add_dos_client2a(self):
         self.add_login_steps_user2()
