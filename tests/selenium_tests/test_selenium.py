@@ -117,6 +117,24 @@ class SeleniumTests(unittest.TestCase):
         print(self.driver.page_source)
         return False
 
+    def retry_select_by_css_selector(self, selector):
+        start_time = datetime.datetime.now()
+        curr_time = datetime.datetime.now()
+        while curr_time < (start_time + datetime.timedelta(seconds=30)):
+            try:
+                self.driver.find_element_by_css_selector(selector).click()
+                return True
+            except NoSuchElementException:
+                print('current url %s' % self.driver.current_url)
+                print('failed to find %s. curr_time %s start_time %s' % (
+                    selector, curr_time, start_time))
+                time.sleep(1)
+                curr_time = datetime.datetime.now()
+
+        print(self.driver.page_source)
+        return False
+
+
     @classmethod
     def add_users(cls):
         driver = cls.driver
@@ -282,55 +300,31 @@ class SeleniumTests(unittest.TestCase):
         self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
         driver.find_element_by_css_selector("input[type=submit]").click()
 
-    def add_rep_1_day(self, client_name):
+    def _add_rep_generic(self, client_name, repeat_freq):
         driver = self.driver
         driver.get(self.base_url + "/Mindwell/2011/05/02/07/00/calendar/")
         self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
         self.assertTrue(self.retry_select_id("id_dos_repeat", "One Day"))
         driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
+        self.retry_select_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e")
         driver.find_element_by_link_text("28").click()
         driver.find_element_by_css_selector("input[type=submit]").click()
+
+
+    def add_rep_1_day(self, client_name):
+        self._add_rep_generic(client_name, "One Day")
 
     def add_rep_1_week(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/08/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "One Week"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
-        driver.find_element_by_css_selector("input[type=submit]").click()
+        self._add_rep_generic(client_name, "One Week")
 
     def add_rep_2_weeks(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/09/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "Two Weeks"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
-        driver.find_element_by_css_selector("input[type=submit]").click()
+        self._add_rep_generic(client_name, "Two Weeks")
 
     def add_rep_3_weeks(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/10/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "Three Weeks"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        self.retry_click_link("28")
-        driver.find_element_by_css_selector("input[type=submit]").click()
+        self._add_rep_generic(client_name, "Three Weeks")
 
     def add_rep_4_weeks(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/11/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "Four Weeks"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
-        driver.find_element_by_css_selector("input[type=submit]").click()
+        self._add_rep_generic(client_name, "Four Weeks")
 
 
     def test_add_dos(self):

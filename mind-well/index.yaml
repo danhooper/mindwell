@@ -17,6 +17,11 @@ indexes:
 
 - kind: ClientInfo
   properties:
+  - name: user_id
+  - name: referrer
+
+- kind: ClientInfo
+  properties:
   - name: userinfo
   - name: dsm_code
 
