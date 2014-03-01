@@ -281,7 +281,6 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/2011/05/02/06/00/calendar/")
         self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
         driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
 
     def add_rep_1_day(self, client_name):
         driver = self.driver
@@ -292,7 +291,6 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
         driver.find_element_by_link_text("28").click()
         driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
 
     def add_rep_1_week(self, client_name):
         driver = self.driver
@@ -303,7 +301,6 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
         driver.find_element_by_link_text("28").click()
         driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
 
     def add_rep_2_weeks(self, client_name):
         driver = self.driver
@@ -314,7 +311,6 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
         driver.find_element_by_link_text("28").click()
         driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
 
     def add_rep_3_weeks(self, client_name):
         driver = self.driver
@@ -323,9 +319,8 @@ class SeleniumTests(unittest.TestCase):
         self.assertTrue(self.retry_select_id("id_dos_repeat", "Three Weeks"))
         driver.find_element_by_id("id_dos_repeat_end_date").click()
         driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
+        self.retry_click_link("28")
         driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
 
     def add_rep_4_weeks(self, client_name):
         driver = self.driver
