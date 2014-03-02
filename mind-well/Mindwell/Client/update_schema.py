@@ -14,7 +14,11 @@ def UpdateDOSSchema(cursor=None, num_updated=0):
         query.with_cursor(cursor)
 
     to_put = []
+    fetched_dos = False
     for dos in query.fetch(limit=BATCH_SIZE):
+        fetched_dos = True
+        if dos.meta_version == models.dos_meta_version and dos.user_id:
+            continue
         dos.meta_version = models.dos_meta_version
         if not dos.user_id:
             dos.user_id = dos.userinfo.user_id()
@@ -26,6 +30,7 @@ def UpdateDOSSchema(cursor=None, num_updated=0):
         logging.info(
             'Put %d entities to Datastore for a total of %d',
             len(to_put), num_updated)
+    if fetched_dos:
         deferred.defer(
             UpdateDOSSchema, cursor=query.cursor(), num_updated=num_updated)
     else:
