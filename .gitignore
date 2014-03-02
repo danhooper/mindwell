@@ -7,3 +7,5 @@ bulkloader-log-*
 bulkloader-progress-*
 nose_unit_tests.xml
 .coverage.unit_test
+htmlcov/*
+nosetests.xml

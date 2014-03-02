@@ -83,6 +83,11 @@ class Test_generate_client_invoices(mock_common.MockAppEngineTest):
         http_response = views.generate_client_invoices(req, 2012, 1)
         self.assertEqual(http_response.status_code, 200)
 
+    def test_generate_with_dos_repeat_call(self):
+        self.test_generate_with_dos()
+        # test that we don't bother generating a new invoice
+        self.test_generate_with_dos()
+
     def test_generate_with_dos(self):
         req = mock_common.MockRequest()
         resp = views.generate_client_invoices(req, 2012, 1)
@@ -90,6 +95,8 @@ class Test_generate_client_invoices(mock_common.MockAppEngineTest):
         self.assertRegexpMatches(
             resp.content,
             '.*/Mindwell/\d+/attended_only/invoice_display/.*')
+        # check that we only generate one invoice
+        self.assertEqual(len(models.Invoice.safe_all(req).fetch(3000)), 1)
 
 
 class Test_generate_client_invoices_by_date(mock_common.MockAppEngineTest):

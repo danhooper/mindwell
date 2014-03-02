@@ -31,7 +31,7 @@ system_test: secret_passphrase
 
 coverage:
 	coverage combine
-	coverage html --omit=/*google_appengine/*,mind-well/reportlab.zip/*,/*/pyshared/*,/*/dist-packages/*
+	coverage html --omit=/*/google_appengine*,,mind-well/reportlab.zip/*,/*/pyshared/*,/*/dist-packages/*
 
 alttest: cleanup_coverage unit_test altsystem_test coverage
 
