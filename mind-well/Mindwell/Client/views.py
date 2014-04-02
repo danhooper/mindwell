@@ -51,7 +51,7 @@ def reports(request):
 def invoices(request):
     form = None
     if request.method == 'POST':
-        form = models.InvoiceForm(request.POST)
+        form = models.InvoiceForm(request.POST, request=request)
         if form.is_valid():
             form_dict = form.cleaned_data
             try:
