@@ -49,8 +49,9 @@ def reports(request):
 
 
 def invoices(request):
+    form = None
     if request.method == 'POST':
-        form = models.InvoiceForm(request.POST)
+        form = models.InvoiceForm(request.POST, request=request)
         if form.is_valid():
             form_dict = form.cleaned_data
             try:
@@ -62,8 +63,10 @@ def invoices(request):
                 return HttpResponseRedirect(entity.get_absolute_url())
             except ValueError:   # catches calling int on non integer
                 logging.exception('Invalid client')
-
-    form = models.InvoiceForm(request=request)
+        else:
+            logging.error('invoices form is invalid %s' % form)
+    if not form:
+        form = models.InvoiceForm(request=request)
     all_invoices = models.Invoice.safe_all(request=request).fetch(
         common.get_maximum_num_dos_fetch())
     view_common.prefetch_refprops(all_invoices, models.Invoice.clientinfo)
