@@ -7,12 +7,12 @@ cleanup_coverage:
 	-rm -f coverage_files
 
 unit_test:
-	/usr/bin/nosetests-2.7 -v --with-xunit --xunit-file nose_unit_tests.xml --with-coverage -w tests/unit_tests --cover-package=Mindwell
+	nosetests -v --with-xunit --xunit-file nose_unit_tests.xml --with-coverage -w tests/unit_tests --cover-package=Mindwell
 	mv .coverage .coverage.unit_test
 
 altsystem_test: secret_passphrase
 	-kill `ps | grep python | sed 's/pts\/*\w*.*//'`
-	/usr/bin/python2.7 /usr/local/lib/python2.7/dist-packages/coverage/__main__.py run ~/workspace/google_appengine/dev_appserver.py mind-well --port 9000 --clear_datastore --skip_sdk_update_check &
+	/usr/bin/python2.7 /usr/local/lib/python2.7/dist-packages/coverage/__main__.py run ~/google_appengine/dev_appserver.py mind-well --port 9000 --clear_datastore --skip_sdk_update_check &
 	sleep 5
 	/usr/bin/nosetests-2.7 --with-xunit -w tests/selenium_tests
 	-kill `ps | grep python | sed 's/pts\/*\w*.*//'`
@@ -44,7 +44,7 @@ secret_passphrase:
 	fi
 
 altrun:
-	/usr/bin/python2.7 ~/workspace/google_appengine_1.8.1/dev_appserver.py mind-well --host 0.0.0.0 --port 9000
+	/usr/bin/python2.7 ~/google_appengine/dev_appserver.py mind-well --host 0.0.0.0 --port 9000
 
 run:
 	/usr/bin/python2.7 /usr/lib/python2.7/dist-packages/coverage/__main__.py run /var/lib/jenkins/google_appengine/dev_appserver.py mind-well --admin_host 0.0.0.0 --host 0.0.0.0 --port 9000 --clear_datastore --datastore_path=./datastore &
