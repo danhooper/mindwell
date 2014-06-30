@@ -6,6 +6,8 @@ install:
 before_script:
     - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.6.zip
     - unzip google_appengine_1.9.6.zip
-script: make unit_test
+script:
+    - make secret_passphrase
+    - make unit_test
 after_success:
     coveralls
