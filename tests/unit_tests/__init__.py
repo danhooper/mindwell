@@ -1,9 +1,9 @@
 import sys
 import os
+sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', 'google_appengine')))
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..', 'mind-well')))
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..', 'mind-well', 'reportlab.zip')))
 sys.path.insert(0, '/var/lib/jenkins/google_appengine')
-sys.path.insert(0, '/home/dhooper/google_appengine')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'Mindwell.settings'
 import logging
 logging.error(sys.path)
