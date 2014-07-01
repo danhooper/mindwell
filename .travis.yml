@@ -9,5 +9,6 @@ before_script:
 script:
     - make secret_passphrase
     - make unit_test
+    - coverage combine
 after_success:
     coveralls
