@@ -8,19 +8,20 @@ function FormatNumberLength(num, length) {
   return r;
 }
 function FormatCalendarDate(date) {
-  var str = FormatNumberLength(date.getFullYear(),4) + '/' +
-            FormatNumberLength(date.getMonth()+1,2) + '/' + // quirk: Javascript uses 0 based months
+    console.log(date);
+  var str = FormatNumberLength(date.year(),4) + '/' +
+            FormatNumberLength(date.month()+1,2) + '/' + // quirk: Javascript uses 0 based months
                                                             // while we use 1 based months
-            FormatNumberLength(date.getDate(),2) + '/' +
-            FormatNumberLength(date.getHours(),2) + '/' +
-            FormatNumberLength(date.getMinutes(),2);
+            FormatNumberLength(date.date(),2) + '/' +
+            FormatNumberLength(date.hour(),2) + '/' +
+            FormatNumberLength(date.minute(),2);
   return str;
 }
 function FormatCalendarDateNoHoursOrMinutes(date) {
-  var str = FormatNumberLength(date.getFullYear(),4) + '/' +
-            FormatNumberLength(date.getMonth()+1,2) + '/' + // quirk: Javascript uses 0 based months
+  var str = FormatNumberLength(date.year(),4) + '/' +
+            FormatNumberLength(date.month()+1,2) + '/' + // quirk: Javascript uses 0 based months
                                                             // while we use 1 based months
-            FormatNumberLength(date.getDate(),2);
+            FormatNumberLength(date.date(),2);
   return str;
 }
 function OnChangeGenerateReport(dropdown) {
@@ -64,10 +65,8 @@ function show_calendar(show_weekends, date, view) {
   weekends: show_weekends,
   editable: false,
   allDaySlot: false,
-  slotMinutes: 15,
-  year: date.getFullYear(),
-  month: date.getMonth(),
-  date: date.getDate(),
+  slotDuration: '00:15:00',
+  defaultDate: date,
   weekMode: 'liquid',
   events: "/Mindwell/calendar_feed",
   dayClick: function(date, allDay, jsEvent, view) {
@@ -133,17 +132,17 @@ function show_hide_weekends(btn) {
 {% endblock page_javascript %}
 {% block document_ready_javascript %}
   {% include "sort_client_javascript_snippet.html" %}
-  show_calendar({{displayweekends}}, new Date({{year}}, {{month}}, {{day}}), 'agendaWeek');
+  show_calendar({{displayweekends}}, moment(new Date({{year}}, {{month}}, {{day}})), 'agendaWeek');
   {% include "dos_form_javascript_snippet.html" %}
   $("#dialog-modal").dialog({autoOpen: false,
-    width:450,     
+    width:450,
     modal: true
   });
   $('a.uimodal').bind('click', function() {
     var $this = $(this);
      $("#dialog-modal").load($this.attr("href"), null, function() {
     $("#dialog-modal").dialog('open');
-   
+
    });
    return false;
 });
@@ -156,7 +155,7 @@ create_choice_modal_dialog("session_type", "input#id_session_type");
 {% block calendar_link %}class="active"{% endblock calendar_link %}
 {% block content %}
 <div class="container-fluid">
-<div class="row-fluid">
+<div class="row">
 <div id="cal_options">
   <div id="cal_show">
     <form name="showdays" onsubmit="return false" class="form-inline">
@@ -169,7 +168,7 @@ create_choice_modal_dialog("session_type", "input#id_session_type");
   </div>
 </div>
 </div>
-<div class="row-fluid">
+<div class="row">
 Key:
 <span class="blocked_time">Blocked Time</span>
 <span class="scheduleClient">Scheduled</span>
@@ -178,11 +177,11 @@ Key:
 <span class="cancel">Cancelled</span>
 <span class="payment_rx">Payment Received</span>
 </div>
-<div class="row-fluid">
-  <div {% if dos_form %}class="span7"{% else %}class="span12"{% endif %} id="calendar"></div>
-  
+<div class="row">
+  <div {% if dos_form %}class="col-md-7"{% else %}class="col-xs-12"{% endif %} id="calendar"></div>
+
   {% if dos_form %}
-      <div class="span5" id="cal_form">
+      <div class="col-md-5" id="cal_form">
               {% render_custom_modal session_type_choices curr_session_type_choices "Session Type" %}
         <a href="{%url add_client_standalone%}" class="uimodal"><strong>Add New Client</strong></a>
         <form action="{{submit_link}}" method="post">

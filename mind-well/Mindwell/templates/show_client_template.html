@@ -5,22 +5,22 @@
   $("table").tablesorter({
       sortList: [[0,0]],
       textExtraction: "complex",
-      
-    widgets : [ "uitheme", "filter", "zebra" ], 
- 
-    widgetOptions : { 
- 
-      // set the uitheme widget to use the bootstrap theme class names 
-      uitheme : "bootstrap" 
- 
-    } 
+
+    widgets : [ "uitheme", "filter", "zebra" ],
+
+    widgetOptions : {
+
+      // set the uitheme widget to use the bootstrap theme class names
+      uitheme : "bootstrap"
+
+    }
   });
   $('#content a[tooltip]').each(function()
   {
     $(this).qtip({content: $(this).attr('tooltip'), style: 'cream'});
   });
   $("#dialog-modal").dialog({autoOpen: false,
-    width:450,     
+    width:450,
     modal: true,
     hide: { effect: 'fade',
             duration: 1000
@@ -71,10 +71,10 @@
         <tr client-id={{client.get_id}} id="client_{{client.get_id}}"><td>
           <a href="{{ client.get_absolute_url}}" tooltip="{{client.get_hover_tip}}">{{client}}</a>
         </td>
-        <td><a title="Edit Client" class="btn btn-success btn-small" href="{{client.get_update_url}}"><i class="icon-edit icon-white" ></i></a>
-        <a title="Delete Client" class="btn btn-danger btn-small uimodal" href="{{client.get_delete_url}}"><i class="icon-white icon-trash" ></i></a></td>
+        <td><a title="Edit Client" class="btn btn-success btn-sm" href="{{client.get_update_url}}"><i class="fa fa-pencil fa-lg" ></i></a>
+        <a title="Delete Client" class="btn btn-danger btn-sm uimodal" href="{{client.get_delete_url}}"><i class="fa fa-trash-o fa-lg" ></i></a></td>
         <td data-balance-url="{%url client_balance client_id=client.get_id %}" class="client_balance"></td>
-        
+
         </tr>
       {% endfor %}
     </tbody>

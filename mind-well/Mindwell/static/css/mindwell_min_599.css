@@ -1,11 +1,17 @@
 select#permitted_user {margin-top: 0px; width:180px;};
 select#id_dob_month {width:100px;}
 ul.errorlist {color:red; font-weight:bold}
-#id_dob_month{width:110px;}
-#id_dob_day{width:55px;}
-#id_dob_year{width:70px;}
+#id_dob_month{width:120px;}
+#id_dob_day{width:75px;}
+#id_dob_year{width:90px;}
 #id_dos_datetime_1_time{width:110px;}
 #id_dos_endtime_time{width:180px;}
+#id_zipcode {
+    width: 150px;
+}
+#id_state {
+    width: 200px;
+}
 label.multicheckbox_other_label{text-align:right; min-width:200px; min-height:30px; font-weight: bold;}
 label.multicheckbox_label{text-align:left; min-width:200px; min-height:30px;}
 input.multicheckbox_other_input{min-width:180px; margin-bottom: 20px;}
@@ -39,3 +45,12 @@ table.tablesorter tbody tr.curr_row td{background-color:#99bbff;}
 .cancel{background-color:gray;border-color:gray;color:white;}
 .payment_rx{background-color:lightgreen;border-color:lightgreen;color:blue;}
 div#content{padding-left:5px;}
+.mindwell-form-num{
+    max-width: 200px;
+}
+.mindwell-form-num-mess{
+    max-width: 200px;
+}
+.mindwell-form-dob select {
+    display:inline-block;
+}

@@ -281,11 +281,11 @@ def calendar_feed(request):
         logging.info('[calendar_feed] end was not set')
         return HttpResponse('')
     starttime = datetime.datetime.combine(
-      datetime.datetime.utcfromtimestamp(int(start)).date(),
-      datetime.time.min)
+        datetime.datetime.strptime(start, '%Y-%m-%d').date(),
+        datetime.time.min)
     endtime = datetime.datetime.combine(
-      datetime.datetime.utcfromtimestamp(int(end)).date(),
-      datetime.time.max)
+        datetime.datetime.strptime(end, '%Y-%m-%d').date(),
+        datetime.time.max)
     cal_feed = CalendarFeed(request, starttime,
                             endtime)
     return HttpResponse(cal_feed.GetFeed(), mimetype='application/json')

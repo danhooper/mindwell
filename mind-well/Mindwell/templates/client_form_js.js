@@ -6,3 +6,5 @@ $( "#id_referrer" ).autocomplete({
 $( "#id_dsm_code" ).autocomplete({
     source: "/Mindwell/dsm_code_autocomplete/",
 });
+$('input').addClass('form-control');
+$('select').addClass('form-control');

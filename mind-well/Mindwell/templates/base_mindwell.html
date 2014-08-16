@@ -1,95 +1,104 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/static/css/mindwell_min_599.css"/>
-  <link rel="stylesheet" href="/static/css/fullcalendar.css"/>
-  <link rel="stylesheet" href="/static/css/jquery-ui-1.9.0.custom.min.css"/>
-  <link rel="stylesheet" href="/static/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="/static/css/bootstrap-responsive.min.css"/>
-  <link rel="stylesheet" href="/static/css/theme.bootstrap.css"/>
-  <script src="/static/javascript/jquery-1.8.2.js" language="javascript" type="text/javascript"></script>
-  <script src="/static/javascript/jquery-ui-1.9.0.custom.min.js" language="javascript" type="text/javascript"></script>
-  <script src="/static/javascript/jquery.qtip.js" language="javascript" type="text/javascript"></script>
-  <script src="/static/javascript/fullcalendar.min.js" language="javascript" type="text/javascript"></script>
-  <script src="/static/javascript/jquery.tablesorter.2.4.min.js" language="javascript" type="text/javascript"></script>
-  <script src="/static/javascript/jquery.tablesorter.widgets.min.js" language="javascript" type="text/javascript"></script>
-  <script src="/static/javascript/mindwell.js" language="javascript" type="text/javascript"></script>
-  {% block script_sources %}{% endblock script_sources %}
-  <script type="text/javascript" id="js">
-    function OnChangePermittedUser(dropdown) {
-      window.location="/Mindwell/" + dropdown.value + "/change_user/";
-    }
-  {% block page_javascript %}
-  {% endblock page_javascript %}
-  $(document).ready(function() {
-    {% block document_ready_javascript %}
-    {% endblock document_ready_javascript %}
-    {% if popups %}
-      {% for popup in popups %}
-        window.open("{{popup.get_absolute_url}}");
-      {% endfor %}
-    {% endif %}
-    
-    $.extend($.tablesorter.themes.bootstrap, { 
-    // these classes are added to the table. To see other table classes available, 
-    // look here: http://twitter.github.com/bootstrap/base-css.html#tables 
-    table    : 'table table-bordered table-striped', 
-    header   : 'bootstrap-header', // give the header a gradient background 
-    icons    : '', // add "icon-white" to make them white; this icon class is added to the <i> in the header 
-    sortNone : 'bootstrap-icon-unsorted', 
-    sortAsc  : 'icon-chevron-up', 
-    sortDesc : 'icon-chevron-down', 
-    active   : '', // applied when column is sorted 
-    hover    : '', // use custom css here - bootstrap class may not override it 
-    filterRow: '', // filter row class 
-    even     : '', // odd row zebra striping 
-    odd      : ''  // even row zebra striping 
-    }); 
-  });
-  </script>
-  <title>Mindwell - {% block title %}{% endblock %}</title>
-</head>
-<body>
-  <div class="navbar">
-    <div class="navbar-inner">
-        <div id="main_links">
-        <ul class="nav">
-          <li><a class="brand" href="{% url show_client %}">MindWell</a></li>
-          <li {%block show_client_link%}{%endblock show_client_link %}><a href="{% url show_client %}">Clients</a></li>
-          <li {%block calendar_link%}{%endblock calendar_link%}><a href="/Mindwell/{% now "Y/m/d/"%}calendar/">Calendar</a></li>
-          <li {%block reports_link%}{%endblock reports_link%}><a href="{% url reports %}">Reports</a></li>
-          <li {%block settings_link%}{%endblock settings_link%}><a href="{% url settings %}">Settings</a></li>
-          <li><a href="{{ logout_url }}">Logout</a></li>
-          <li class="divider-vertical"></li>
-          <li><form class="navbar-form pull-left">
-            <span class="navbar-text">Acting as</span>
-            <select name="permitted_user" id="permitted_user"
-                        onchange='OnChangePermittedUser(this.form.permitted_user);'>
-              <option>Self</option>
-              {% for user in permitted_users %}
-                {% ifequal user.permitteduser current_user.permitteduser %}
-                  <option selected="selected" value="{{user.key}}">{{ user.permitteduser }}</option>
-                {% else %}
-                  <option value="{{user.key}}">{{ user.permitteduser }}</option>
-                {% endifequal %}
-              {% endfor %}
-            </select>
-          </form>
-          </li>
-          <li class="divider-vertical"></li>
-          <li>
-        <form class="navbar-search pull-right" action="/Mindwell/search/" method="post">
-          <input class="search-query" id="id_search_input" name="search_input" type="text" placeholder="Search for client" onfocus="if(this.value=='Search for client') this.value='';" onblur="if(this.value=='') this.value='Search for client';"/>
-          <input type="hidden" value="Submit" />
-        </form>
-        </li>
-        </ul>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/css/mindwell_min_599.css"/>
+        <link rel="stylesheet" href="/static/bower_components/fullcalendar/dist/fullcalendar.css"/>
+        <link rel="stylesheet" href="/static/bower_components/jquery-ui/jquery-ui.min.js">
+        <link rel="stylesheet" href="/static/bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/static/bower_components/jquery.tablesorter/css/theme.bootstrap.css"/>
+        <link rel="stylesheet" href="/static/bower_components/fontawesome/css/font-awesome.min.css"/>
+        <link rel="stylesheet" href="/static/bower_components/qtip2/jquery.qtip.min.css"/>
+        <script src="/static/bower_components/jquery/dist/jquery.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/bower_components/jquery-ui/jquery-ui.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/bower_components/qtip2/jquery.qtip.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/bower_components/moment/min/moment.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/bower_components/fullcalendar/dist/fullcalendar.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/bower_components/jquery.tablesorter/js/jquery.tablesorter.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/bower_components/jquery.tablesorter/js/jquery.tablesorter.widgets.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/./bower_components/bootstrap/dist/js/bootstrap.min.js" language="javascript" type="text/javascript"></script>
+        <script src="/static/javascript/mindwell.js" language="javascript" type="text/javascript"></script>
+        {% block script_sources %}{% endblock script_sources %}
+        <script type="text/javascript" id="js">
+            function OnChangePermittedUser(dropdown) {
+                window.location="/Mindwell/" + dropdown.value + "/change_user/";
+            }
+            {% block page_javascript %}
+            {% endblock page_javascript %}
+            $(document).ready(function() {
+                {% block document_ready_javascript %}
+                {% endblock document_ready_javascript %}
+                {% if popups %}
+                {% for popup in popups %}
+                window.open("{{popup.get_absolute_url}}");
+                {% endfor %}
+                {% endif %}
+
+                $.extend($.tablesorter.themes.bootstrap, {
+                    // these classes are added to the table. To see other table classes available,
+                    // look here: http://twitter.github.com/bootstrap/base-css.html#tables
+                    table    : 'table table-bordered table-striped',
+                    header   : 'bootstrap-header', // give the header a gradient background
+                    icons    : '', // add "icon-white" to make them white; this icon class is added to the <i> in the header
+                    sortNone : 'bootstrap-icon-unsorted',
+                    sortAsc  : 'icon-chevron-up',
+                    sortDesc : 'icon-chevron-down',
+                    active   : '', // applied when column is sorted
+                    hover    : '', // use custom css here - bootstrap class may not override it
+                    filterRow: '', // filter row class
+                    even     : '', // odd row zebra striping
+                    odd      : ''  // even row zebra striping
+                });
+            });
+        </script>
+        <title>Mindwell - {% block title %}{% endblock %}</title>
+    </head>
+    <body>
+        <div class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mindwell-navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{% url show_client %}">MindWell</a>
+                </div>
+                <div class="collapse navbar-collapse" id="mindwell-navbar">
+                    <ul class="nav navbar-nav">
+                        <li {%block show_client_link%}{%endblock show_client_link %}><a href="{% url show_client %}">Clients</a></li>
+                        <li {%block calendar_link%}{%endblock calendar_link%}><a href="/Mindwell/{% now "Y/m/d/"%}calendar/">Calendar</a></li>
+                        <li {%block reports_link%}{%endblock reports_link%}><a href="{% url reports %}">Reports</a></li>
+                        <li {%block settings_link%}{%endblock settings_link%}><a href="{% url settings %}">Settings</a></li>
+                        <li><a href="{{ logout_url }}">Logout</a></li>
+                        <li class="divider-vertical"></li>
+                    </ul>
+                    <form class="navbar-form navbar-left">
+                        <div class="form-group">
+                            <label>Acting as</label>
+                            <select class="form-control" name="permitted_user" id="permitted_user"
+                                onchange='OnChangePermittedUser(this.form.permitted_user);'>
+                                <option>Self</option>
+                                {% for user in permitted_users %}
+                                {% ifequal user.permitteduser current_user.permitteduser %}
+                                <option selected="selected" value="{{user.key}}">{{ user.permitteduser }}</option>
+                                {% else %}
+                                <option value="{{user.key}}">{{ user.permitteduser }}</option>
+                                {% endifequal %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                        <form class="navbar-form navbar-right" action="/Mindwell/search/" method="post">
+                            <input class="search-query form-control" id="id_search_input" name="search_input" type="text" placeholder="Search for client" onfocus="if(this.value=='Search for client') this.value='';" onblur="if(this.value=='') this.value='Search for client';"/>
+                            <input type="hidden" value="Submit" />
+                        </form>
+                </div>
+            </div>
         </div>
-    </div>
-  </div>
-  <div id="content">
-    {% block content %}{% endblock %}
-  </div>
-</body>
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
 </html>
