@@ -1,6 +1,5 @@
 {% extends "base_mindwell.html" %}
 {% block script_sources %}
-  <script src="/static/javascript/jquery.flot.min.js" language="javascript" type="text/javascript"></script>
 {% endblock script_sources %}
 {% block document_ready_javascript %}
   dos_count = [
@@ -42,14 +41,14 @@
   $("table").tablesorter({
       sortList: [[0,0]],
       textExtraction: "complex",
-    widgets : [ "uitheme", "filter", "zebra" ], 
- 
-    widgetOptions : { 
- 
-      // set the uitheme widget to use the bootstrap theme class names 
-      uitheme : "bootstrap" 
- 
-    } 
+    widgets : [ "uitheme", "filter", "zebra" ],
+
+    widgetOptions : {
+
+      // set the uitheme widget to use the bootstrap theme class names
+      uitheme : "bootstrap"
+
+    }
   });
 {% endblock document_ready_javascript %}
 {% block content %}
