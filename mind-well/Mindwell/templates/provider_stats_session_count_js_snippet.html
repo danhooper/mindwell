@@ -1,0 +1,9 @@
+  session_count = [
+    {% for session in session_list %}
+      {% if forloop.first %}
+        [{{forloop.counter}}, {{session}}]
+      {% else %}
+        ,[{{forloop.counter}}, {{session}}]
+      {% endif %}
+    {% endfor %}
+    ]

@@ -2,73 +2,53 @@
 {% block script_sources %}
 {% endblock script_sources %}
 {% block document_ready_javascript %}
-  dos_count = [
-    {% for month_number, month_name, month_count, month_value in months %}
-      {% if forloop.first %}
-        [{{month_number}}, {{month_count}}]
-      {% else %}
-        ,[{{month_number}}, {{month_count}}]
-      {% endif %}
-    {% endfor %}
-  ]
-  dos_value = [
-    {% for month_number, month_name, month_count, month_value in months %}
-      {% if forloop.first %}
-        [{{month_number}}, {{month_value}}]
-      {% else %}
-        ,[{{month_number}}, {{month_value}}]
-      {% endif %}
-    {% endfor %}
-  ]
-  $.plot($("#placeholder"), [
-    { data: dos_count, label: "DOS Count" },
-    { data: dos_value, label: "DOS Value", yaxis: 2 }
-    ],
-    {
-      yaxis: {
-        tickFormatter: function(v, axis) {
-          return v.toFixed(axis.tickDecimals) + " DOS"
-        }
-      },
-      y2axis: {
-        tickFormatter: function(v, axis) {
-          return "$" + v.toFixed(axis.tickDecimals)
-        }
-      }
-    }
-  );
-  // call the tablesorter plugin
-  $("table").tablesorter({
-      sortList: [[0,0]],
-      textExtraction: "complex",
-    widgets : [ "uitheme", "filter", "zebra" ],
-
-    widgetOptions : {
-
-      // set the uitheme widget to use the bootstrap theme class names
-      uitheme : "bootstrap"
-
-    }
-  });
+dos_count = [
+{% for month_number, month_name, month_count, month_value in months %}
+{% if forloop.first %}
+[{{month_number}}, {{month_count}}]
+{% else %}
+,[{{month_number}}, {{month_count}}]
+{% endif %}
+{% endfor %}
+]
+dos_value = [
+{% for month_number, month_name, month_count, month_value in months %}
+{% if forloop.first %}
+[{{month_number}}, {{month_value}}]
+{% else %}
+,[{{month_number}}, {{month_value}}]
+{% endif %}
+{% endfor %}
+]
+MW.dosValueInit(dos_count, dos_value);
+{% include "provider_stats_session_count_js_snippet.html" %}
+    MW.sessionCountInit(session_count);
 {% endblock document_ready_javascript %}
 {% block content %}
-  <h2>Provider Statistics</h2>
+<div class="row">
+    <div class="col-md-6">
+        <h2>Provider Statistics</h2>
 
-  <table cellspacing="1" class="tablesorter">
-    <thead>
-      <tr>
-        <th>Month</th>
-        <th>DOS Count</th>
-        <th>DOS Value</th>
-      </tr>
-    </thead>
-    {% for month_number, month_name, month_count, month_value in months %}
-    <tr>
-      <td>{{month_number}} - {{month_name}}</td>
-      <td>{{month_count}}</td>
-      <td>{{month_value}}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  <div id="placeholder" style="width:600px;height:300px"></div>
+        <table cellspacing="1" class="tablesorter">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>DOS Count</th>
+                    <th>DOS Value</th>
+                </tr>
+            </thead>
+            {% for month_number, month_name, month_count, month_value in months %}
+            <tr>
+                <td>{{month_number}} - {{month_name}}</td>
+                <td>{{month_count}}</td>
+                <td>{{month_value}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div id="placeholder" style="width:600px;height:300px"></div>
+    </div>
+    <div class="col-md-6">
+        {% include "provider_stats_session_count.html" %}
+    </div>
+</div>
 {% endblock %}

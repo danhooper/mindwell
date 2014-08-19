@@ -7,7 +7,7 @@ function create_choice_modal_dialog(dialog_prefix, input_id) {
         modal: true,
         dialogClass: dialog_id,
         buttons: {
-            "OK": {         
+            "OK": {
                 text: 'OK',
                 id: "OK_" + dialog_id,
                 click: function() {
@@ -38,3 +38,66 @@ function create_choice_modal_dialog(dialog_prefix, input_id) {
             $( "#" + dialog_id ).dialog( "open" );
     });
 }
+var MW = {};
+MW.sessionCountInit = function(session_count) {
+  $.plot($("#mw-session-count"), [
+    { data: session_count, label: "Session Count" },
+    ],
+    {
+      yaxis: {
+        tickFormatter: function(v, axis) {
+          return v.toFixed(axis.tickDecimals) + " clients";
+        },
+        tickDecimals: 0
+      },
+     xaxis: {
+       tickDecimals: 0
+     },
+    }
+  );
+  // call the tablesorter plugin
+  $("table#mw-session-table").tablesorter({
+      sortList: [[0,0]],
+      textExtraction: "complex",
+    widgets : [ "uitheme", "filter", "zebra" ],
+
+    widgetOptions : {
+
+      // set the uitheme widget to use the bootstrap theme class names
+      uitheme : "bootstrap"
+
+    }
+  });
+};
+MW.dosValueInit = function(dos_count, dos_value) {
+  $.plot($("#placeholder"), [
+    { data: dos_count, label: "DOS Count" },
+    { data: dos_value, label: "DOS Value", yaxis: 2 }
+    ],
+    {
+      yaxis: {
+        tickFormatter: function(v, axis) {
+          return v.toFixed(axis.tickDecimals) + " DOS";
+        }
+      },
+      y2axis: {
+        tickFormatter: function(v, axis) {
+          return "$" + v.toFixed(axis.tickDecimals);
+        }
+      }
+    }
+  );
+  // call the tablesorter plugin
+  $("table").tablesorter({
+      sortList: [[0,0]],
+      textExtraction: "complex",
+    widgets : [ "uitheme", "filter", "zebra" ],
+
+    widgetOptions : {
+
+      // set the uitheme widget to use the bootstrap theme class names
+      uitheme : "bootstrap"
+
+    }
+  });
+};

@@ -1,61 +1,8 @@
 {% extends "base_mindwell.html" %}
-{% block script_sources %}
-{% endblock script_sources %}
 {% block document_ready_javascript %}
-  session_count = [
-    {% for session in session_list %}
-      {% if forloop.first %}
-        [{{forloop.counter}}, {{session}}]
-      {% else %}
-        ,[{{forloop.counter}}, {{session}}]
-      {% endif %}
-    {% endfor %}
-  ]
-  $.plot($("#placeholder"), [
-    { data: session_count, label: "Session Count" },
-    ],
-    {
-      yaxis: {
-        tickFormatter: function(v, axis) {
-          return v.toFixed(axis.tickDecimals) + " clients"
-        },
-        tickDecimals: 0
-      },
-     xaxis: {
-       tickDecimals: 0
-     },
-    }
-  );
-  // call the tablesorter plugin
-  $("table").tablesorter({
-      sortList: [[0,0]],
-      textExtraction: "complex",
-    widgets : [ "uitheme", "filter", "zebra" ],
-
-    widgetOptions : {
-
-      // set the uitheme widget to use the bootstrap theme class names
-      uitheme : "bootstrap"
-
-    }
-  });
+{% include "provider_stats_session_count_js_snippet.html" %}
+    MW.sessionCountInit(session_count);
 {% endblock document_ready_javascript %}
 {% block content %}
-  <h2>Provider Statistics</h2>
-  Average Number of Sessions Per Client: {{average}}
-  <table cellspacing="1" class="tablesorter">
-    <thead>
-      <tr>
-        <th>Session Count</th>
-        <th>Number of Clients with this many sessions</th>
-      </tr>
-    </thead>
-    {% for session_count in session_list %}
-    <tr>
-      <td>{{forloop.counter}}</td>
-      <td>{{session_count}}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  <div id="placeholder" style="width:600px;height:300px"></div>
+{% include "provider_stats_session_count.html" %}
 {% endblock %}

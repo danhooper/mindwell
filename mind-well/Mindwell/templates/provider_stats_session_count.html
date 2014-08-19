@@ -1,0 +1,17 @@
+<h2>Provider Statistics</h2>
+Average Number of Sessions Per Client: {{average}}
+<table cellspacing="1" class="tablesorter" id="mw-session-table">
+    <thead>
+        <tr>
+            <th>Session Count</th>
+            <th>Number of Clients with this many sessions</th>
+        </tr>
+    </thead>
+    {% for session_count in session_list %}
+    <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{session_count}}</td>
+    </tr>
+    {% endfor %}
+</table>
+<div id="mw-session-count" style="width:600px;height:300px"></div>

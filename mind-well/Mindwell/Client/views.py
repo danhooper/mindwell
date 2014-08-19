@@ -531,16 +531,14 @@ def provider_statistics_display(request, year):
         "months": zip(month_number, calendar.month_name[1:13],
             monthly_count, month_value)
     }
+    render_to_response_dict.update(get_provider_stats(dos))
 
     return render_to_response("provider_statistics_display_template.html",
                               render_to_response_dict,
                               context_instance=RequestContext(request))
 
 
-def provider_stats_all_time(request):
-    dos = models.DOS.safe_all(request=request).filter(
-        'session_result = ', 'Attended').fetch(
-        common.get_maximum_num_dos_fetch())
+def get_provider_stats(dos):
     dos_dict = {}
     for d in dos:
         if models.DOS.clientinfo.get_value_for_datastore(d) in dos_dict:
@@ -563,10 +561,18 @@ def provider_stats_all_time(request):
         average = float(total) / number_clients
     else:
         average = 0
-    render_to_response_dict = {
+    stats_dict = {
         'session_list': max_sess_list,
         'average': average,
     }
+    return stats_dict
+
+
+def provider_stats_all_time(request):
+    dos = models.DOS.safe_all(request=request).filter(
+        'session_result = ', 'Attended').fetch(
+        common.get_maximum_num_dos_fetch())
+    render_to_response_dict = get_provider_stats(dos)
 
     return render_to_response('provider_stats_all_time_template.html',
                               render_to_response_dict,
