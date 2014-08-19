@@ -99,3 +99,8 @@ urlpatterns += patterns('Mindwell.Client.calendar_views',
     url(r'^Mindwell/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/(?P<dos_id>\d+)/calendar_cancel_all_series_dos/$', 'calendar_cancel_all_series_dos', name='calendar_cancel_all_series_dos')
 )
 
+urlpatterns += patterns(
+    'Mindwell.Client.rest_views',
+    url(r'^Mindwell/rest/dos', 'rest_dos', name='rest_dos'),
+)
+

@@ -1037,6 +1037,15 @@ class DOS(db.Model):
         """ Fetches the DOS by ID for a given user. """
         return global_get_by_id(DOS, ids, request=request, parent=None)
 
+    def get_rest(self):
+        rest_dict = db.to_dict(self)
+        rest_dict['clientinfo'] = DOS.clientinfo.get_value_for_datastore(self).id_or_name()
+        rest_dict['dos_datetime'] = rest_dict['dos_datetime'].isoformat('T')
+        rest_dict['dos_endtime'] = self.get_endtime().isoformat('T')
+        rest_dict['userinfo'] = str(rest_dict['userinfo'])
+        logging.info(rest_dict)
+        return rest_dict
+
 
 class DOSForm(forms.Form):
     """ Used to create a form for a DOS including the client drop down. """
