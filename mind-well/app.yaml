@@ -1,5 +1,5 @@
 application: mindwellonline
-version: 3-0-0-20140402b
+version: 3-0-0-20140818-bower
 runtime: python27
 api_version: 1
 threadsafe: false
