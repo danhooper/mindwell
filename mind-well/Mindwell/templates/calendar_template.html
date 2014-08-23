@@ -78,7 +78,7 @@ function show_calendar(show_weekends, date, view) {
     });
     $('.fc-event-title', element).html(event.title + '<br/>' + event.note);
   },
-  viewDisplay: function(view) {
+  viewRender: function(view) {
     // this code basically generates the drop downdown with content specific to the current view
     $('#generate_report').html("");
     $('#generate_report').prepend($('<option></option>').val('100').html('Generate a ...'));
@@ -132,7 +132,11 @@ function show_hide_weekends(btn) {
 {% block document_ready_javascript %}
   {% include "sort_client_javascript_snippet.html" %}
   show_calendar({{displayweekends}}, moment(new Date({{year}}, {{month}}, {{day}})), 'agendaWeek');
-  {% include "dos_form_javascript_snippet.html" %}
+  {% if blocked_time %}
+  MW.dosFormJavascriptInit(true);
+  {% else %}
+  MW.dosFormJavascriptInit(false);
+  {% endif %}
   $("#dialog-modal").dialog({autoOpen: false,
     width:450,
     modal: true

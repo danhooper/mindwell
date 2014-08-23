@@ -1,18 +1,6 @@
 {% extends "settings_template.html" %}
 {% block document_ready_javascript %}
-  // call the tablesorter plugin
-  $(".tablesorter").tablesorter({
-      sortList: [[1,0]],
-      textExtraction: "complex",
-    widgets : [ "uitheme", "filter", "zebra" ], 
- 
-    widgetOptions : { 
- 
-      // set the uitheme widget to use the bootstrap theme class names 
-      uitheme : "bootstrap" 
- 
-    } 
-  });
+    MW.permissionSettingsInit();
 {% endblock document_ready_javascript %}
 {% block settings %}
   <h2>Permission Settings</h2>

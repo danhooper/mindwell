@@ -1,52 +1,7 @@
 {% extends "base_mindwell.html" %}
 {% block title %}Show Clients{% endblock %}
 {% block document_ready_javascript %}
-  // call the tablesorter plugin
-  $("table").tablesorter({
-      sortList: [[0,0]],
-      textExtraction: "complex",
-
-    widgets : [ "uitheme", "filter", "zebra" ],
-
-    widgetOptions : {
-
-      // set the uitheme widget to use the bootstrap theme class names
-      uitheme : "bootstrap"
-
-    }
-  });
-  $('#content a[tooltip]').each(function()
-  {
-    $(this).qtip({content: $(this).attr('tooltip'), style: 'cream'});
-  });
-  $("#dialog-modal").dialog({autoOpen: false,
-    width:450,
-    modal: true,
-    hide: { effect: 'fade',
-            duration: 1000
-    },
-  });
-  $('a.uimodal').bind('click', function() {
-    var $this = $(this);
-    $("#dialog-modal").dialog('open');
-    $("#dialog-modal").load($this.attr("href"), null, function() {
-    });
-    return false;
-  });
-  function getBalanceSuccessFunc(client_obj) {
-    var client_td = client_obj;
-    // create a closure so we can access the client_td in the callback
-    return function(data) {
-        $(client_td).text(data['balance']);
-    };
-  };
-  $('#calc_balances').click(function(event) {
-    event.preventDefault();
-    $('.client_balance').each(function(index) {
-      client_td = $(this);
-      $.getJSON($(this).data('balance-url'), getBalanceSuccessFunc(client_td));
-    });
-  });
+    MW.showClientsInit();
 {% endblock document_ready_javascript %}
 {% block show_client_link %}class="active"{% endblock show_client_link%}
 {% block content %}

@@ -1,16 +1,6 @@
 {% extends "reports_template.html" %}
 {% block document_ready_javascript %}
-  $("#invoice_table").tablesorter({
-      sortList: [[0,0]],
-    widgets : [ "uitheme", "filter", "zebra" ], 
- 
-    widgetOptions : { 
- 
-      // set the uitheme widget to use the bootstrap theme class names 
-      uitheme : "bootstrap" 
- 
-    } 
-  });
+    MW.invoicesInit();
   {% include "sort_client_javascript_snippet.html" %}
 {% endblock document_ready_javascript %}
 {% block invoice_content %}
