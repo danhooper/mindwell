@@ -540,6 +540,9 @@ def provider_statistics_display(request, year):
 
 def get_provider_stats(dos):
     dos_dict = {}
+    # remove all except for attended and with real clients
+    dos = [d for d in dos
+           if not d.get_blocked_time() and d.session_result == 'Attended']
     for d in dos:
         if models.DOS.clientinfo.get_value_for_datastore(d) in dos_dict:
             dos_dict[models.DOS.clientinfo.get_value_for_datastore(d)] += 1
