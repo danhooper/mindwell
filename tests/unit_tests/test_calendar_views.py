@@ -91,9 +91,9 @@ class Test_calendar_feed(mock_common.MockAppEngineTest):
         super(Test_calendar_feed, self).setUp()
         now = datetime.datetime.now()
         start_datetime = (now - datetime.timedelta(days=30))
-        start = time.mktime(start_datetime.timetuple())
+        start = start_datetime.strftime('%Y-%m-%d')
         end_datetime = (now + datetime.timedelta(days=30))
-        end = time.mktime(end_datetime.timetuple())
+        end = end_datetime.strftime('%Y-%m-%d')
         self.req = mock_common.MockRequest(GET={
             'start': start,
             'end': end})
