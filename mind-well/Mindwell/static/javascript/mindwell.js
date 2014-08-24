@@ -271,3 +271,25 @@ MW.dosFormJavascriptInit = function(blocked_time) {
     $( "#id_dos_repeat_end_date" ).datepicker();
     create_choice_modal_dialog("session_type", "input#id_session_type");
 };
+MW.baseMindwellInit = function() {
+
+    $.extend($.tablesorter.themes.bootstrap, {
+        // these classes are added to the table. To see other table classes available,
+        // look here: http://twitter.github.com/bootstrap/base-css.html#tables
+        table    : 'table table-bordered table-striped',
+        header   : 'bootstrap-header', // give the header a gradient background
+        icons    : '', // add "icon-white" to make them white; this icon class is added to the <i> in the header
+        sortNone : 'bootstrap-icon-unsorted',
+        sortAsc  : 'icon-chevron-up',
+        sortDesc : 'icon-chevron-down',
+        active   : '', // applied when column is sorted
+        hover    : '', // use custom css here - bootstrap class may not override it
+        filterRow: '', // filter row class
+        even     : '', // odd row zebra striping
+        odd      : ''  // even row zebra striping
+    });
+    $('input[type="text"]').addClass('form-control');
+    $('select').addClass('form-control');
+    $('textarea').addClass('form-control');
+    $('button.ui-dialog-titlebar-close').html('<i class="fa fa-times"></i>');
+};

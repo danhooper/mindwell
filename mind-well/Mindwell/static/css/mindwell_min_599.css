@@ -4,13 +4,26 @@ ul.errorlist {color:red; font-weight:bold}
 #id_dob_month{width:120px;}
 #id_dob_day{width:75px;}
 #id_dob_year{width:90px;}
-#id_dos_datetime_1_time{width:110px;}
-#id_dos_endtime_time{width:180px;}
+#id_dos_datetime_1_time{
+    width:110px;
+    display: inline-block;
+}
+#id_dos_endtime_time{
+    width:180px;
+    display: inline-block;
+}
 #id_zipcode {
     width: 150px;
 }
 #id_state {
     width: 200px;
+}
+#id_start_date_month, #id_start_date_day, #id_start_date_year,
+#id_end_date_month, #id_end_date_day, #id_end_date_year,
+#id_start_invoice_date_month, #id_start_invoice_date_day, #id_start_invoice_date_year,
+#id_end_invoice_date_month, #id_end_invoice_date_day, #id_end_invoice_date_year {
+    width: auto;
+    display:inline-block;
 }
 label.multicheckbox_other_label{text-align:right; min-width:200px; min-height:30px; font-weight: bold;}
 label.multicheckbox_label{text-align:left; min-width:200px; min-height:30px;}
@@ -54,3 +67,9 @@ div#content{padding-left:5px;}
 .mindwell-form-dob select {
     display:inline-block;
 }
+.ui-dialog-titlebar-close i {
+    color: black;
+    top: -4px;
+    position: relative;
+}
+
