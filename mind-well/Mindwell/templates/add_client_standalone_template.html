@@ -8,15 +8,15 @@
 </table>
 </form>
 <script>
-    {% include "client_form_js.js" %}
+  MW.clientFormInit();
 function on_add_client_form_submit() {
   $.post("{{ submit_link}}",
     $('#add_client_form').serialize(),
     function(data) {
-      $('#add_client_form').html("<div id='message'></div>");  
+      $('#add_client_form').html("<div id='message'></div>");
       $("select#id_clientinfo").append('<option value="' + data['key'] + '">'+ data['name'] + "</option>");
       $("select#id_clientinfo option:contains(" + data['name'] + ")").attr('selected', true);
-      
+
       $('#message').html("<h2>New Client Added!</h2>" + "<p>" + data['name'] + "</p>{% for script_line in new_client_script %}{{script_line|escapejs}}<br/>{% endfor %}");
     }
   );

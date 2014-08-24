@@ -111,11 +111,11 @@ MW.showClientsInit = function() {
         });
         return false;
     });
-    function getBalanceSuccessFunc(client_obj) {
+    var getBalanceSuccessFunc = function(client_obj) {
         var client_td = client_obj;
         // create a closure so we can access the client_td in the callback
         return function(data) {
-            $(client_td).text(data['balance']);
+            $(client_td).text(data.balance);
         };
     };
     $('#calc_balances').click(function(event) {
@@ -188,6 +188,7 @@ MW.dosFormJavascriptInit = function(blocked_time) {
         var fields = ["id_clientinfo", "id_session_type", "id_session_result",
             "id_dsm_code", "id_type_pay", "id_amt_due", "id_amt_paid", "id_print_receipt"
         ];
+        var x;
         if( $("#id_blocked_time").is(":checked" )) {
             for( x in fields) {
                 $("#" + fields[x]).hide();
@@ -202,8 +203,9 @@ MW.dosFormJavascriptInit = function(blocked_time) {
         }
     }
     function on_click_dos_datetime_1_time() {
+        var start_hour;
         try {
-            var start_hour = $("#id_dos_datetime_1_time").val().slice(0, 2);
+            start_hour = $("#id_dos_datetime_1_time").val().slice(0, 2);
         } catch(exception) {
             return;
         }
@@ -215,10 +217,10 @@ MW.dosFormJavascriptInit = function(blocked_time) {
         var hourVals = ["12", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"];
         var minuteVals = ["00", "15", "30", "45"];
         var meridiemVals = ["am", "pm"];
-        for( x in meridiemVals) {
+        for( var x in meridiemVals) {
             if( meridiemVals[x] == start_meridiem)
             {
-                start_meridiem = x
+                start_meridiem = x;
                 break;
             }
         }
@@ -243,7 +245,7 @@ MW.dosFormJavascriptInit = function(blocked_time) {
                     $("#id_dos_endtime_time").append(
                         $("<option></option>").val(output).html(output + " (" + minute_counter + " mins)")
                     );
-                    minute_counter += 15
+                    minute_counter += 15;
                 }
                 start_minute = 0;
             }
@@ -260,7 +262,7 @@ MW.dosFormJavascriptInit = function(blocked_time) {
     $("#id_blocked_time").click( on_click_blocked_time);
     if(blocked_time) {
         $("#id_blocked_time").attr("checked", true);
-        on_click_blocked_time()
+        on_click_blocked_time();
     }
     $("#id_dos_datetime_1_time").change(on_click_dos_datetime_1_time);
     on_click_dos_datetime_1_time();
@@ -292,4 +294,14 @@ MW.baseMindwellInit = function() {
     $('select').addClass('form-control');
     $('textarea').addClass('form-control');
     $('button.ui-dialog-titlebar-close').html('<i class="fa fa-times"></i>');
+};
+MW.clientFormInit = function() {
+    create_choice_modal_dialog("referrer", "input#id_referrer");
+    create_choice_modal_dialog("reason_for_visit", "input#id_reason_for_visit");
+    $( "#id_referrer" ).autocomplete({
+        source: "/Mindwell/referrer_autocomplete/",
+    });
+    $( "#id_dsm_code" ).autocomplete({
+        source: "/Mindwell/dsm_code_autocomplete/",
+    });
 };

@@ -2,15 +2,14 @@
 {% block title %} Add Client {% endblock %}
 
 {% block document_ready_javascript %}
-    {% include "client_form_js.js" %}
-
+  MW.clientFormInit();
 {% endblock %}
 {% block show_client_link %}class="active"{% endblock show_client_link%}
 {% block content %}
 <div class="container-fluid">
-<form action="{{ submit_link}}" method="post">
-	{% include "client_form_snippet.html" %}
-<input class="btn" type="submit" value="Submit" style="height: 2.5em; width: 8em"/>
-</form>
+  <form action="{{ submit_link}}" method="post">
+    {% include "client_form_snippet.html" %}
+    <input class="btn" type="submit" value="Submit" style="height: 2.5em; width: 8em"/>
+  </form>
 </div>
 {% endblock %}
