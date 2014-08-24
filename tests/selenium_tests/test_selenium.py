@@ -374,8 +374,8 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/show_client/")
         driver.find_element_by_link_text("Settings").click()
         driver.find_element_by_link_text("Permission Settings").click()
-        driver.find_element_by_id("id_permitted_user_email").clear()
-        driver.find_element_by_id("id_permitted_user_email").send_keys("test2@example.com")
+        driver.find_element_by_id("id_permitteduser").clear()
+        driver.find_element_by_id("id_permitteduser").send_keys("test2@example.com")
         driver.find_element_by_css_selector("input[type=submit]").click()
 
     def test_zz_02_grant_permission(self):
