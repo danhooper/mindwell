@@ -1,3 +1,6 @@
+'''
+Runs selenium based unit/system tests.
+'''
 import time
 import datetime
 import getpass
@@ -7,8 +10,10 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from pyvirtualdisplay import Display
 
-
 class SeleniumTests(unittest.TestCase):
+    '''
+    Runs the selenium tests.
+    '''
     @classmethod
     def setUpClass(cls):
         if 'jenkins' in getpass.getuser():
@@ -19,7 +24,8 @@ class SeleniumTests(unittest.TestCase):
         cls.display = Display(visible=vis, size=(1024, 768))
         cls.display.start()
         cls.driver = webdriver.Firefox()
-        cls.driver.implicitly_wait(60)
+        cls.driver.set_window_size(1000, 700)
+        cls.driver.implicitly_wait(30)
         cls.base_url = 'http://localhost:9000'
         cls.add_users()
 
@@ -60,17 +66,68 @@ class SeleniumTests(unittest.TestCase):
         print(self.driver.page_source)
         return False
 
-    def retry_select_id(self, id, text):
+    def retry_click_link(self, link_text):
         start_time = datetime.datetime.now()
         curr_time = datetime.datetime.now()
         while curr_time < (start_time + datetime.timedelta(seconds=30)):
             try:
-                Select(self.driver.find_element_by_id(id)).select_by_visible_text(text)
+                self.driver.find_element_by_link_text(link_text).click()
                 return True
             except NoSuchElementException:
                 print('current url %s' % self.driver.current_url)
                 print('failed to find %s. curr_time %s start_time %s' % (
-                    id, curr_time, start_time))
+                    link_text, curr_time, start_time))
+                time.sleep(1)
+                curr_time = datetime.datetime.now()
+
+        print(self.driver.page_source)
+        return False
+
+    def retry_select_id(self, select_id, text):
+        start_time = datetime.datetime.now()
+        curr_time = datetime.datetime.now()
+        while curr_time < (start_time + datetime.timedelta(seconds=30)):
+            try:
+                Select(self.driver.find_element_by_id(select_id)).select_by_visible_text(text)
+                return True
+            except NoSuchElementException:
+                print('current url %s' % self.driver.current_url)
+                print('failed to find %s. curr_time %s start_time %s' % (
+                    select_id, curr_time, start_time))
+                time.sleep(1)
+                curr_time = datetime.datetime.now()
+
+        print(self.driver.page_source)
+        return False
+
+    def retry_click_id(self, item_id):
+        start_time = datetime.datetime.now()
+        curr_time = datetime.datetime.now()
+        while curr_time < (start_time + datetime.timedelta(seconds=30)):
+            try:
+                self.driver.find_element_by_id(item_id).click()
+                return True
+            except NoSuchElementException:
+                print('current url %s' % self.driver.current_url)
+                print('failed to find %s. curr_time %s start_time %s' % (
+                    item_id, curr_time, start_time))
+                time.sleep(1)
+                curr_time = datetime.datetime.now()
+
+        print(self.driver.page_source)
+        return False
+
+    def retry_select_by_css_selector(self, selector):
+        start_time = datetime.datetime.now()
+        curr_time = datetime.datetime.now()
+        while curr_time < (start_time + datetime.timedelta(seconds=30)):
+            try:
+                self.driver.find_element_by_css_selector(selector).click()
+                return True
+            except NoSuchElementException:
+                print('current url %s' % self.driver.current_url)
+                print('failed to find %s. curr_time %s start_time %s' % (
+                    selector, curr_time, start_time))
                 time.sleep(1)
                 curr_time = datetime.datetime.now()
 
@@ -242,61 +299,32 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/2011/05/02/06/00/calendar/")
         self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
         driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
 
-    def add_rep_1_day(self, client_name):
+    def _add_rep_generic(self, client_name, repeat_freq):
         driver = self.driver
         driver.get(self.base_url + "/Mindwell/2011/05/02/07/00/calendar/")
         self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
         self.assertTrue(self.retry_select_id("id_dos_repeat", "One Day"))
         driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
+        self.retry_select_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e")
         driver.find_element_by_link_text("28").click()
         driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
+
+
+    def add_rep_1_day(self, client_name):
+        self._add_rep_generic(client_name, "One Day")
 
     def add_rep_1_week(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/08/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "One Week"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
-        driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
+        self._add_rep_generic(client_name, "One Week")
 
     def add_rep_2_weeks(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/09/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "Two Weeks"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
-        driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
+        self._add_rep_generic(client_name, "Two Weeks")
 
     def add_rep_3_weeks(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/10/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "Three Weeks"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
-        driver.find_element_by_css_selector("input[type=submit]").click()
-        time.sleep(10)
+        self._add_rep_generic(client_name, "Three Weeks")
 
     def add_rep_4_weeks(self, client_name):
-        driver = self.driver
-        driver.get(self.base_url + "/Mindwell/2011/05/02/11/00/calendar/")
-        self.assertTrue(self.retry_select_xpath("//select[@id='id_clientinfo']", client_name))
-        self.assertTrue(self.retry_select_id("id_dos_repeat", "Four Weeks"))
-        driver.find_element_by_id("id_dos_repeat_end_date").click()
-        driver.find_element_by_css_selector("span.ui-icon.ui-icon-circle-triangle-e").click()
-        driver.find_element_by_link_text("28").click()
-        driver.find_element_by_css_selector("input[type=submit]").click()
+        self._add_rep_generic(client_name, "Four Weeks")
 
 
     def test_add_dos(self):
@@ -338,9 +366,7 @@ class SeleniumTests(unittest.TestCase):
         self.add_login_steps_user1()
         driver = self.driver
         driver.get(self.base_url + "/Mindwell/2011/05/26/calendar/")
-        driver.find_element_by_xpath("//div[@id='calendar']/table/tbody/tr/td[3]/span/span/span[2]/span").click()
-        Select(driver.find_element_by_id("generate_report")).select_by_visible_text("Current Month")
-
+        driver.find_element_by_class_name('fc-button-month').click()
 
     def test_zz_01_ask_permission(self):
         self.add_login_steps_user1()
@@ -348,8 +374,8 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/show_client/")
         driver.find_element_by_link_text("Settings").click()
         driver.find_element_by_link_text("Permission Settings").click()
-        driver.find_element_by_id("id_permitteduser").clear()
-        driver.find_element_by_id("id_permitteduser").send_keys("test2@example.com")
+        driver.find_element_by_id("id_permitted_user_email").clear()
+        driver.find_element_by_id("id_permitted_user_email").send_keys("test2@example.com")
         driver.find_element_by_css_selector("input[type=submit]").click()
 
     def test_zz_02_grant_permission(self):
@@ -358,10 +384,10 @@ class SeleniumTests(unittest.TestCase):
         driver.get(self.base_url + "/Mindwell/show_client/")
         driver.find_element_by_link_text("Settings").click()
         driver.find_element_by_link_text("Permission Settings").click()
-        driver.find_element_by_link_text("Change").click()
-        Select(driver.find_element_by_id("id_user_approved")).select_by_visible_text("Approved")
-        driver.find_element_by_id('id_submit_update_request').click()
-
+        self.assertTrue(self.retry_click_link('Change'))
+        self.assertTrue(self.retry_select_id('id_user_approved', 'Approved'))
+        self.assertTrue(self.retry_click_id('id_submit_update_request'))
+        time.sleep(5)
 
     def act_as_user2(self):
         driver = self.driver
@@ -403,11 +429,13 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_link_text("Provider Invoices").click()
         Select(driver.find_element_by_id("id_start_invoice_date_month")).select_by_visible_text("January")
         Select(driver.find_element_by_id("id_start_invoice_date_day")).select_by_visible_text("1")
-        Select(driver.find_element_by_id("id_start_invoice_date_year")).select_by_visible_text("2008")
+        Select(driver.find_element_by_id("id_start_invoice_date_year")).select_by_visible_text("2009")
         Select(driver.find_element_by_id("id_end_invoice_date_month")).select_by_visible_text("January")
         Select(driver.find_element_by_id("id_end_invoice_date_day")).select_by_visible_text("1")
         Select(driver.find_element_by_id("id_end_invoice_date_year")).select_by_visible_text("2020")
         driver.find_element_by_css_selector("input[type=submit]").click()
+        time.sleep(5)
+        driver.refresh()
         self.verifyTextPresent('test_last_name2, test_first_name2')
         self.verifyTextPresent('100')
         self.verifyTextPresent('95')
@@ -424,7 +452,7 @@ class SeleniumTests(unittest.TestCase):
 #    def test_zz_07_mark_dos_attended_client2(self):
 #        self.add_login_steps_user1()
 #        self.act_as_user2()
-#        driver = self.driver        
+#        driver = self.driver
 #        driver.get(self.base_url + "/Mindwell/2011/05/23/calendar/")
 #        driver.find_element_by_link_text("test_last_name2, test_first_name2").click()
 #        Select(driver.find_element_by_id("id_session_result")).select_by_visible_text("Attended")
@@ -481,6 +509,7 @@ class SeleniumTests(unittest.TestCase):
         driver.find_element_by_id("id_dsm_code").clear()
         driver.find_element_by_id("id_dsm_code").send_keys("test_dsm")
         driver.find_element_by_css_selector("input[type=submit]").click()
+        time.sleep(5)
 
     def test_zz_10_add_dos_client2a(self):
         self.add_login_steps_user2()
@@ -503,7 +532,7 @@ class SeleniumTests(unittest.TestCase):
 #        driver.find_element_by_link_text("test_last_name2, test_first_name2").click()
 ##        driver.find_element_by_xpath("//div[@id='content']/table/tbody/tr[4]/td/a").click()
 #        driver.find_element_by_xpath("/html/body/div[2]/table/tbody/tr[4]/td/a").click()
-#        
+#
 #        driver.find_element_by_id("id_amt_due").clear()
 #        driver.find_element_by_id("id_amt_due").send_keys("150")
 #        driver.find_element_by_css_selector("input[type=submit]").click()
@@ -541,3 +570,4 @@ class SeleniumTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.driver.quit()
         cls.display.stop()
+
