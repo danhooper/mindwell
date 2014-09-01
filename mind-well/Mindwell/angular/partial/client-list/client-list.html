@@ -1,7 +1,9 @@
 <div class="col-md-12" ng-controller="ClientListCtrl">
-  <div ng-repeat="client in clients">
-    {{client.lastname}} {{client.firstname}}
-  </div>
-
-
+  <table ng-table="tableParams" class="table" show-filter="true">
+    <tr ng-repeat="client in $data">
+      <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
+        {{client.lastname}}, {{client.firstname}}
+      </td>
+    </tr>
+  </table>
 </div>

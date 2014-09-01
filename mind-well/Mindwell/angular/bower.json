@@ -22,6 +22,7 @@
     "moment": "~2.5",
     "less.js": "~1.6",
     "font-awesome": "~4.0",
-    "restangular": "~1.4.0"
+    "restangular": "~1.4.0",
+    "ng-table": "~0.3.3"
   }
 }
