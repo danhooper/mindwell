@@ -14,6 +14,36 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from secret_info import secret_passphrase
 
+SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
+
+
+def get_rest(model, eager_load=False):
+    output = {}
+
+    for key, prop in model.properties().iteritems():
+        value = getattr(model, key)
+
+        if value is None or isinstance(value, SIMPLE_TYPES):
+            output[key] = value
+        elif (isinstance(value, datetime.date) or
+              isinstance(value, datetime.time)):
+            output[key] = value.isoformat()
+        elif isinstance(value, datetime.datetime):
+            output[key] = value.isoformat('T')
+        elif isinstance(value, db.GeoPt):
+            output[key] = {'lat': value.lat, 'lon': value.lon}
+        elif isinstance(value, db.Model):
+            if eager_load:
+                output[key] = get_rest(value)
+            else:
+                output[key] = value.key().id_or_name()
+        elif isinstance(value, users.User):
+            output[key] = unicode(value)
+        else:
+            raise ValueError('cannot encode ' + repr(prop))
+
+    return output
+
 
 class Checkbox(object):
     def __init__(self, choice, selected):
@@ -26,7 +56,7 @@ class Checkbox(object):
 
 def pull_current_user_from_request(request):
     """Gets the current user, which might either be the logged in user
-        or the user they are acting as."""
+    or the user they are acting as."""
     # first use the logged in user
     current_user = users.get_current_user()
     if request is not None:
@@ -45,8 +75,8 @@ def date_formatter(date_in):
 
 def global_get_all(classname, request=None, keys_only=False):
     """This replaces the all functions from google app engine on models.
-        This function will filter out all entities that a user owns
-        so that no user can see someone else's information."""
+    This function will filter out all entities that a user owns
+    so that no user can see someone else's information."""
     result = classname.all(keys_only=keys_only)
     current_user = pull_current_user_from_request(request)
     return result.filter('userinfo =', current_user)
@@ -54,8 +84,8 @@ def global_get_all(classname, request=None, keys_only=False):
 
 def global_get_by_id(classname, ids, request=None, parent=None):
     """This replaces the get_by_id of google app engine on models.
-       This function ensures that a user can only access entities they
-       own."""
+    This function ensures that a user can only access entities they
+    own."""
     result = classname.get_by_id(int(ids), parent)
     if result is None:
         result = classname.get_by_key_name(str(ids), parent)
@@ -70,8 +100,8 @@ def global_get_by_id(classname, ids, request=None, parent=None):
 # TODO: need to handle multiple keys
 def global_get(classname, keys):
     """This replaces the app engine get function for entities.
-       It ensures that a given user can only access their own
-       entities."""
+    It ensures that a given user can only access their own
+    entities."""
     try:
         result = classname.get(keys)
         if result.userinfo != users.get_current_user():
@@ -83,13 +113,13 @@ def global_get(classname, keys):
 
 class EncryptedField(db.StringProperty):
     """ This supports a property which is encrypted with a salted hash.  See
-        http://danhooper.blogspot.com/2010/06/encrypting-fields-in-google-app-engine.html
-        for more information."""
+    http://danhooper.blogspot.com/2010/06/encrypting-fields-in-google-app-engine.html
+    for more information."""
     data_type = str
 
     def __get_sha_digest(self, random_number=None):
         """ This function returns a sha hash of a random number
-            and the secret password."""
+        and the secret password."""
         sha = SHA256.new()
         if not random_number:
             random_number = os.urandom(16)
@@ -123,7 +153,7 @@ class EncryptedField(db.StringProperty):
 
     def decrypt(self, data):
         """ Decrypts the data from the datastore.  Basically the inverse of
-            encrypt."""
+        encrypt."""
         # check that either the string is None or the data itself is none
         if data is None:
             return None
@@ -158,8 +188,8 @@ class EncryptedField(db.StringProperty):
             value = str(value)
         if value is not None and not isinstance(value, str):
             raise db.BadValueError('Property %s must be convertible '
-                                'to a str instance (%s)' %
-                                (self.name, value))
+                                   'to a str instance (%s)' %
+                                   (self.name, value))
         return super(EncryptedField, self).validate(value)
 
     def empty(self, value):
@@ -175,7 +205,7 @@ class UserInfo(db.Model):
     @staticmethod
     def CurrentUserAllowed():
         """ This function returns true if the current user is allowed access
-            this application."""
+        this application."""
         current_user = users.get_current_user()
         if not current_user:
             return False
@@ -211,7 +241,7 @@ class UserInfo(db.Model):
 
 class UserPermission(db.Model):
     """ This class is used to hold information about which users may act on
-        behalf of other uses (can see their client etc)."""
+    behalf of other uses (can see their client etc)."""
 
     userinfo = db.UserProperty()  # this is the user with the permission
     # Not used today, but in the future will be filtered all the time to get a
@@ -222,8 +252,9 @@ class UserPermission(db.Model):
     permitteduser = db.UserProperty()
     PERMISSION_LEVEL_CHOICES = (
         'Read and Write',
-        )
-    permissionlevel = db.StringProperty(verbose_name='Permission Level',
+    )
+    permissionlevel = db.StringProperty(
+        verbose_name='Permission Level',
         choices=PERMISSION_LEVEL_CHOICES, default='Read and Write')
     user_approved = db.StringProperty(verbose_name='User Approval',
                                       default='Not Yet Approved')
@@ -231,21 +262,21 @@ class UserPermission(db.Model):
     @staticmethod
     def safe_all(request=None, keys_only=False):
         """ This function is used to get all the entities of this class that
-            the current user owns."""
+        the current user owns."""
         return global_get_all(UserPermission, request=request,
                               keys_only=keys_only)
 
     @staticmethod
     def safe_get_by_id(ids, request=None, parent=None):
         """ This function is used to get a specific entity of this class that
-            the current user owns."""
+        the current user owns."""
         return global_get_by_id(UserPermission, ids, request=request,
                                 parent=None)
 
     @staticmethod
     def safe_get(keys):
         """ This function is used to get a specific entity of this class that
-            the current user owns."""
+        the current user owns."""
         user_permission = global_get(UserPermission, keys)
         if user_permission:
             if user_permission.user_approved == 'Approved':
@@ -286,13 +317,13 @@ class UserPermission(db.Model):
 
 class UserPermissionForm(forms.Form):
     """ Creates the userpermission form for requesters to use.
-        Omits the user_approved field."""
+    Omits the user_approved field."""
 
     # this is the user the current user can act on behalf of
     permitteduser = forms.CharField(max_length=200)
     PERMISSION_LEVEL_CHOICES = (
         ('Read and Write', 'Read and Write'),
-        )
+    )
     permissionlevel = forms.ChoiceField(label='Permission Level',
                                         choices=PERMISSION_LEVEL_CHOICES)
 
@@ -307,9 +338,9 @@ class UserPermissionForm(forms.Form):
 
 class UserPermissionRequestsForm(forms.Form):
     """ Creates the userpermission form for approvers/rejectors to use.
-        Creates the userpermission form but omits the submitter's fields.  So
-        this is used when the user is approving or rejecting other requester's
-        permission requests."""
+    Creates the userpermission form but omits the submitter's fields.  So
+    this is used when the user is approving or rejecting other requester's
+    permission requests."""
 
     USER_APPROVED_CHOICES = (
         ('Approved', 'Approved'),
@@ -317,7 +348,7 @@ class UserPermissionRequestsForm(forms.Form):
         ('Not Yet Approved', 'Not Yet Approved'),
     )
     user_approved = forms.ChoiceField(label='User Approval',
-        choices=USER_APPROVED_CHOICES)
+                                      choices=USER_APPROVED_CHOICES)
 
 
 client_info_meta_version = '1'
@@ -338,15 +369,18 @@ class ClientInfo(db.Model):
     MESSAGE_CHOICES = (
         'Message OK',
         'Message Not OK'
-        )
+    )
     cellnumber = EncryptedField(verbose_name='Cell Number', indexed=False)
-    cellmessage = db.StringProperty(verbose_name='Cell Message',
-        choices=MESSAGE_CHOICES, default='Message Not OK', indexed=False)
+    cellmessage = db.StringProperty(
+        verbose_name='Cell Message', choices=MESSAGE_CHOICES,
+        default='Message Not OK', indexed=False)
     homenumber = EncryptedField(verbose_name='Home Number')
-    homemessage = db.StringProperty(verbose_name='Home Message',
+    homemessage = db.StringProperty(
+        verbose_name='Home Message',
         choices=MESSAGE_CHOICES, default='Message Not OK', indexed=False)
     worknumber = EncryptedField(verbose_name='Work Number', indexed=False)
-    workmessage = db.StringProperty(verbose_name='Work Message',
+    workmessage = db.StringProperty(
+        verbose_name='Work Message',
         choices=MESSAGE_CHOICES, default='Message Not OK', indexed=False)
     emailaddress = EncryptedField(verbose_name='Email', indexed=False)
     address = EncryptedField(verbose_name='Address', indexed=False)
@@ -403,8 +437,8 @@ class ClientInfo(db.Model):
         'Washington DC',
         'West Virginia',
         'Wisconsin',
-        'Wyoming',
-        )
+    'Wyoming'
+    )
     state = db.StringProperty(verbose_name='State', choices=STATE_CHOICES,
                               default='Maryland', indexed=False)
     zipcode = EncryptedField(verbose_name='Zip Code', indexed=False)
@@ -412,11 +446,12 @@ class ClientInfo(db.Model):
 
     guardians_name = EncryptedField(verbose_name='Guardians Name',
                                     indexed=False)
-    guardians_phone_number = EncryptedField(verbose_name='Guardians Phone Number',
-                                            indexed=False)
+    guardians_phone_number = EncryptedField(
+        verbose_name='Guardians Phone Number', indexed=False)
     emergency_contact = EncryptedField(verbose_name='Emergency Contact',
                                        indexed=False)
-    emergency_contact_phone_number = EncryptedField(verbose_name='Emergency Contact Phone Number', indexed=False)
+    emergency_contact_phone_number = EncryptedField(
+        verbose_name='Emergency Contact Phone Number', indexed=False)
     #Indexed for autocomplete of referrer
     referrer = EncryptedField(verbose_name='Referrered By')
     #Indexed for autocomplete of DSM code
@@ -424,7 +459,7 @@ class ClientInfo(db.Model):
     CLIENT_STATUS_CHOICES = (
         'Active',
         'Inactive',
-        )
+    )
     reason_for_visit = db.StringProperty(default='',
                                          verbose_name="Reason for Visit")
     client_status = db.StringProperty(verbose_name='Client Status',
@@ -433,7 +468,7 @@ class ClientInfo(db.Model):
 
     def __unicode__(self):
         """ Converts the user to a unicode string."""
-        return  u'%s, %s' % (self.lastname, self.firstname)
+        return u'%s, %s' % (self.lastname, self.firstname)
 
     def get_absolute_url(self):
         """ Link in MindWell to show a specific client."""
@@ -449,8 +484,6 @@ class ClientInfo(db.Model):
         """ Link in MindWell to delete a specific client."""
         return reverse('delete_client',
                        kwargs={'client_id': str(self.key().id_or_name())})
-
-
 
     def getallfields_inc_hidden(self):
         """ Gets all the fields for the client including hidden ones."""
@@ -521,7 +554,7 @@ class ClientInfo(db.Model):
             ('Work Number', self.worknumber),
             ('Work Message', self.workmessage),
             ('Email', self.emailaddress),
-            )
+        )
 
     def get_address_fields(self):
         """ Gets all the address information fields for the client."""
@@ -531,7 +564,7 @@ class ClientInfo(db.Model):
             ('City', self.city),
             ('State', self.state),
             ('Zip Code', self.zipcode),
-            )
+        )
 
     def get_other_fields(self):
         """ Gets all the other fields for the client."""
@@ -584,19 +617,22 @@ class ClientInfo(db.Model):
         for k, v in values.iteritems():
             setattr(self, k, v)
 
+    def get_rest(self):
+        return get_rest(self)
+
     class Meta:
         ordering = ["lastname"]
 
 
 class ClientForm(forms.Form):
     """ Form used to add or update a client.  The userinfo is populated
-        manually after creating the client. """
+    manually after creating the client. """
     lastname = forms.CharField(max_length=300, required=False)
     firstname = forms.CharField(max_length=300, required=False)
     MESSAGE_CHOICES = (
         ('Message Not OK', 'Message Not OK'),
         ('Message OK', 'Message OK'),
-        )
+    )
     cellnumber = forms.CharField(max_length=300, required=False)
     cellmessage = forms.ChoiceField(choices=MESSAGE_CHOICES, required=False)
     homenumber = forms.CharField(max_length=300, required=False)
@@ -658,8 +694,8 @@ class ClientForm(forms.Form):
         ('Washington DC', 'Washington DC'),
         ('West Virginia', 'West Virginia'),
         ('Wisconsin', 'Wisconsin'),
-        ('Wyoming', 'Wyoming'),
-        )
+        ('Wyoming', 'Wyoming')
+    )
     state = forms.ChoiceField(choices=STATE_CHOICES, required=False,
                               initial='Maryland')
     zipcode = forms.CharField(max_length=300, required=False)
@@ -681,14 +717,14 @@ class ClientForm(forms.Form):
     CLIENT_STATUS_CHOICES = (
         ('Active', 'Active'),
         ('Inactive', 'Inactive'),
-        )
+    )
     client_status = forms.ChoiceField(choices=CLIENT_STATUS_CHOICES,
                                       required=False)
 
 
 class SimpleClientForm(forms.Form):
     """ Form used to add or update a client.  The userinfo is populated
-        manually after creating the client. """
+    manually after creating the client. """
     lastname = forms.CharField(max_length=300, required=False,
                                label='Last name')
     firstname = forms.CharField(max_length=300, required=False,
@@ -696,7 +732,7 @@ class SimpleClientForm(forms.Form):
     MESSAGE_CHOICES = (
         ('Message Not OK', 'Message Not OK'),
         ('Message OK', 'Message OK'),
-        )
+    )
     cellnumber = forms.CharField(max_length=300, required=False,
                                  label='Cell number')
     cellmessage = forms.ChoiceField(choices=MESSAGE_CHOICES, required=False,
@@ -718,7 +754,7 @@ dos_meta_version = '3'
 
 class DOS(db.Model):
     """ Model for Date of Session (DOS). This basically stores information
-        about a session with a client. """
+    about a session with a client. """
     userinfo = db.UserProperty()
     user_id = db.StringProperty()
     meta_version = db.StringProperty(default=dos_meta_version)
@@ -735,7 +771,7 @@ class DOS(db.Model):
         'Cancellation - Late',
         'Cancellation - Timely',
         'Payment Received',
-        )
+    )
     # Used to filter DOS based upon attended DOS
     session_result = db.StringProperty(verbose_name='Session Result',
                                        choices=SESSION_RESULT_CHOICES,
@@ -760,7 +796,7 @@ class DOS(db.Model):
         '90',
         '105',
         '120',
-        )
+    )
     dos_duration = db.StringProperty(verbose_name='DOS Duration',
                                      choices=DURATION_CHOICES, default='45',
                                      indexed=False)
@@ -771,7 +807,7 @@ class DOS(db.Model):
         'Two Weeks',
         'Three Weeks',
         'Four Weeks',
-        )
+    )
     dos_repeat = db.StringProperty(verbose_name='DOS Repeat',
                                    choices=REPEAT_CHOICES, default='No')
     dos_repeat_end_date = db.DateProperty(verbose_name='Repeat End Date')
@@ -798,7 +834,7 @@ class DOS(db.Model):
             ('DOS Date and Time', self.dos_datetime),
             ('DOS Repeat', self.dos_repeat),
             ('Repeat End Date', self.dos_repeat_end_date),
-            )
+        )
 
     def getallfields(self):
         """ Gets all the dos fields excluding hidden ones. """
@@ -814,7 +850,7 @@ class DOS(db.Model):
             ('DOS Date and Time', self.dos_datetime),
             ('DOS Repeat', self.dos_repeat),
             ('Repeat End Date', self.dos_repeat_end_date),
-            )
+        )
 
     def get_hover_tip(self):
         """ Gets a hover tip for all the fields of a DOS. """
@@ -847,7 +883,7 @@ class DOS(db.Model):
 
     def get_update_absolute_url(self):
         """ Gets the url of this DOS to make the update to it in the calendar
-            view. """
+        view. """
         if self.dos_datetime:
             return reverse('calendar_update_dos',
                            args=('%04d' % self.dos_datetime.year,
@@ -879,8 +915,8 @@ class DOS(db.Model):
 
     def get_endtime(self):
         """ Gets the ending time of this DOS.
-            Note: For old DOS this used to have a duration, now it has an
-            explicit end time."""
+        Note: For old DOS this used to have a duration, now it has an
+        explicit end time."""
         if self.dos_endtime:
             return datetime.datetime.combine(self.dos_datetime.date(),
                                              self.dos_endtime)
@@ -897,8 +933,8 @@ class DOS(db.Model):
 
     def get_repeat_end_date(self):
         """ Gets the date that this DOS stops repeating.
-            Note: There used to not be a specific end date, so we set the end
-            date for those DOS' far in the future. """
+        Note: There used to not be a specific end date, so we set the end
+        date for those DOS' far in the future. """
         try:
             if self.dos_repeat_end_date is not None:
                 return datetime.datetime.fromordinal(
@@ -927,7 +963,7 @@ class DOS(db.Model):
 
     def get_class_name(self):
         """ Gets the HTML class name of this DOS based upon attributes of this
-            DOS. """
+        DOS. """
         try:
             if not self.get_clientinfo():
                 return 'blocked_time'
@@ -964,7 +1000,7 @@ class DOS(db.Model):
 
     def get_blocked_time(self):
         """ True if this is a blocked time (no client, user just wants to
-            block the time in the schedule)."""
+        block the time in the schedule)."""
         if self.get_clientinfo():
             return False
         else:
@@ -988,7 +1024,7 @@ class DOS(db.Model):
 
     def get_background_color(self):
         """ Gets the background color of this DOS based upon various
-            attributes. """
+        attributes. """
         try:
             if not self.get_clientinfo():
                 return 'blue'
@@ -1038,13 +1074,7 @@ class DOS(db.Model):
         return global_get_by_id(DOS, ids, request=request, parent=None)
 
     def get_rest(self):
-        rest_dict = db.to_dict(self)
-        rest_dict['clientinfo'] = DOS.clientinfo.get_value_for_datastore(self).id_or_name()
-        rest_dict['dos_datetime'] = rest_dict['dos_datetime'].isoformat('T')
-        rest_dict['dos_endtime'] = self.get_endtime().isoformat('T')
-        rest_dict['userinfo'] = str(rest_dict['userinfo'])
-        logging.info(rest_dict)
-        return rest_dict
+        return get_rest(self)
 
 
 class DOSForm(forms.Form):
@@ -1060,7 +1090,7 @@ class DOSForm(forms.Form):
         ('Cancellation - Late', 'Cancellation - Late'),
         ('Cancellation - Timely', 'Cancellation - Timely'),
         ('Payment Received', 'Payment Received'),
-        )
+    )
     # Used to filter DOS based upon attended DOS
     session_result = forms.ChoiceField(choices=SESSION_RESULT_CHOICES,
                                        required=False)
@@ -1085,7 +1115,7 @@ class DOSForm(forms.Form):
         ('75', '75'),
         ('90', '90'),
         ('105', '105'),
-        )
+    )
     REPEAT_CHOICES = (
         ('No', 'No'),
         ('One Day', 'One Day'),
@@ -1093,7 +1123,7 @@ class DOSForm(forms.Form):
         ('Two Weeks', 'Two Weeks'),
         ('Three Weeks', 'Three Weeks'),
         ('Four Weeks', 'Four Weeks'),
-        )
+    )
     dos_repeat = forms.ChoiceField(choices=REPEAT_CHOICES, required=False)
     dos_repeat_end_date = forms.DateField(required=False)
 
@@ -1115,8 +1145,7 @@ class DOSForm(forms.Form):
 
 class DOSFormNoClientSelect(forms.Form):
     """ Used to create a form for a DOS without showing the client drop
-        down. """
-
+    down. """
 
     session_type = forms.CharField(max_length=300, required=False)
     SESSION_RESULT_CHOICES = (
@@ -1126,7 +1155,7 @@ class DOSFormNoClientSelect(forms.Form):
         ('Cancellation - Late', 'Cancellation - Late'),
         ('Cancellation - Timely', 'Cancellation - Timely'),
         ('Payment Received', 'Payment Received'),
-        )
+    )
     # Used to filter DOS based upon attended DOS
     session_result = forms.ChoiceField(choices=SESSION_RESULT_CHOICES,
                                        required=False)
@@ -1151,7 +1180,7 @@ class DOSFormNoClientSelect(forms.Form):
         ('75', '75'),
         ('90', '90'),
         ('105', '105'),
-        )
+    )
     REPEAT_CHOICES = (
         ('No', 'No'),
         ('One Day', 'One Day'),
@@ -1159,7 +1188,7 @@ class DOSFormNoClientSelect(forms.Form):
         ('Two Weeks', 'Two Weeks'),
         ('Three Weeks', 'Three Weeks'),
         ('Four Weeks', 'Four Weeks'),
-        )
+    )
     dos_repeat = forms.ChoiceField(choices=REPEAT_CHOICES, required=False)
     dos_repeat_end_date = forms.DateField(required=False)
 
@@ -1186,28 +1215,28 @@ class DOSRecurr(db.Model):
 
     def get_blocked_time(self):
         """ Returns true if this DOSRecurr has a clientinfo set, False
-            otherwise. """
+        otherwise. """
         if not self.dos_base.clientinfo:
             return True
         return False
 
     def get_class_name(self):
         """ Returns an HTML class name based upon various attributes of this
-            DOS. """
+        DOS. """
         if self.get_blocked_time():
             return 'blocked_time'
         return 'recurrClient'
 
     def get_background_color(self):
         """ Returns a background color based upon various attributes of this
-            DOS. """
+        DOS. """
         if self.get_blocked_time():
             return 'blue'
         return 'yellow'
 
     def get_text_color(self):
         """ Returns a text color based upon various attributes of this
-            DOS. """
+        DOS. """
         if self.get_blocked_time():
             return 'white'
         return 'blue'
@@ -1231,7 +1260,7 @@ class DOSRecurr(db.Model):
 
     def get_endtime(self):
         return datetime.datetime.combine(self.dos_recurr_datetime.date(),
-                                        self.dos_base.get_endtime().time())
+                                         self.dos_base.get_endtime().time())
 
     def get_note(self):
         if self.get_blocked_time():
@@ -1249,7 +1278,7 @@ class DOSRecurr(db.Model):
             'amt_due': self.dos_base.amt_due,
             'dos_duration': self.dos_base.dos_duration,
             'dos_repeat_end_date': dos_datetime,
-            })
+        })
         return form
 
     @staticmethod
@@ -1287,19 +1316,19 @@ class Invoice(db.Model):
         return ''
 
     def get_all_dos_absolute_url(self):
-        return ('/Mindwell/' + str(self.get_id()) + \
+        return ('/Mindwell/' + str(self.get_id()) +
                 '/all_dos/invoice_display/')
 
     def get_attended_only_absolute_url(self):
-        return ('/Mindwell/' + str(self.get_id()) + \
+        return ('/Mindwell/' + str(self.get_id()) +
                 '/attended_only/invoice_display/')
 
     def get_all_dos_absolute_url_html(self):
-        return ('/Mindwell/' + str(self.get_id()) + \
+        return ('/Mindwell/' + str(self.get_id()) +
                 '/all_dos/html/invoice_display/')
 
     def get_attended_only_absolute_url_html(self):
-        return ('/Mindwell/' + str(self.get_id()) + \
+        return ('/Mindwell/' + str(self.get_id()) +
                 '/attended_only/html/invoice_display/')
 
     def get_absolute_url(self):
@@ -1314,15 +1343,15 @@ class Invoice(db.Model):
             print_receipt_dos = DOS.safe_get_by_id(int(receipt_dos), request)
             if print_receipt_dos:
                 invoice = Invoice.safe_all(request).filter(
-                        'start_date =',
-                        print_receipt_dos.dos_datetime.date()
-                    ).filter(
-                        'end_date =',
-                        print_receipt_dos.dos_datetime.date()
-                    ).filter(
-                       'clientinfo = ',
-                       print_receipt_dos.clientinfo.key()
-                   ).get()
+                    'start_date =',
+                    print_receipt_dos.dos_datetime.date()
+                ).filter(
+                    'end_date =',
+                    print_receipt_dos.dos_datetime.date()
+                ).filter(
+                    'clientinfo = ',
+                    print_receipt_dos.clientinfo.key()
+                ).get()
                 if not invoice:
                     invoice = Invoice(
                         clientinfo=print_receipt_dos.clientinfo,
@@ -1454,7 +1483,7 @@ class CustomFormSettings(db.Model):
             choices = getattr(self, attr).split('\n')
             choices = [choice for choice in choices if choice]
             choices = [Checkbox(choice.rstrip(), False)
-                           for choice in choices]
+                       for choice in choices]
         return choices
 
     def get_reason_for_visit_choices(self):
@@ -1540,7 +1569,7 @@ class CalendarSettings(db.Model):
         start_time = 6
         if calendar_settings:
             start_time = int(str(
-                  calendar_settings.calendar_start_time).split(' ')[0])
+                calendar_settings.calendar_start_time).split(' ')[0])
             if 'pm' in calendar_settings.calendar_start_time:
                 start_time += 12
             if start_time == 12 or start_time == 24:
@@ -1561,30 +1590,30 @@ class CalendarSettingsForm(forms.Form):
         label='Display Weekends by Default',
         choices=DISPLAY_WEEKEND_CHOICES)
     CALENDAR_START_TIME_CHOICES = (
-      ('12 am', '12 am'),
-      ('1 am', '1 am'),
-      ('2 am', '2 am'),
-      ('3 am', '3 am'),
-      ('4 am', '4 am'),
-      ('5 am', '5 am'),
-      ('6 am', '6 am'),
-      ('7 am', '7 am'),
-      ('8 am', '8 am'),
-      ('9 am', '9 am'),
-      ('10 am', '10 am'),
-      ('11 am', '11 am'),
-      ('12 pm', '12 pm'),
-      ('1 pm', '1 pm'),
-      ('2 pm', '2 pm'),
-      ('3 pm', '3 pm'),
-      ('4 pm', '4 pm'),
-      ('5 pm', '5 pm'),
-      ('6 pm', '6 pm'),
-      ('7 pm', '7 pm'),
-      ('8 pm', '8 pm'),
-      ('9 pm', '9 pm'),
-      ('10 pm', '10 pm'),
-      ('11 pm', '11 pm'),
+        ('12 am', '12 am'),
+        ('1 am', '1 am'),
+        ('2 am', '2 am'),
+        ('3 am', '3 am'),
+        ('4 am', '4 am'),
+        ('5 am', '5 am'),
+        ('6 am', '6 am'),
+        ('7 am', '7 am'),
+        ('8 am', '8 am'),
+        ('9 am', '9 am'),
+        ('10 am', '10 am'),
+        ('11 am', '11 am'),
+        ('12 pm', '12 pm'),
+        ('1 pm', '1 pm'),
+        ('2 pm', '2 pm'),
+        ('3 pm', '3 pm'),
+        ('4 pm', '4 pm'),
+        ('5 pm', '5 pm'),
+        ('6 pm', '6 pm'),
+        ('7 pm', '7 pm'),
+        ('8 pm', '8 pm'),
+        ('9 pm', '9 pm'),
+        ('10 pm', '10 pm'),
+        ('11 pm', '11 pm'),
     )
     calendar_start_time = forms.ChoiceField(
         choices=CALENDAR_START_TIME_CHOICES,
