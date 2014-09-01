@@ -7,3 +7,4 @@ bulkloader-log-*
 bulkloader-progress-*
 nose_unit_tests.xml
 .coverage.unit_test
+node_modules/
