@@ -260,7 +260,7 @@ def calendar_display(request, year=None, month=None, day=None, hour=None,
         "displayweekends":
         models.CalendarSettings.GetDisplayWeekend(calendar_settings),
         "calendar_start_time":
-        models.CalendarSettings.GetStartTime(calendar_settings),
+        '%02d:00:00' % int(models.CalendarSettings.GetStartTime(calendar_settings)),
         "blocked_time": blocked_time,
     }
     if invoice is not None:

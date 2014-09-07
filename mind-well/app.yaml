@@ -1,5 +1,5 @@
 application: mindwellonline
-version: 3-0-0-20140824-bower
+version: 3-0-0-20140906-bower
 runtime: python27
 api_version: 1
 threadsafe: false
@@ -47,3 +47,13 @@ libraries:
   version: "1.2"
 - name: pycrypto
   version: "2.3"
+skip_files:
+# app engine defaults
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+# mindwell
+- ^(.*/)?.*/node_modules/.*$
+
