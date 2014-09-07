@@ -4,6 +4,10 @@
       <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
         {{client.lastname}}, {{client.firstname}}
       </td>
+      <td data-title="'Actions'">
+        <button class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+        <button ng-click="onDelete(client)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
+      </td>
     </tr>
   </table>
 </div>

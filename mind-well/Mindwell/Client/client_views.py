@@ -323,13 +323,7 @@ def delete_client(request, client_id):
         view_common.log_access_violation('delete_client')
         return HttpResponseRedirect(reverse('show_client'))
     if request.method == 'POST':
-        db.delete(models.DOS.safe_all().filter(
-            "clientinfo =", client.key()).fetch(
-            common.get_maximum_num_dos_fetch()))
-        db.delete(models.Invoice.safe_all().filter(
-            "clientinfo =", client.key()).fetch(
-            common.get_maximum_num_dos_fetch()))
-        client.delete()
+        common.delete_client(client)
         json_data = json.dumps({"message": 'Success'})
         return HttpResponse(json_data, mimetype="application/json")
     return render_to_response('delete_client.html', {'client': client},

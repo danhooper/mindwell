@@ -42,6 +42,8 @@ def get_rest(model, eager_load=False):
         else:
             raise ValueError('cannot encode ' + repr(prop))
 
+    output['id'] = model.get_id()
+
     return output
 
 

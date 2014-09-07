@@ -101,8 +101,10 @@ urlpatterns += patterns('Mindwell.Client.calendar_views',
 
 urlpatterns += patterns(
     'Mindwell.Client.rest_views',
-    url(r'^Mindwell/rest/clientinfo', 'rest_clientinfo',
+    url(r'^Mindwell/rest/clientinfo$', 'rest_clientinfo',
         name='rest_clientinfo'),
-    url(r'^Mindwell/rest/dos', 'rest_dos', name='rest_dos'),
+    url(r'^Mindwell/rest/clientinfo/(?P<client_id>\d+)$', 'rest_indiv_client',
+        name='rest_indiv_client'),
+    url(r'^Mindwell/rest/dos$', 'rest_dos', name='rest_dos'),
 )
 

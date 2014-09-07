@@ -16,7 +16,7 @@ ereporter.register_logger()
 
 
 def log_exception(*args, **kwds):
-    logging.error('Exception in request:')
+    logging.exception('Exception in request:')
 
 # Log errors.
 django.dispatch.Signal.connect(

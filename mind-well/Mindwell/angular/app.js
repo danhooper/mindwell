@@ -1,4 +1,4 @@
-angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 'restangular', 'ngTable']);
+angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 'restangular', 'ngTable', 'cgPrompt']);
 
 angular.module('mindwell').config(function($routeProvider, RestangularProvider) {
 
