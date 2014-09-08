@@ -1,0 +1,30 @@
+<div class="col-md-12" ng-controller="ClientDetailCtrl">
+  {{client}}
+  <form>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Lastname</label>
+          <input ng-model="client.lastname" type="text" class="form-control" id="lastname">
+        </div>
+        <div class="form-group">
+          <label>Firstname</label>
+          <input ng-model="client.firstname" type="text" class="form-control" id="firstname">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Cell #</label><br/>
+          <input ng-model="client.cellnumber" type="text" class="form-control mindwell-phone-input" id="cellnumber">
+          <select ng-model="client.cellmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"/>
+        </div>
+        <div class="form-group">
+          <label>Firstname</label>
+          <input ng-model="client.firstname" type="text" class="form-control" id="firstname">
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

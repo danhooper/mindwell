@@ -3,6 +3,7 @@ angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 're
 angular.module('mindwell').config(function($routeProvider, RestangularProvider) {
 
     $routeProvider.when('/client-list',{templateUrl: 'partial/client-list/client-list.html'});
+    $routeProvider.when('/client-detail',{templateUrl: 'partial/client-detail/client-detail.html'});
     /* Add New Routes Above */
     $routeProvider.otherwise({redirectTo:'/home'});
 

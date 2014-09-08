@@ -1,5 +1,4 @@
-angular.module('mindwell').controller('ClientListCtrl', function($scope, mindwellRest, $filter, ngTableParams, prompt, $timeout) {
-
+angular.module('mindwell').controller('ClientListCtrl', function($scope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout) {
 
     $scope.clients = [];
     mindwellRest.clients.getList().then(function(clients) {
@@ -41,7 +40,9 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, mindwel
             $scope.clients = _.without($scope.clients, client);
             $scope.tableParams.reload();
         });
+    };
 
-
+    $scope.onEdit = function(client) {
+        $location.path('/client-detail') .search({'contentId': client.id});
     };
 });
