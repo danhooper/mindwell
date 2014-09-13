@@ -7,7 +7,7 @@ angular.module('mindwell').config(function($routeProvider, RestangularProvider) 
     /* Add New Routes Above */
     $routeProvider.otherwise({redirectTo:'/home'});
 
-    RestangularProvider.setBaseUrl('http://havok:9000/Mindwell/rest');
+    RestangularProvider.setBaseUrl('/Mindwell/rest');
     RestangularProvider.setDefaultHttpFields({
         'withCredentials': true
         });
