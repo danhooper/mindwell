@@ -8,9 +8,6 @@ angular.module('mindwell').config(function($routeProvider, RestangularProvider) 
     $routeProvider.otherwise({redirectTo:'/home'});
 
     RestangularProvider.setBaseUrl('/Mindwell/rest');
-    RestangularProvider.setDefaultHttpFields({
-        'withCredentials': true
-        });
 
 });
 

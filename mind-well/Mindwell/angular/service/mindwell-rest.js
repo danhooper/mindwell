@@ -4,5 +4,7 @@ angular.module('mindwell').factory('mindwellRest', function(Restangular) {
 
     mindwellRest.clients = Restangular.all('clientinfo');
 
+    mindwellRest.balance = Restangular.all('balance');
+
     return mindwellRest;
 });

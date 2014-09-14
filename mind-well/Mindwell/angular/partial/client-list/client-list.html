@@ -1,13 +1,25 @@
 <div class="col-md-12" ng-controller="ClientListCtrl">
-  <table ng-table="tableParams" class="table" show-filter="true">
-    <tr ng-repeat="client in $data">
-      <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
-        {{client.lastname}}, {{client.firstname}}
-      </td>
-      <td data-title="'Actions'">
-        <button ng-click="onEdit(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
-        <button ng-click="onDelete(client)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
-      </td>
-    </tr>
-  </table>
+  <div class="row">
+    <div class="col-md-12">
+      <button class="btn btn-default" ng-click="addClient()"><i class="fa fa-plus"></i> Add New Client</button>
+      <button class="btn btn-default" ng-click="calcBalance()"><i class="fa fa-plus"></i> Calculate Balances</button>
+    </div>
+  </div>
+  <br/>
+  <div class="row">
+    <table ng-table="tableParams" class="table" show-filter="true">
+      <tr ng-repeat="client in $data">
+        <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
+          {{client.lastname}}, {{client.firstname}}
+        </td>
+        <td data-title="'Actions'">
+          <button ng-click="onEdit(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+          <button ng-click="onDelete(client)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
+        </td>
+        <td data-title="'Balance'" sortable="'balance'" >
+          {{client.balance}}
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>

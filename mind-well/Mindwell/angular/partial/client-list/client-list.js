@@ -1,9 +1,6 @@
-angular.module('mindwell').controller('ClientListCtrl', function($scope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout) {
+angular.module('mindwell').controller('ClientListCtrl', function($scope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout, mindwellCache) {
 
-    $scope.clients = [];
-    mindwellRest.clients.getList().then(function(clients) {
-        $scope.clients = clients;
-    });
+    $scope.mindwellCache = mindwellCache;
 
     $scope.filters = {
         lastname: ''
@@ -21,11 +18,11 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $locati
         counts: [],
         getData: function($defer, params) {
             var orderedData = params.filter() ?
-            $filter('filter')($scope.clients, params.filter()) :
-            $scope.clients;
+                $filter('filter')(mindwellCache.clients, params.filter()) :
+                mindwellCache.clients;
             orderedData = params.sorting() ?
-            $filter('orderBy')(orderedData, params.orderBy()) :
-            orderedData;
+                $filter('orderBy')(orderedData, params.orderBy()) :
+                orderedData;
             $defer.resolve(orderedData);
         }
     });
@@ -37,12 +34,25 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $locati
         }).then(function() {
             return client.remove();
         }).then(function() {
-            $scope.clients = _.without($scope.clients, client);
+            mindwellCache.clients = _.without(mindwellCache.clients, client);
             $scope.tableParams.reload();
         });
     };
 
     $scope.onEdit = function(client) {
-        $location.path('/client-detail') .search({'contentId': client.id});
+        $location.path('/client-detail').search({
+            'contentId': client.id
+        });
+    };
+
+    $scope.addClient = function() {
+        $location.path('/client-detail');
+    };
+    $scope.calcBalance = function() {
+        _.forEach(mindwellCache.clients, function(client) {
+            mindwellRest.balance.get(client.id).then(function(balance) {
+                client.balance = balance.balance;
+            });
+        });
     };
 });

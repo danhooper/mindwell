@@ -80,6 +80,9 @@ urlpatterns += patterns('Mindwell.Client.client_views',
     url(r'^Mindwell/(?P<client_id>\d+)/delete_client/$', 'delete_client',
         name='delete_client'),
     url(r'Mindwell/(?P<client_id>\d+)/balance/$', 'client_balance',
+        name='client_balance'),
+    # REST ENDPOINT
+    url(r'Mindwell/rest/balance/(?P<client_id>\d+)$', 'client_balance',
         name='client_balance')
 )
 

@@ -6,20 +6,15 @@ from google.appengine.ext import db
 
 import common
 import models
-
-
-def add_response_headers(response, request):
-    if request.META['SERVER_NAME'] == 'havok':
-        response['Access-Control-Allow-Origin'] = 'http://havok:9001'
-        response['Access-Control-Allow-Credentials'] = 'true'
+import view_common
 
 
 def rest_dos(request):
     if request.method == 'GET':
         dos = models.DOS.safe_all(request=request).fetch(
             common.get_maximum_num_dos_fetch())
-        resp = HttpResponse(json.dumps([d.get_rest() for d in dos]), content_type="application/json")
-        add_response_headers(resp, request)
+        resp = HttpResponse(json.dumps([d.get_rest() for d in dos]),
+                            content_type="application/json")
         return resp
     elif request.method == 'POST':
         pass
@@ -29,11 +24,17 @@ def rest_clientinfo(request):
     if request.method == 'GET':
         clients = models.ClientInfo.safe_all(request=request).fetch(
             common.get_maximum_num_dos_fetch())
-        resp = HttpResponse(json.dumps([c.get_rest() for c in clients]), content_type="application/json")
-        add_response_headers(resp, request)
+        resp = HttpResponse(json.dumps([c.get_rest() for c in clients]),
+                            content_type="application/json")
         return resp
     elif request.method == 'POST':
-        pass
+        post_dict = json.loads(request.raw_post_data)
+        form = models.ClientForm(post_dict)
+        if form.is_valid():
+            entity = models.ClientInfo(**form.cleaned_data)
+            view_common.save_entity(request, entity)
+            return HttpResponse(json.dumps(entity.get_rest()),
+                                content_type='application/json')
 
 
 def rest_indiv_client(request, client_id):
@@ -46,18 +47,20 @@ def rest_indiv_client(request, client_id):
     if request.method == 'GET':
         resp = HttpResponse(json.dumps(client.get_rest()),
                             content_type='application/json')
-        add_response_headers(resp, request)
         return resp
+    elif request.method == 'PUT':
+        put_dict = json.loads(request.raw_post_data)
+        form = models.ClientForm(put_dict)
+        if form.is_valid():
+            client.update_model(form.cleaned_data)
+            view_common.save_entity(request, client)
+            return HttpResponse(json.dumps(client.get_rest()),
+                                content_type='application/json')
     elif request.method == 'DELETE':
         common.delete_client(client)
         resp = HttpResponse('', content_type='application/json')
-        add_response_headers(resp, request)
         return resp
     elif request.method == 'OPTIONS':
         resp = HttpResponse('')
-        resp['allow'] =','.join(['get', 'put', 'delete', 'options'])
-        resp['Access-Control-Allow-Methods'] = ','.join(['DELETE'])
-        resp['Access-Control-Allow-Headers'] = ','.join(['accept', 'content-type'])
         resp['Content-Length'] = '0'
-        add_response_headers(resp, request)
         return resp
