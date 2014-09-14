@@ -1,6 +1,30 @@
-angular.module('mindwell').controller('ClientListCtrl', function($scope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout, mindwellCache) {
+angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootScope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout, mindwellCache) {
 
     $scope.mindwellCache = mindwellCache;
+    $scope.currentLetter = {};
+    var letterMatchesLastname = function(client, letter) {
+        return client.lastname && client.lastname.length > 1 && client.lastname[0].toUpperCase() === letter;
+    };
+    var buildClientLetters = function() {
+        var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $scope.clientLetters = _.map(letters, function(letter){
+            var clientLetter = {letter: letter};
+            clientLetter.link = _.find(mindwellCache.clients, function(client) {
+                return letterMatchesLastname(client, letter);
+            });
+            return clientLetter;
+
+        });
+        console.log($scope.clientLetters);
+    };
+    $rootScope.$on('mindwell.clientsUpdated', function() {
+        console.log('clients updated');
+        buildClientLetters();
+    });
+    if (mindwellCache.clients) {
+        buildClientLetters();
+    }
+    $scope.clientLetters = [];
 
     $scope.filters = {
         lastname: ''
@@ -23,6 +47,11 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $locati
             orderedData = params.sorting() ?
                 $filter('orderBy')(orderedData, params.orderBy()) :
                 orderedData;
+            if ($scope.currentLetter.letter) {
+                orderedData = _.filter(orderedData, function(client) {
+                    return letterMatchesLastname(client, $scope.currentLetter.letter);
+                });
+            }
             $defer.resolve(orderedData);
         }
     });
@@ -54,5 +83,9 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $locati
                 client.balance = balance.balance;
             });
         });
+    };
+    $scope.filterByLetter = function(letter) {
+        $scope.currentLetter = letter;
+        $scope.tableParams.reload();
     };
 });
