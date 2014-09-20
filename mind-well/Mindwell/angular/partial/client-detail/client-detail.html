@@ -62,7 +62,9 @@
         <h3>Other</h3>
         <div class="form-group">
           <label>DOB</label><br/>
-          TODO!
+          <select class="mw-month form-control" ng-model="client.dob_month" ng-options="option.value as option.name for option in months"/>
+          <select class="mw-day form-control" ng-model="client.dob_day" ng-options="option as option for option in days"/>
+          <select class="mw-year form-control" ng-model="client.dob_year" ng-options="option as option for option in years"/>
         </div>
         <div class="form-group">
           <label>Referrer</label><br/>

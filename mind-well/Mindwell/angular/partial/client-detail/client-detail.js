@@ -4,9 +4,13 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
 
     if ($scope.contentId === -1 || !$scope.contentId) {
         $scope.client = {};
+        $scope.dob = {};
     } else {
         mindwellRest.clients.get($scope.contentId).then(function(client) {
             $scope.client = client;
+            $scope.client.dob_year = moment($scope.client.dob).year();
+            $scope.client.dob_month = moment($scope.client.dob).month() + 1;
+            $scope.client.dob_day = moment($scope.client.dob).day();
         });
     }
 
@@ -252,6 +256,22 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
             "abbreviation": "WY"
         }
     ];
+    $scope.months = [
+        {name: "January", value: 1},
+        {name: "February", value: 2},
+        {name: "March", value: 3},
+        {name: "April", value: 4},
+        {name: "May", value: 5},
+        {name: "June", value: 6},
+        {name: "July", value: 7},
+        {name: "August", value: 8},
+        {name: "September", value: 9},
+        {name: "October", value: 10},
+        {name: "November", value: 11},
+        {name: "December", value: 12}
+    ];
+    $scope.years = _.range(1900, moment().year() + 1);
+    $scope.days = _.range(1, 32);
 
     $scope.statusOptions = [
         {name: 'Active'},

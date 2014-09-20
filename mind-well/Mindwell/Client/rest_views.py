@@ -35,6 +35,12 @@ def rest_clientinfo(request):
             view_common.save_entity(request, entity)
             return HttpResponse(json.dumps(entity.get_rest()),
                                 content_type='application/json')
+        else:
+            errors = [(k, unicode(v[0]))
+                      for k, v in form.errors.items()]
+            return HttpResponse(json.dumps({'success': False,
+                                            'errors': errors}),
+                                content_type='application/json')
 
 
 def rest_indiv_client(request, client_id):
