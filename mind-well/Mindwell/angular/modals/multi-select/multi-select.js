@@ -2,12 +2,14 @@ angular.module('mindwell').controller('MultiSelectCtrl',function($scope, choices
     $scope.choices = _.map(choices, function(choice) {
         return {value: false, name: choice};
     });
+    $scope.choices = _.filter($scope.choices, function(choice) {
+        return choice.name;
+    });
 
     $scope.other = '';
     $scope.title = title;
 
     _.forEach(currValue.split(', '), function(value) {
-        console.log(value);
         var choice = _.find($scope.choices, function(choice) {
             return choice.name === value;
         });

@@ -3,7 +3,7 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
     $scope.contentId = search['contentId'];
 
     if ($scope.contentId === -1 || !$scope.contentId) {
-        $scope.client = {};
+        $scope.client = {client_status: 'Active'};
         $scope.dob = {};
     } else {
         mindwellRest.clients.get($scope.contentId).then(function(client) {
@@ -13,12 +13,8 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
             $scope.client.dob_day = moment($scope.client.dob).day();
         });
     }
-    mindwellRest.customForm.getList().then(function(customFormSettings) {
-        if (customFormSettings.length === 1) {
-            $scope.customFormSettings = customFormSettings[0];
-        } else {
-            $scope.customFormSettings = {referrer_choices: ''};
-        }
+    mindwellCache.getCustomForm().then(function(customForm) {
+        $scope.customForm = customForm;
     });
 
     $scope.messageOptions = [
@@ -312,7 +308,7 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
             controller: 'MultiSelectCtrl',
             resolve: {
                 choices: function() {
-                    return $scope.customFormSettings.referrer_choices.split('\r\n');
+                    return $scope.customForm.referrer_choices.split('\r\n');
                 },
                 currValue: function() {
                     return $scope.client.referrer;
@@ -325,6 +321,25 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
             $scope.client.referrer = result;
         });
     };
+    $scope.rfvModal = function() {
+        $modal.open({
+            templateUrl: 'modals/multi-select/multi-select.html',
+            controller: 'MultiSelectCtrl',
+            resolve: {
+                choices: function() {
+                    return $scope.customForm.reason_for_visit_choices.split('\r\n');
+                },
+                currValue: function() {
+                    return $scope.client.reason_for_visit;
+                },
+                title: function() {
+                    return 'Reason for Visit';
+                }
+            }
+        }).result.then(function(result){
+            $scope.client.reason_for_visit= result;
+        });
+    };
 
 
-    });
+});

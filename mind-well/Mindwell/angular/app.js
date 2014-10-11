@@ -24,6 +24,9 @@ angular.module('mindwell').run(function($rootScope) {
         }
     };
 
+    $rootScope.getCalendarURL = function() {
+        return 'Mindwell/' + moment().format('YYYY/MM/DD') + '/calendar/';
+    };
 
 
 });

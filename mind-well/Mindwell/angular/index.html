@@ -45,6 +45,49 @@
     <!-- Add New Component JS Above -->
 
     <div>
+      <div class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mindwell-navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url show_client %}">MindWell</a>
+          </div>
+          <div class="collapse navbar-collapse" id="mindwell-navbar">
+            <ul class="nav navbar-nav">
+              <li><a href="/#/client-list">Clients</a></li>
+              <li><a href="{{ getCalendarURL() }}">Calendar</a></li>
+              <li><a href="{% url reports %}">Reports</a></li>
+              <li><a href="{% url settings %}">Settings</a></li>
+              <li><a href="{{ logout_url }}">Logout</a></li>
+              <li class="divider-vertical"></li>
+            </ul>
+            <form class="navbar-form navbar-left">
+              <div class="form-group">
+                <label>Acting as</label>
+                <select class="form-control" name="permitted_user" id="permitted_user"
+                  onchange='OnChangePermittedUser(this.form.permitted_user);'>
+                  <option>Self</option>
+                  {% for user in permitted_users %}
+                  {% ifequal user.permitteduser current_user.permitteduser %}
+                  <option selected="selected" value="{{user.key}}">{{ user.permitteduser }}</option>
+                  {% else %}
+                  <option value="{{user.key}}">{{ user.permitteduser }}</option>
+                  {% endifequal %}
+                  {% endfor %}
+                </select>
+              </div>
+            </form>
+            <form class="navbar-form navbar-right" action="/Mindwell/search/" method="post">
+              <input class="search-query form-control" id="id_search_input" name="search_input" type="text" placeholder="Search for client" onfocus="if(this.value=='Search for client') this.value='';" onblur="if(this.value=='') this.value='Search for client';"/>
+              <input type="hidden" value="Submit" />
+            </form>
+          </div>
+        </div>
+      </div>
       <div id="content" class="container">
         <div class="row">
           <div ng-view>
