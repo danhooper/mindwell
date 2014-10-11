@@ -1,7 +1,6 @@
 *.pyc
 secret_info.py
 *.swp
-datastore
 .coverage
 bulkloader-log-*
 bulkloader-progress-*
