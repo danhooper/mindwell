@@ -70,3 +70,10 @@ def rest_indiv_client(request, client_id):
         resp = HttpResponse('')
         resp['Content-Length'] = '0'
         return resp
+
+
+def rest_custom_form_settings(request):
+    if request.method == 'GET':
+        cf_settings = models.CustomFormSettings.GetSettings(request=request)
+        return HttpResponse(json.dumps([cf_settings.get_rest()]),
+                            content_type='application/json')

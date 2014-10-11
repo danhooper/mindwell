@@ -1507,6 +1507,12 @@ class CustomFormSettings(db.Model):
         return reverse('updated_custom_form_settings',
                        kwargs={'update': 'update'})
 
+    def get_id(self):
+        return str(self.key().id_or_name())
+
+    def get_rest(self):
+        return get_rest(self)
+
 
 class CustomFormSettingsForm(forms.Form):
     reason_for_visit_choices = forms.CharField(widget=forms.Textarea(),

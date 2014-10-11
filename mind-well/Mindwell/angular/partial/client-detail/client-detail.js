@@ -1,4 +1,4 @@
-angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $location, mindwellRest, Restangular, mindwellCache){
+angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $location, mindwellRest, Restangular, mindwellCache, $modal){
     var search = $location.search();
     $scope.contentId = search['contentId'];
 
@@ -13,6 +13,13 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
             $scope.client.dob_day = moment($scope.client.dob).day();
         });
     }
+    mindwellRest.customForm.getList().then(function(customFormSettings) {
+        if (customFormSettings.length === 1) {
+            $scope.customFormSettings = customFormSettings[0];
+        } else {
+            $scope.customFormSettings = {referrer_choices: ''};
+        }
+    });
 
     $scope.messageOptions = [
         {text: 'Message Not OK', value: 'Message Not OK'},
@@ -282,19 +289,38 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
         if ($scope.client.id) {
             console.log('saving client');
             $scope.client.save().then(function(client) {
-                var cacheId = _.findIndex(mindwellCache.clients, function(cacheClient) {
-                    return client.id === cacheClient.id;
+                mindwellCache.getClients().then(function() {
+                    var cacheId = _.findIndex(mindwellCache.clients, function(cacheClient) {
+                        return client.id === cacheClient.id;
+                    });
+                    mindwellCache.clients[cacheId] = client;
+                    $location.path('client-list').search({'contentId': null});
                 });
-                mindwellCache.clients[cacheId] = client;
-                $location.path('client-list').search({'contentId': null});
             });
         } else {
             mindwellRest.clients.post($scope.client).then(function(client) {
-                mindwellCache.clients.push(client);
-                $location.path('client-list').search({'contentId': null});
+                mindwellCache.getClients().then(function() {
+                    mindwellCache.clients.push(client);
+                    $location.path('client-list').search({'contentId': null});
+                });
             });
         }
     };
+    $scope.referrerModal = function() {
+        $modal.open({
+            templateUrl: 'partial/client-detail/referrer/referrer.html',
+            controller: 'ReferrerCtrl',
+            resolve: {
+                customForm: function() {
+                    return $scope.customFormSettings;
+                },
+                client: function() {
+                    return $scope.client;
+                }
+            }
+        }).result.then(function(result){
+        });
+    };
 
 
-});
+    });

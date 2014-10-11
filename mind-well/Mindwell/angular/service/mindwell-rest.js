@@ -6,5 +6,7 @@ angular.module('mindwell').factory('mindwellRest', function(Restangular) {
 
     mindwellRest.balance = Restangular.all('balance');
 
+    mindwellRest.customForm = Restangular.all('custom_form');
+
     return mindwellRest;
 });
