@@ -1,4 +1,4 @@
-<strong>Are you sure you wish to delete {{client}}?  This will delete all dates of service and all records of this client. 
+<strong>Are you sure you wish to delete {{client}}?  This will delete all dates of service and all records of this client.
         This cannot be undone!</strong>
 <div id="message"></div>
 <form id="delete_client_form" onSubmit='return on_delete_client_submit()' action="">
@@ -8,7 +8,7 @@
 <script>
 
 function on_delete_client_submit() {
-  $.post("{% url delete_client client.get_id %}",
+  $.post("{% url 'delete_client' client.get_id %}",
     $('#delete_client_form').serialize(),
     function(data) {
       $('#message').html("<h2>Client {{client}} deleted!</h2>");

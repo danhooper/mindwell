@@ -186,7 +186,7 @@ Key:
   {% if dos_form %}
       <div class="col-md-5" id="cal_form">
               {% render_custom_modal session_type_choices curr_session_type_choices "Session Type" %}
-        <a href="{%url add_client_standalone%}" class="uimodal"><strong>Add New Client</strong></a>
+        <a href="{% url 'add_client_standalone' %}" class="uimodal"><strong>Add New Client</strong></a>
         <form action="{{submit_link}}" method="post">
           <table>
             {% include "dos_form_snippet.html" %}

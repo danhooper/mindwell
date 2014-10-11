@@ -1,4 +1,5 @@
 import os
+from Client import secret_info
 
 DEBUG = True
 TEMPLATE_DEBUG = True
@@ -39,3 +40,5 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     ROOT_PATH + '/templates',
 )
+
+SECRET_KEY=secret_info.secret_passphrase

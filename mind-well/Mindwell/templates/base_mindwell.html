@@ -50,14 +50,14 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url show_client %}">MindWell</a>
+          <a class="navbar-brand" href="/#/client-list">MindWell</a>
         </div>
         <div class="collapse navbar-collapse" id="mindwell-navbar">
           <ul class="nav navbar-nav">
             <li {%block show_client_link%}{%endblock show_client_link %}><a href="/#/client-list">Clients</a></li>
             <li {%block calendar_link%}{%endblock calendar_link%}><a href="/Mindwell/{% now "Y/m/d/"%}calendar/">Calendar</a></li>
-            <li {%block reports_link%}{%endblock reports_link%}><a href="{% url reports %}">Reports</a></li>
-            <li {%block settings_link%}{%endblock settings_link%}><a href="{% url settings %}">Settings</a></li>
+            <li {%block reports_link%}{%endblock reports_link%}><a href="{% url 'reports' %}">Reports</a></li>
+            <li {%block settings_link%}{%endblock settings_link%}><a href="{% url 'settings' %}">Settings</a></li>
             <li><a href="{{ logout_url }}">Logout</a></li>
             <li class="divider-vertical"></li>
           </ul>

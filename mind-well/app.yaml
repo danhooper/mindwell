@@ -44,7 +44,7 @@ handlers:
 
 libraries:
 - name: django
-  version: "1.2"
+  version: "1.5"
 - name: pycrypto
   version: "2.3"
 skip_files:
