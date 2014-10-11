@@ -308,17 +308,21 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
     };
     $scope.referrerModal = function() {
         $modal.open({
-            templateUrl: 'partial/client-detail/referrer/referrer.html',
-            controller: 'ReferrerCtrl',
+            templateUrl: 'modals/multi-select/multi-select.html',
+            controller: 'MultiSelectCtrl',
             resolve: {
-                customForm: function() {
-                    return $scope.customFormSettings;
+                choices: function() {
+                    return $scope.customFormSettings.referrer_choices.split('\r\n');
                 },
-                client: function() {
-                    return $scope.client;
+                currValue: function() {
+                    return $scope.client.referrer;
+                },
+                title: function() {
+                    return 'Referrer';
                 }
             }
         }).result.then(function(result){
+            $scope.client.referrer = result;
         });
     };
 

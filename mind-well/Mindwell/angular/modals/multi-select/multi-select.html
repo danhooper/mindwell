@@ -1,0 +1,22 @@
+<div>
+  <div class="modal-header">
+    <button type="button" class="close pull-right" ng-click="$dismiss()" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">{{title}}</h4>
+  </div>
+  <div class="modal-body">
+    <table>
+      <tr ng-repeat="rows in choiceRows">
+        <td class="mw-choices" ng-repeat="choice in rows">
+          <input type="checkbox" ng-model="choice.value">
+          {{choice.name}}
+        </td>
+      </tr>
+    </table>
+    <label>Other</label>
+    <input type="text" ng-model="$parent.other">
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="$dismiss()">Cancel</button>
+    <button type="button" class="btn btn-primary" ng-click="updateMultiSelect()">Save changes</button>
+  </div>
+</div>

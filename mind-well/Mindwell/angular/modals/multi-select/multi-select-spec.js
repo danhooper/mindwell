@@ -1,4 +1,4 @@
-describe('ReferrerCtrl', function() {
+describe('MultiSelectCtrl', function() {
 
     beforeEach(module('mindwell'));
 
@@ -6,10 +6,11 @@ describe('ReferrerCtrl', function() {
 
     beforeEach(inject(function($rootScope, $controller) {
         scope = $rootScope.$new();
-        ctrl = $controller('ReferrerCtrl', {
+        ctrl = $controller('MultiSelectCtrl', {
             $scope: scope,
-            client: {referrer: ''},
-            customForm: {referrer_choices: ''},
+            currValue: '',
+            title: '',
+            choices: [],
             $modalInstance: {close: function() {}}
         });
     }));
