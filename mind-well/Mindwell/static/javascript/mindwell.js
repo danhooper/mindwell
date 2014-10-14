@@ -139,7 +139,7 @@ MW.permissionSettingsInit = function() {
 
 MW.showSpecificClientInit = function () {
     var tblOptions = MW.getDefaultTablesorterOptions();
-    tblOptions.sortList = [[10,1]];
+    tblOptions.sortList = [[9,1]];
     tblOptions.headers = { 0: { sorter: false} };
 
     // call the tablesorter plugin
