@@ -8,5 +8,7 @@ angular.module('mindwell').factory('mindwellRest', function(Restangular) {
 
     mindwellRest.customForm = Restangular.all('custom_form');
 
+    mindwellRest.userPerm = Restangular.all('userperm');
+
     return mindwellRest;
 });

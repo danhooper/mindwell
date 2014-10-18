@@ -1,4 +1,8 @@
 /* Mindwell's own JS */
+function OnChangePermittedUser(dropdown) {
+    window.location="/Mindwell/" + dropdown.value + "/change_user/";
+}
+
 function create_choice_modal_dialog(dialog_prefix, input_id) {
     var dialog_id = dialog_prefix + "_dlg";
     $( "#" + dialog_id ).dialog({

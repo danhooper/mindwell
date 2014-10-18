@@ -23,6 +23,7 @@
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/moment/moment.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-resource/angular-resource.js"></script>
@@ -31,7 +32,10 @@
     <script src="bower_components/restangular/dist/restangular.js"></script>
     <script src="bower_components/ng-table/ng-table.js"></script>
     <script src="bower_components/angular-prompt/dist/angular-prompt.js"></script>
+    <script src="bower_components/angular-busy/dist/angular-busy.js"></script>
     <script src="bower_components/lodash/dist/lodash.js"></script>
+    <script src="/static/javascript/mindwell.js"></script>
+
     <!-- Add New Bower Component JS Above -->
 
 
@@ -61,7 +65,7 @@
               <li><a href="/#/client-list">Clients</a></li>
               <li><a href="{{ getCalendarURL() }}">Calendar</a></li>
               <li><a href="{% url reports %}">Reports</a></li>
-              <li><a href="{% url settings %}">Settings</a></li>
+              <li><a href="Mindwell/settings/">Settings</a></li>
               <li><a href="{{ logout_url }}">Logout</a></li>
               <li class="divider-vertical"></li>
             </ul>
@@ -69,15 +73,9 @@
               <div class="form-group">
                 <label>Acting as</label>
                 <select class="form-control" name="permitted_user" id="permitted_user"
-                  onchange='OnChangePermittedUser(this.form.permitted_user);'>
-                  <option>Self</option>
-                  {% for user in permitted_users %}
-                  {% ifequal user.permitteduser current_user.permitteduser %}
-                  <option selected="selected" value="{{user.key}}">{{ user.permitteduser }}</option>
-                  {% else %}
-                  <option value="{{user.key}}">{{ user.permitteduser }}</option>
-                  {% endifequal %}
-                  {% endfor %}
+                  ng-model="currentUser" ng-change="updateUser()">
+                  <option value="" ng-selected="!currentUser">Self</option>
+                  <option ng-repeat="user in mindwellCache.userPerm" ng-selected="currentUser === user.key" value="{{user.key}}">{{ user.permitteduser }}</option>
                 </select>
               </div>
             </form>
@@ -88,7 +86,7 @@
           </div>
         </div>
       </div>
-      <div id="content" class="container">
+      <div id="content" class="container" cg-busy="mindwellCache._clientsDefer.promise">
         <div class="row">
           <div ng-view>
           </div>

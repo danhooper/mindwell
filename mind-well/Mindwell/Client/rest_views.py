@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from google.appengine.ext import db
 
 import common
+import context_processors
 import models
 import view_common
 
@@ -77,3 +78,13 @@ def rest_custom_form_settings(request):
         cf_settings = models.CustomFormSettings.GetSettings(request=request)
         return HttpResponse(json.dumps([cf_settings.get_rest()]),
                             content_type='application/json')
+
+
+def rest_user_perm(request):
+    if request.method == 'GET':
+        perm_users = context_processors.get_permitted_users(request)
+        perm_users = perm_users['permitted_users']
+        return HttpResponse(
+            json.dumps([user.get_rest() for user in perm_users]),
+            content_type='application/json')
+

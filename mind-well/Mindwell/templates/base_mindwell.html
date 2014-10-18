@@ -22,9 +22,6 @@
     <script src="/static/javascript/mindwell.js" language="javascript" type="text/javascript"></script>
     {% block script_sources %}{% endblock script_sources %}
     <script type="text/javascript" id="js">
-      function OnChangePermittedUser(dropdown) {
-        window.location="/Mindwell/" + dropdown.value + "/change_user/";
-      }
       {% block page_javascript %}
       {% endblock page_javascript %}
       $(document).ready(function() {

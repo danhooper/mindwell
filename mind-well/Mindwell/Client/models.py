@@ -43,6 +43,7 @@ def get_rest(model, eager_load=False):
             raise ValueError('cannot encode ' + repr(prop))
 
     output['id'] = model.get_id()
+    output['key'] = str(model.key())
 
     return output
 
@@ -315,6 +316,9 @@ class UserPermission(db.Model):
     def update_model(self, values):
         for k, v in values.iteritems():
             setattr(self, k, v)
+
+    def get_rest(self):
+        return get_rest(self)
 
 
 class UserPermissionForm(forms.Form):

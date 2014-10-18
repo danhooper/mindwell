@@ -19,6 +19,7 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     };
     $rootScope.$on('mindwell.clientsUpdated', function() {
         buildClientLetters();
+        $scope.tableParams.reload();
     });
     mindwellCache.getClients().then(function() {
         buildClientLetters();
