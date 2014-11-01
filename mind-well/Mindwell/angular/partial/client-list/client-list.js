@@ -15,7 +15,6 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
             return clientLetter;
 
         });
-        console.log($scope.clientLetters);
     };
     $rootScope.$on('mindwell.clientsUpdated', function() {
         buildClientLetters();

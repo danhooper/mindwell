@@ -9,6 +9,10 @@ angular.module('mindwell').controller('MultiSelectCtrl',function($scope, choices
     $scope.other = '';
     $scope.title = title;
 
+    if (!currValue) {
+        currValue = '';
+    }
+
     _.forEach(currValue.split(', '), function(value) {
         var choice = _.find($scope.choices, function(choice) {
             return choice.name === value;

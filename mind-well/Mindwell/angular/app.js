@@ -38,8 +38,10 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $cookies, $ti
             $cookies.current_user = $rootScope.currentUser;
         }
         $timeout(function() {
-            $rootScope.getClientsPromise = mindwellCache.getClients(true);
-            mindwellCache.getCustomForm(true);
+            mindwellCache.clearClientCache();
+            $rootScope.getClientsPromise = mindwellCache.getClients();
+            mindwellCache.clearCustomFormCache();
+            mindwellCache.getCustomForm();
         });
     };
 

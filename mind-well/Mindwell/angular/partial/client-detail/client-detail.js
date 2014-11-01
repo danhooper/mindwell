@@ -283,7 +283,6 @@ angular.module('mindwell').controller('ClientDetailCtrl',function($scope, $locat
 
     $scope.saveChanges = function() {
         if ($scope.client.id) {
-            console.log('saving client');
             $scope.client.save().then(function(client) {
                 mindwellCache.getClients().then(function() {
                     var cacheId = _.findIndex(mindwellCache.clients, function(cacheClient) {

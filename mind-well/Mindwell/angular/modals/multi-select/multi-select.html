@@ -7,8 +7,10 @@
     <table>
       <tr ng-repeat="rows in choiceRows">
         <td class="mw-choices" ng-repeat="choice in rows">
-          <input type="checkbox" ng-model="choice.value">
-          {{choice.name}}
+          <label>
+            <input type="checkbox" ng-model="choice.value">
+            {{choice.name}}
+          </label>
         </td>
       </tr>
     </table>
