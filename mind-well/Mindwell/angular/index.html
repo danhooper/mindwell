@@ -46,6 +46,7 @@
     <script src="partial/client-detail/client-detail.js"></script>
     <script src="service/mindwell-cache.js"></script>
     <script src="modals/multi-select/multi-select.js"></script>
+    <script src="partial/client-dos/client-dos.js"></script>
     <!-- Add New Component JS Above -->
 
     <div>
@@ -62,7 +63,7 @@
           </div>
           <div class="collapse navbar-collapse" id="mindwell-navbar">
             <ul class="nav navbar-nav">
-              <li><a href="/#/client-list">Clients</a></li>
+              <li ng-class="{'active': linkActive.clients}"><a href="/#/client-list">Clients</a></li>
               <li><a href="{{ getCalendarURL() }}">Calendar</a></li>
               <li><a href="{% url reports %}">Reports</a></li>
               <li><a href="Mindwell/settings/">Settings</a></li>

@@ -1,5 +1,6 @@
 angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootScope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout, mindwellCache) {
 
+    $rootScope.linkActive = {clients:  true};
     $scope.mindwellCache = mindwellCache;
     $scope.currentLetter = {};
     var letterMatchesLastname = function(client, letter) {
