@@ -15,3 +15,7 @@ def delete_client(client):
         get_maximum_num_dos_fetch()))
     client.delete()
     return True
+
+
+def get_mwa_root():
+    return '/#/'

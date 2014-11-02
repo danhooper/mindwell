@@ -282,9 +282,8 @@ def search(request):
     if request.method == 'POST':
         form = models.SearchForm(request.POST)
         if form.is_valid():
-            return HttpResponseRedirect(reverse(
-                'search_result', kwargs={'search_input':
-                                         form.cleaned_data['search_input']}))
+            return HttpResponseRedirect('%sclient-list?search=%s' % (
+                common.get_mwa_root(), form.cleaned_data['search_input']))
     else:
         form = models.SearchForm()
     render_to_response_dict = {

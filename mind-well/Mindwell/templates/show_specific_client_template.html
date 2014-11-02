@@ -9,123 +9,123 @@ MW.dosFormJavascriptInit();
 {% block content %}
 <div id="spacer"><br/></div>
 <div id="client_info_block">
-    <div id="client_info_header">{{ client }}&nbsp <a href="{{ client.get_update_url}}">Edit Client Info</a></div>
-    <table id="client_info_table">
-        <tr>
-            <td><div class="client_info_category">Contact Info</div></td>
-            <td><div class="client_info_category">Address</div></td>
-            <td><div class="client_info_category">Other</div></td>
-            <td><div class="client_info_category">{% if dos_id %}Update DOS{% else %}Add New DOS{%endif%}</div></td>
-        </tr>
-        <tr>
-            <td>
-                <div class="client_info">
-                    <span class="client_info_fields">
-                        {% if client.cellnumber %}
-                        <strong>Cell Number: </strong> {{client.cellnumber}}
-                        {{client.cellmessage}}<br/>
-                        {% endif %}
-                        {% if client.homenumber %}
-                        <strong>Home Number: </strong> {{client.homenumber}}
-                        {{client.homemessage}}<br/>
-                        {% endif %}
-                        {% if client.worknumber %}
-                        <strong>Work Number: </strong> {{client.worknumber}}
-                        {{client.workmessage}}<br/>
-                        {% endif %}
-                        {% if client.emailaddress %}
-                        <strong>Email: </strong> {{client.emailaddress}}
-                        {% endif %}
-                        <br/>
-                    </span>
-                </div>
-            </td>
-            <td>
-                <div class="client_info">
-                    <span class="client_info_fields">
-                        {% if client.address %}
-                        {{client.address}}<br/>
-                        {% endif %}
-                        {% if client.address2 %}
-                        {{client.address2}}<br/>
-                        {% endif %}
-                        {% if client.city %}
-                        {{client.city}}{% if client.state %}, {{client.state}}{% endif %}
-                        {% endif %}
-                        {% if client.state %}
-                        {{client.zipcode}}
-                        {% endif %}
-                        <br/>
-                    </span>
-                </div>
-            </td>
-            <td>
-                <div class="client_info">
-                    <span class="client_info_fields">
-                        {% for name, value in client.get_other_fields %}
-                        {% if value %}
-                        <strong>{{name}}: </strong> {{ value }}<br/>
-                        {% endif %}
-                        {% endfor %}
-                        <br/>
-                    </span>
-                </div>
-            </td>
-            <td>
+  <div id="client_info_header">{{ client }}&nbsp <a href="/#/client-detail?contentId={{client.get_id}}">Edit Client Info</a></div>
+  <table id="client_info_table">
+    <tr>
+      <td><div class="client_info_category">Contact Info</div></td>
+      <td><div class="client_info_category">Address</div></td>
+      <td><div class="client_info_category">Other</div></td>
+      <td><div class="client_info_category">{% if dos_id %}Update DOS{% else %}Add New DOS{%endif%}</div></td>
+    </tr>
+    <tr>
+      <td>
+        <div class="client_info">
+          <span class="client_info_fields">
+            {% if client.cellnumber %}
+            <strong>Cell Number: </strong> {{client.cellnumber}}
+            {{client.cellmessage}}<br/>
+            {% endif %}
+            {% if client.homenumber %}
+            <strong>Home Number: </strong> {{client.homenumber}}
+            {{client.homemessage}}<br/>
+            {% endif %}
+            {% if client.worknumber %}
+            <strong>Work Number: </strong> {{client.worknumber}}
+            {{client.workmessage}}<br/>
+            {% endif %}
+            {% if client.emailaddress %}
+            <strong>Email: </strong> {{client.emailaddress}}
+            {% endif %}
+            <br/>
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="client_info">
+          <span class="client_info_fields">
+            {% if client.address %}
+            {{client.address}}<br/>
+            {% endif %}
+            {% if client.address2 %}
+            {{client.address2}}<br/>
+            {% endif %}
+            {% if client.city %}
+            {{client.city}}{% if client.state %}, {{client.state}}{% endif %}
+            {% endif %}
+            {% if client.state %}
+            {{client.zipcode}}
+            {% endif %}
+            <br/>
+          </span>
+        </div>
+      </td>
+      <td>
+        <div class="client_info">
+          <span class="client_info_fields">
+            {% for name, value in client.get_other_fields %}
+            {% if value %}
+            <strong>{{name}}: </strong> {{ value }}<br/>
+            {% endif %}
+            {% endfor %}
+            <br/>
+          </span>
+        </div>
+      </td>
+      <td>
 
-                {% render_custom_modal session_type_choices curr_session_type_choices "Session Type" %}
-                <form action="{{form_dest}}" method="post">
-                    <table>
-                        {% include "dos_form_snippet.html" %}
-                    </table>
-                    <input type="submit" value="{{form_button}}" />
-                </form>
-            </td>
-        </tr>
-    </table>
+        {% render_custom_modal session_type_choices curr_session_type_choices "Session Type" %}
+        <form action="{{form_dest}}" method="post">
+          <table>
+            {% include "dos_form_snippet.html" %}
+          </table>
+          <input type="submit" value="{{form_button}}" />
+        </form>
+      </td>
+    </tr>
+  </table>
 </div>
 <table cellspacing="1" class="tablesorter">
-    {% for individual_dos, running_bal in dos_zipped %}
-    {% if forloop.first %}
-    <thead>
-        <tr>
-            {% for name, value in individual_dos.getallfields %}
-            {% if forloop.first %}
-            <th>Actions</th>
-            {% endif %}
-            <th>{{name}}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% endif %}
-        {% for name, value in individual_dos.getallfields %}
-        {% if forloop.first %}
-        {% ifequal dos_id individual_dos.get_id %}
-        <tr class="curr_row">
-            {% else %}
-            <tr>
-                {% endifequal %}
-                <td><a title="Update DOS" href="{{individual_dos.get_absolute_url}}"><i class="icon-pencil"></i> Update DOS</a><br/>
-                    <a title="Print Receipt" href="{{individual_dos.get_receipt_absolute_url}}"><i class="icon-print"></i> Print Receipt</a></td>
-                {% endif %}
-                {% if name == "Running Balance" %}
-                <td>{{running_bal}}</td>
-                {% else %}
-                {% if name == "DOS Date and Time" %}
-                <td><span class="hidden">{{value|date:"U"}}</span>{{value}}</td>
-                {% else %}
-                <td>{{ value }} </td>
-                {% endif %}
-                {% endif %}
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    Balance: {{ balance }}<br/>
-    {% if dos_id %}
-    <a href="{{client.get_absolute_url}}">Add New DOS</a>
+  {% for individual_dos, running_bal in dos_zipped %}
+  {% if forloop.first %}
+  <thead>
+    <tr>
+      {% for name, value in individual_dos.getallfields %}
+      {% if forloop.first %}
+      <th>Actions</th>
+      {% endif %}
+      <th>{{name}}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
     {% endif %}
-    <br/>
-    {% endblock %}
+    {% for name, value in individual_dos.getallfields %}
+    {% if forloop.first %}
+    {% ifequal dos_id individual_dos.get_id %}
+    <tr class="curr_row">
+      {% else %}
+      <tr>
+        {% endifequal %}
+        <td><a title="Update DOS" href="{{individual_dos.get_absolute_url}}"><i class="icon-pencil"></i> Update DOS</a><br/>
+          <a title="Print Receipt" href="{{individual_dos.get_receipt_absolute_url}}"><i class="icon-print"></i> Print Receipt</a></td>
+        {% endif %}
+        {% if name == "Running Balance" %}
+        <td>{{running_bal}}</td>
+        {% else %}
+        {% if name == "DOS Date and Time" %}
+        <td><span class="hidden">{{value|date:"U"}}</span>{{value}}</td>
+        {% else %}
+        <td>{{ value }} </td>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  Balance: {{ balance }}<br/>
+  {% if dos_id %}
+  <a href="{{client.get_absolute_url}}">Add New DOS</a>
+  {% endif %}
+  <br/>
+  {% endblock %}

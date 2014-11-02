@@ -1,8 +1,11 @@
 <div class="col-md-12" ng-controller="ClientListCtrl">
   <div class="row">
     <div class="col-md-12">
+      <div ng-if="search">
+        <strong>Searching for "{{search}}"</strong></br></br>
+      </div>
       <button class="btn btn-default" ng-click="addClient()"><i class="fa fa-plus"></i> Add New Client</button>
-      <button class="btn btn-default" ng-click="filterByLetter({})"> Show All</button>
+      <button class="btn btn-default" ng-click="showAll()"> Show All</button>
       <button class="btn btn-default" ng-click="calcBalance()"><i class="fa fa-plus"></i> Calculate Balances</button>
     </div>
   </div>
@@ -18,7 +21,7 @@
     <table ng-table="tableParams" class="table" show-filter="true">
       <tr ng-repeat="client in $data">
         <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
-          {{client.lastname}}, {{client.firstname}}
+          <a href="/Mindwell/{{client.id}}/show_specific_client/">{{client.lastname}}, {{client.firstname}}
         </td>
         <td data-title="'Actions'">
           <button ng-click="onEdit(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>

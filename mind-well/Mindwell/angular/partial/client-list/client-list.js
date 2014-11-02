@@ -16,11 +16,13 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
 
         });
     };
+    $scope.search = $location.search().search;
     $rootScope.$on('mindwell.clientsUpdated', function() {
         buildClientLetters();
         $scope.tableParams.reload();
     });
     mindwellCache.getClients().then(function() {
+
         buildClientLetters();
     });
     $scope.clientLetters = [];
@@ -51,6 +53,10 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
                     orderedData = _.filter(orderedData, function(client) {
                         return letterMatchesLastname(client, $scope.currentLetter.letter);
                     });
+                }
+                if ($location.search().search) {
+                    console.log('filtering by', $location.search().search);
+                    orderedData = $filter('filter')(orderedData, $location.search().search);
                 }
                 $defer.resolve(orderedData);
             });
@@ -88,5 +94,9 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     $scope.filterByLetter = function(letter) {
         $scope.currentLetter = letter;
         $scope.tableParams.reload();
+    };
+    $scope.showAll = function() {
+        $location.search('search', null);
+        $scope.filterByLetter({});
     };
 });

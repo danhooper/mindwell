@@ -39,7 +39,7 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
     };
 
     mindwellCache._userPermPromise = undefined;
-    mindwellCache.getuserPerm = function() {
+    mindwellCache.getUserPerm = function() {
         if (!mindwellCache._userPermPromise) {
             mindwellCache._userPermPromise = mindwellRest.userPerm.getList().then(function(userPerm) {
                 mindwellCache.userPerm = userPerm;
