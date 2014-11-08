@@ -54,9 +54,26 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
         mindwellCache._userPermPromise = undefined;
     };
 
+    mindwellCache._logoutUrlPromise = undefined;
+    mindwellCache.getLogoutUrl = function() {
+        if (!mindwellCache._logoutUrlPromise) {
+            mindwellCache._logoutUrlPromise = mindwellRest.logoutUrl.customGET().then(function(logoutUrl) {
+                mindwellCache.logoutUrl = logoutUrl;
+                $rootScope.$emit('mindwell.logoutUrlUpdated');
+                return mindwellCache.logoutUrl;
+            });
+        }
+        return mindwellCache._logoutUrlPromise;
+    };
+
+    mindwellCache.clearLogoutUrl = function() {
+        mindwellCache._logoutUrlPromise = undefined;
+    };
+
     mindwellCache.getClients();
     mindwellCache.getCustomForm();
     mindwellCache.getUserPerm();
+    mindwellCache.getLogoutUrl();
 
     return mindwellCache;
 });

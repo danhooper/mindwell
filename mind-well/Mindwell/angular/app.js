@@ -26,7 +26,7 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $cookies, $ti
     };
 
     $rootScope.getCalendarURL = function() {
-        return 'Mindwell/' + moment().format('YYYY/MM/DD') + '/calendar/';
+        return '/Mindwell/' + moment().format('YYYY/MM/DD') + '/calendar/';
     };
 
     $rootScope.mindwellCache = mindwellCache;

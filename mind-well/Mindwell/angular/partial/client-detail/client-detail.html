@@ -18,17 +18,17 @@
         <div class="form-group">
           <label>Cell #</label><br/>
           <input ng-model="client.cellnumber" type="text" class="form-control mindwell-phone-input">
-          <select ng-model="client.cellmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"/>
+          <select ng-model="client.cellmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
         </div>
         <div class="form-group">
           <label>Home #</label><br/>
           <input ng-model="client.homenumber" type="text" class="form-control mindwell-phone-input">
-          <select ng-model="client.homemessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"/>
+          <select ng-model="client.homemessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
         </div>
         <div class="form-group">
           <label>Work #</label><br/>
           <input ng-model="client.worknumber" type="text" class="form-control mindwell-phone-input">
-          <select ng-model="client.workmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"/>
+          <select ng-model="client.workmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
         </div>
         <div class="form-group">
           <label>Email</label><br/>
@@ -51,7 +51,7 @@
         </div>
         <div class="form-group">
           <label>State</label><br/>
-          <select ng-model="client.state" ng-options="option.name as option.name for option in usStates" class="form-control"/>
+          <select ng-model="client.state" ng-options="option.name as option.name for option in usStates" class="form-control"></select>
         </div>
         <div class="form-group">
           <label>Zip</label><br/>
@@ -62,9 +62,9 @@
         <h3>Other</h3>
         <div class="form-group">
           <label>DOB</label><br/>
-          <select class="mw-month form-control" ng-model="client.dob_month" ng-options="option.value as option.name for option in months"/>
-          <select class="mw-day form-control" ng-model="client.dob_day" ng-options="option as option for option in days"/>
-          <select class="mw-year form-control" ng-model="client.dob_year" ng-options="option as option for option in years"/>
+          <select class="mw-month form-control" ng-model="client.dob_month" ng-options="option.value as option.name for option in months"></select>
+          <select class="mw-day form-control" ng-model="client.dob_day" ng-options="option as option for option in days"></select>
+          <select class="mw-year form-control" ng-model="client.dob_year" ng-options="option as option for option in years"></select>
         </div>
         <div class="form-group">
           <label>Referrer</label><br/>
@@ -76,7 +76,7 @@
         </div>
         <div class="form-group">
           <label>Client Status</label><br/>
-          <select ng-model="client.client_status" ng-options="option.name as option.name for option in statusOptions" class="form-control"/>
+          <select ng-model="client.client_status" ng-options="option.name as option.name for option in statusOptions" class="form-control"></select>
         </div>
         <div class="form-group">
           <label>Guardian's Name</label><br/>

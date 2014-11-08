@@ -88,3 +88,10 @@ def rest_user_perm(request):
             json.dumps([user.get_rest() for user in perm_users]),
             content_type='application/json')
 
+
+def rest_logouturl(request):
+    if request.method == 'GET':
+        return HttpResponse(
+            json.dumps(context_processors.get_logout_url(request)),
+            content_type='application/json'
+        )

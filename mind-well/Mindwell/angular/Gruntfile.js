@@ -2,6 +2,7 @@
 'use strict';
 
 var pkg = require('./package.json');
+var rewriteRulesSnippet = require('grunt-connect-rewrite/lib/utils').rewriteRequest;
 
 //Using exclusion patterns slows down Grunt significantly
 //instead of creating a set of patterns like '**/*.js' and '!**/node_modules/**'
@@ -35,10 +36,17 @@ module.exports = function(grunt) {
     // load all grunt tasks
     require('load-grunt-tasks')(grunt);
     grunt.loadNpmTasks('grunt-connect-proxy');
+    grunt.loadNpmTasks('grunt-connect-rewrite');
 
     // Project configuration.
     grunt.initConfig({
         connect: {
+            rules: [
+                {from: '^/angular/(.*)$', to: '/$1'}
+            ],
+            options: {
+                port: 10000
+            },
             main: {
                 options: {
                     hostname: '*',
@@ -48,6 +56,7 @@ module.exports = function(grunt) {
                         return [
                             // Include the proxy first
                             proxy,
+                            rewriteRulesSnippet,
                             // Serve static files.
                             connect.static(options.base),
                             // Make empty directories browsable.
@@ -61,6 +70,7 @@ module.exports = function(grunt) {
                     port: 9000,
                     https: false,
                 }],
+
             },
         },
         watch: {
@@ -184,6 +194,7 @@ module.exports = function(grunt) {
                 options: {
                     collapseBooleanAttributes: true,
                     collapseWhitespace: true,
+                    conservativeCollapse: true,
                     removeAttributeQuotes: true,
                     removeComments: true,
                     removeEmptyAttributes: true,
@@ -228,7 +239,7 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('build', ['jshint', 'clean:before', 'less', 'dom_munger', 'ngtemplates', 'cssmin', 'concat', 'ngmin', 'uglify', 'copy', 'htmlmin', 'imagemin', 'clean:after']);
-    grunt.registerTask('serve', ['dom_munger:read', 'jshint', 'configureProxies:main', 'connect', 'watch']);
+    grunt.registerTask('serve', ['dom_munger:read', 'jshint', 'configureProxies:main', 'configureRewriteRules', 'connect', 'watch']);
     grunt.registerTask('test', ['dom_munger:read', 'karma:all_tests']);
 
     grunt.event.on('watch', function(action, filepath) {

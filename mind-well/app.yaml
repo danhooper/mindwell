@@ -18,6 +18,9 @@ handlers:
 - url: /static
   static_dir: Mindwell/static
 
+- url: /angular
+  static_dir: Mindwell/angular/dist
+
 #- url: /test.*
 #  script: Mindwell/gaeunit/gaeunit.py
 
