@@ -55,3 +55,5 @@ upload_data:
 stop:
 	-kill `ps | grep python | sed 's/pts\/*\w*.*//'`
 
+run_grunt:
+	cd mind-well/Mindwell/angular && grunt serve
