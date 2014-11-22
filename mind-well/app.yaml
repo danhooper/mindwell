@@ -1,5 +1,5 @@
 application: mindwellonline
-version: 3-0-0-20141014-bower
+version: 3-0-0-20141114-angular
 runtime: python27
 api_version: 1
 threadsafe: false
