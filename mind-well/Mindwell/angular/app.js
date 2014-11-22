@@ -12,7 +12,7 @@ angular.module('mindwell').config(function($routeProvider, RestangularProvider) 
 
 });
 
-angular.module('mindwell').run(function($rootScope, mindwellCache, $cookies, $timeout) {
+angular.module('mindwell').run(function($rootScope, mindwellCache, $cookies, $timeout, mindwellUtil) {
 
     $rootScope.safeApply = function(fn) {
         var phase = $rootScope.$$phase;
@@ -30,6 +30,7 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $cookies, $ti
     };
 
     $rootScope.mindwellCache = mindwellCache;
+    $rootScope.mindwellUtil = mindwellUtil;
     $rootScope.currentUser = $cookies.current_user;
 
     $rootScope.updateUser= function() {

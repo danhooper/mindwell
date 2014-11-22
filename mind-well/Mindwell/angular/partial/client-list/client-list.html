@@ -21,10 +21,10 @@
     <table ng-table="tableParams" class="table" show-filter="true">
       <tr ng-repeat="client in $data">
         <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
-          <a href="/Mindwell/{{client.id}}/show_specific_client/">{{client.lastname}}, {{client.firstname}}
+          <a href ng-click="clientDos(client)">{{client | clientName}}</a>
         </td>
         <td data-title="'Actions'">
-          <button ng-click="onEdit(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+          <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
           <button ng-click="onDelete(client)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
         </td>
         <td data-title="'Balance'" sortable="'balance'" >

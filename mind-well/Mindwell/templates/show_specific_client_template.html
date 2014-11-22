@@ -52,7 +52,7 @@ MW.dosFormJavascriptInit();
             {% if client.city %}
             {{client.city}}{% if client.state %}, {{client.state}}{% endif %}
             {% endif %}
-            {% if client.state %}
+            {% if client.zipcode%}
             {{client.zipcode}}
             {% endif %}
             <br/>

@@ -1,4 +1,30 @@
 <div class="col-md-12" ng-controller="ClientDosCtrl">
-
-
+  <div class="mw-client-info-name"><h2>{{client | clientName}}</h2> <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm"><i class="fa fa-edit"></i> Edit</button></div>
+  <div class="row">
+    <div class="col-md-8">
+      <div class="mw-client-info row">
+        <div class="mw-client-info-col col-md-4">
+          <h3>Contact Info</h3></br>
+          <span ng-if="client.cellnumber"><strong>Cell Number: </strong>{{client.cellnumber}} {{client.cellmessage}}</br></span>
+          <span ng-if="client.homenumber"><strong>Home Number: </strong>{{client.homenumber}} {{client.homemessage}}</br></span>
+          <span ng-if="client.worknumber"><strong>Work Number: </strong>{{client.worknumber}} {{client.workmessage}}</br></span>
+          <span ng-if="client.emailaddress"><strong>Email: </strong>{{client.emailaddress}}</span>
+        </div>
+        <div class="mw-client-info-col col-md-4">
+          <h3>Address</h3><br/>
+          <span ng-if="client.address">{{client.address}}</br></span>
+          <span ng-if="client.address2">{{client.address2}}</br></span>
+          <span ng-if="client.city">{{client.city}}<span ng-if="client.state">, {{client.state}}</span></br></span>
+          <span ng-if="client.zipcode">{{client.zipcode}}</br></span>
+        </div>
+        <div class="mw-client-info-col col-md-4">
+          <h3>Other</h3><br/>
+          <span ng-repeat="field in otherFields" ng-if="client[field.key]"><strong>{{field.display}}: </strong>{{client[field.key]}}</br></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <h3>Add New DOS</h3>
+    </div>
+  </div>
 </div>

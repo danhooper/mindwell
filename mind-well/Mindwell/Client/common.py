@@ -18,4 +18,4 @@ def delete_client(client):
 
 
 def get_mwa_root():
-    return '/#/'
+    return '/angular/index.html#/'

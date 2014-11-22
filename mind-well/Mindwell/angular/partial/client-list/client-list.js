@@ -76,12 +76,6 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
         });
     };
 
-    $scope.onEdit = function(client) {
-        $location.path('/client-detail').search({
-            'contentId': client.id
-        });
-    };
-
     $scope.addClient = function() {
         $location.path('/client-detail');
     };
@@ -99,5 +93,10 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     $scope.showAll = function() {
         $location.search('search', null);
         $scope.filterByLetter({});
+    };
+
+    $scope.clientDos = function(client) {
+        //$location.path('client-dos').search('contentId', client.id);
+        window.location = '/Mindwell/' + client.id + '/show_specific_client/';
     };
 });
