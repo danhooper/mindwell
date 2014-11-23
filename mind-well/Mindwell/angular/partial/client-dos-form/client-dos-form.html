@@ -1,5 +1,83 @@
 <div class="col-md-12" ng-controller="ClientDosFormCtrl">
-  test
+  <form class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Session Type</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.session_type" ng-click="sessionTypeModal()" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Session Result</label>
+      <div class="col-sm-8">
+        <select ng-model="newDos.session_result" ng-options="value for value in resultChoices" class="form-control"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">DSM Code</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.dsm_code" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Type of Payment</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.type_pay" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Amount Due</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.amt_due" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Amount Paid</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.amt_paid" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Note</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.note" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Date and Time</label>
+      <div class="col-sm-8 controls">
+        <div class="input-group">
+          <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="date" is-open="opened" ng-required="true" close-text="Close" >
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="open($event)"><i class="fa fa-calendar"></i></button>
+          </span>
+        </div>
+        <div class="form-group mw-dos-time">
+          <div class="mw-dos-start">
+            <select ng-model="starttime" class="form-control" ng-options="value for value in timeChoices"></select>
+          </div> -
+          <div class="mw-dos-end">
+            <select ng-model="endtime" class="form-control" ng-options="getEndDisplay(value)  for value in timeChoices"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">DOS Repeat</label>
+      <div class="col-sm-8">
+        <select ng-model="newDos.dos_repeat" class="form-control" ng-options="value for value in dosRepeatChoices"></select>
+      </div>
+    </div>
+    <div class="form-group" ng-if="newDos.dos_repeat !== 'No'">
+      <label class="col-sm-4 control-label">Repeat End Date</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.dos_repeat_ed_date" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Print Receipt</label>
+      <div class="col-sm-8">
+        <input ng-model="newDos.print_receipt" type="checkbox">
+      </div>
+    </div>
 
-
-</div>
+  </div>

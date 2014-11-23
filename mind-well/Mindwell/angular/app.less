@@ -1,6 +1,15 @@
 @import "bower_components/bootstrap/less/bootstrap.less";
 //@import "bower_components/bootstrap/less/theme.less";
 @import "bower_components/font-awesome/less/font-awesome.less";
+@import (less, reference) "bower_components/font-awesome/css/font-awesome.css";
+
+.glyphicon:extend(.fa all) {
+  &.glyphicon-chevron-right:extend(.fa-chevron-right all) {};
+    &.glyphicon-chevron-left:extend(.fa-chevron-left all) {};
+  &.glyphicon-chevron-up:extend(.fa-chevron-up all) {};
+    &.glyphicon-chevron-down:extend(.fa-chevron-down all) {};
+}
+
 @fa-font-path: "bower_components/font-awesome/fonts";
 @import "bower_components/ng-table/ng-table.less";
 
@@ -15,14 +24,3 @@
 /* Required for Angular UI Bootstrap */
 .nav, .pagination, .carousel a { cursor: pointer; }
 
-/* Personal preference for BS modal.  The LESS below makes the backdrop white and
-   causes the modal to fade in rather than slide in. */
-//@modal-backdrop-bg: white;
-//.modal {
-//	&.fade {
-//		.transition(opacity .3s);
-//	}
-//	&.fade .modal-dialog {
-//		.translate(0,0);
-//	}
-//}

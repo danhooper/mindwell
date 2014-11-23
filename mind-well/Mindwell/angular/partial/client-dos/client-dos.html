@@ -1,7 +1,7 @@
 <div class="col-md-12" ng-controller="ClientDosCtrl">
   <div class="mw-client-info-name"><h2>{{client | clientName}}</h2> <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm"><i class="fa fa-edit"></i> Edit</button></div>
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-7">
       <div class="mw-client-info row">
         <div class="mw-client-info-col col-md-4">
           <h3>Contact Info</h3></br>
@@ -10,7 +10,7 @@
           <span ng-if="client.worknumber"><strong>Work Number: </strong>{{client.worknumber}} {{client.workmessage}}</br></span>
           <span ng-if="client.emailaddress"><strong>Email: </strong>{{client.emailaddress}}</span>
         </div>
-        <div class="mw-client-info-col col-md-4">
+        <div class="mw-client-info-col col-md-3">
           <h3>Address</h3><br/>
           <span ng-if="client.address">{{client.address}}</br></span>
           <span ng-if="client.address2">{{client.address2}}</br></span>
@@ -23,7 +23,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-5">
       <h3>Add New DOS</h3>
       <div ng-include="'/angular/partial/client-dos-form/client-dos-form.html'">
     </div>
