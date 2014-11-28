@@ -1,4 +1,4 @@
-angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $modal, mindwellCache){
+angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $timeout, $modal, mindwellCache, mindwellRest){
     $scope.resultChoices = [
         'Scheduled',
         'Attended',
@@ -15,27 +15,55 @@ angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $moda
         'Three Weeks',
         'Four Weeks'
     ];
+
+    $scope.dosList = [];
+    mindwellRest.dos.getList().then(function(dosList) {
+        $scope.dosList = dosList;
+    });
+
+    var timeFormat = 'hh:mm a';
+
+    $scope.starttime = '12:00 am';
+    $scope.endtime = '12:00 am';
+
+    var getEndDisplay = function(value) {
+        var end = moment(value, timeFormat);
+        var start = moment($scope.starttime, timeFormat);
+        return value + ' (' + end.diff(start, 'minutes') + ' mins)';
+    };
+
     var buildTimeChoices = function() {
         var minutes = _.range(0, 24 * 60, 15);
         $scope.timeChoices = _.map(minutes, function(minute) {
             var day = moment('2013-02-08');
-            return day.add(minute, 'minutes').format('hh:mm a');
+            return day.add(minute, 'minutes').format(timeFormat);
         });
-        console.log(minutes);
+        $scope.endTimeChoices = _.map($scope.timeChoices, function(choice) {
+            return [choice, getEndDisplay(choice)];
+        });
+        var end = moment($scope.endtime, timeFormat);
+        var start = moment($scope.starttime, timeFormat);
+        if (end < start) {
+            $scope.endtime = $scope.starttime;
+        }
     };
     buildTimeChoices();
-    $scope.getEndDisplay = function(value) {
-        var end = moment(value, 'hh:mm a');
-        var start = moment($scope.starttime, 'hh:mm a');
-        return value + ' (' + end.diff(start, 'minutes') + ' mins)';
+
+    $scope.updateEndTime = function() {
+        buildTimeChoices();
     };
-    $scope.starttime = '12:00 am';
-    $scope.endtime = '12:00 am';
+
     $scope.open = function($event) {
         $event.preventDefault();
         $event.stopPropagation();
 
         $scope.opened = true;
+    };
+    $scope.endOpen = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        $scope.endOpened = true;
     };
     $scope.newDos = {
         session_result: 'Scheduled',
@@ -64,5 +92,12 @@ angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $moda
         });
     };
 
+    $scope.addNewDOS = function() {
+        $scope.newDos.dos_datetime = $scope.date + $scope.starttime;
+        $scope.newDos.dos_endtime = $scope.endtime;
+        mindwellRest.dos.post($scope.newDos).then(function(dos) {
+            $scope.dosList.push(dos);
+        });
+    };
 
 });

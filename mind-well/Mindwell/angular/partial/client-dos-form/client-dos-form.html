@@ -53,31 +53,41 @@
         </div>
         <div class="form-group mw-dos-time">
           <div class="mw-dos-start">
-            <select ng-model="starttime" class="form-control" ng-options="value for value in timeChoices"></select>
+            <select ng-model="starttime" class="form-control" ng-change="updateEndTime()" ng-options="value for value in timeChoices"></select>
           </div> -
           <div class="mw-dos-end">
-            <select ng-model="endtime" class="form-control" ng-options="getEndDisplay(value)  for value in timeChoices"></select>
-          </div>
+            <select ng-model="endtime" class="form-control" ng-options="value[0] as value[1] for value in endTimeChoices"></select>
+          </select>
         </div>
       </div>
     </div>
-    <div class="form-group">
-      <label class="col-sm-4 control-label">DOS Repeat</label>
-      <div class="col-sm-8">
-        <select ng-model="newDos.dos_repeat" class="form-control" ng-options="value for value in dosRepeatChoices"></select>
-      </div>
-    </div>
-    <div class="form-group" ng-if="newDos.dos_repeat !== 'No'">
-      <label class="col-sm-4 control-label">Repeat End Date</label>
-      <div class="col-sm-8">
-        <input ng-model="newDos.dos_repeat_ed_date" type="text" class="form-control">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="col-sm-4 control-label">Print Receipt</label>
-      <div class="col-sm-8">
-        <input ng-model="newDos.print_receipt" type="checkbox">
-      </div>
-    </div>
-
   </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">DOS Repeat</label>
+    <div class="col-sm-8">
+      <select ng-model="newDos.dos_repeat" class="form-control" ng-options="value for value in dosRepeatChoices"></select>
+    </div>
+  </div>
+  <div class="form-group" ng-if="newDos.dos_repeat !== 'No'">
+    <label class="col-sm-4 control-label">Repeat End Date</label>
+    <div class="col-sm-8">
+      <div class="input-group">
+        <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="newDos.dos_repeat_end_date" is-open="endOpened" ng-required="false" close-text="Close" >
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-click="endOpen($event)"><i class="fa fa-calendar"></i></button>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Print Receipt</label>
+    <div class="col-sm-8">
+      <input ng-model="newDos.print_receipt" type="checkbox">
+    </div>
+  </div>
+  <div class="row">
+    <button class="btn btn-primary" ng-click="addNewDOS()">Add New DOS</button>
+  </div>
+
+
+</div>

@@ -18,7 +18,19 @@ def rest_dos(request):
                             content_type="application/json")
         return resp
     elif request.method == 'POST':
-        pass
+        post_dict = json.loads(request.raw_post_data)
+        form = models.DOSForm(post_dict)
+        if form.is_valid():
+            entity = models.DOS(**form.cleaned_data)
+            view_common.save_entity(request, entity)
+            return HttpResponse(json.dumps(entity.get_rest()),
+                                content_type='application/json')
+        else:
+            errors = [(k, unicode(v[0]))
+                      for k, v in form.errors.items()]
+            return HttpResponse(json.dumps({'success': False,
+                                            'errors': errors}),
+                                content_type='application/json')
 
 
 def rest_clientinfo(request):
