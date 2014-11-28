@@ -1,9 +1,27 @@
-angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location, mindwellCache){
+angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location, mindwellCache, mindwellRest, ngTableParams){
     var contentId = parseInt($location.search().contentId);
     mindwellCache.getClients().then(function() {
         $scope.client = _.find(mindwellCache.clients, function(client) {
             return contentId === client.id;
         });
+    });
+
+    $scope.tableParams = new ngTableParams({ //jshint ignore:line
+        page: 1, // show first page
+        count: 1000, // count per page
+        sorting: {
+            lastname: 'asc' // initial sorting
+        },
+        filter: $scope.filters,
+    }, {
+        total: 1,
+        counts: [],
+        getData: function($defer, params) {
+            mindwellRest.dos.getList().then(function(dosList) {
+                $scope.dosList = dosList;
+                $defer.resolve($scope.dosList);
+            });
+        }
     });
 
     $scope.otherFields = [

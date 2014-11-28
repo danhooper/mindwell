@@ -21,6 +21,9 @@ def rest_dos(request):
         post_dict = json.loads(request.raw_post_data)
         form = models.DOSForm(post_dict)
         if form.is_valid():
+            client = models.ClientInfo.safe_get_by_id(
+                int(form.cleaned_data['clientinfo']), request=request)
+            form.cleaned_data['clientinfo'] = client
             entity = models.DOS(**form.cleaned_data)
             view_common.save_entity(request, entity)
             return HttpResponse(json.dumps(entity.get_rest()),

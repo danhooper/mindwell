@@ -17,10 +17,6 @@ angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $time
     ];
 
     $scope.dosList = [];
-    mindwellRest.dos.getList().then(function(dosList) {
-        $scope.dosList = dosList;
-    });
-
     var timeFormat = 'hh:mm a';
 
     $scope.starttime = '12:00 am';
@@ -93,11 +89,10 @@ angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $time
     };
 
     $scope.addNewDOS = function() {
-        $scope.newDos.dos_datetime = $scope.date + $scope.starttime;
-        $scope.newDos.dos_endtime = $scope.endtime;
-        mindwellRest.dos.post($scope.newDos).then(function(dos) {
-            $scope.dosList.push(dos);
-        });
+        $scope.newDos.dos_datetime_0 = moment($scope.date).format('YYYY-MM-DD');
+        $scope.newDos.dos_datetime_1_time = $scope.starttime;
+        $scope.newDos.dos_endtime_time = $scope.endtime;
+        $scope.newDos.clientinfo = 5118776383111168;
     };
 
 });

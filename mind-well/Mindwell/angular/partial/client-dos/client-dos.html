@@ -28,4 +28,13 @@
       <div ng-include="'/angular/partial/client-dos-form/client-dos-form.html'">
     </div>
   </div>
+  <div class="row">
+    <table ng-table="tableParams" class="table" show-filter="true">
+      <tr ng-repeat="dos in $data">
+        <td data-title="'DOS Date and Time'" sortable="'dos_datetime'" >
+          {{dos.dos_datetime}}
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
