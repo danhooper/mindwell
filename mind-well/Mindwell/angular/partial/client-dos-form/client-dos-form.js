@@ -1,4 +1,4 @@
-angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $timeout, $modal, mindwellCache, mindwellRest){
+angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $location, $timeout, $modal, mindwellCache, mindwellRest){
     $scope.resultChoices = [
         'Scheduled',
         'Attended',
@@ -92,7 +92,8 @@ angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $time
         $scope.newDos.dos_datetime_0 = moment($scope.date).format('YYYY-MM-DD');
         $scope.newDos.dos_datetime_1_time = $scope.starttime;
         $scope.newDos.dos_endtime_time = $scope.endtime;
-        $scope.newDos.clientinfo = 5118776383111168;
+        $scope.newDos.clientinfo = $location.search().contentId;
+        mindwellRest.dos.post($scope.newDos);
     };
 
 });

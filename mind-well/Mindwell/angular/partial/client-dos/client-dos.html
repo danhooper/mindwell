@@ -26,15 +26,34 @@
     <div class="col-md-5">
       <h3>Add New DOS</h3>
       <div ng-include="'/angular/partial/client-dos-form/client-dos-form.html'">
+      </div>
+    </div>
+    <div class="row">
+      <table ng-table="tableParams" class="table" show-filter="true">
+        <thead>
+          <tr>
+            <th ng-repeat="column in dosTableCols" ng-show="column.visible"
+              class="text-center" ng-class="{
+              'sort-asc': tableParams.isSortBy(column.field, 'asc'),
+              'sort-desc': tableParams.isSortBy(column.field, 'desc'),
+              'sortable': column.title !== 'Actions'
+              }"
+              ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
+              <div>{{column.title}}</div>
+            </th>
+          </tr>
+        </thead>
+        <tr ng-repeat="dos in $data">
+          <td ng-repeat="col in dosTableCols" sortable="col.field">
+            <span ng-if="col.title === 'Actions'">
+              <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+              <button ng-click="onDelete(client)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
+            </span>
+            <span ng-if="col.title !== 'Actions'">
+              {{dos[col.field]}}
+            </span>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
-  <div class="row">
-    <table ng-table="tableParams" class="table" show-filter="true">
-      <tr ng-repeat="dos in $data">
-        <td data-title="'DOS Date and Time'" sortable="'dos_datetime'" >
-          {{dos.dos_datetime}}
-        </td>
-      </tr>
-    </table>
-  </div>
-</div>
