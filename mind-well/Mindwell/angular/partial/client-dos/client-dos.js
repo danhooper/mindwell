@@ -1,11 +1,53 @@
-angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location, mindwellCache, mindwellRest, ngTableParams, $filter){
+angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location, mindwellCache, mindwellRest, ngTableParams, $filter, $timeout, Restangular){
     var contentId = parseInt($location.search().contentId);
+
+    var getDOS = function($defer, params) {
+        if ($scope.client.dosList === undefined) {
+            mindwellRest.dos.getList().then(function(dosList) {
+                $scope.client.dosList = params.sorting() ? $filter('orderBy')(dosList, params.orderBy()) : dosList;
+
+                $defer.resolve($scope.client.dosList);
+            });
+        } else {
+            $scope.client.dosList = params.sorting() ? $filter('orderBy')($scope.client.dosList, params.orderBy()) : $scope.client.dosList;
+            $defer.resolve($scope.client.dosList);
+        }
+    };
+
     mindwellCache.getClients().then(function() {
         $scope.client = _.find(mindwellCache.clients, function(client) {
             return contentId === client.id;
         });
+        $scope.tableParams = new ngTableParams({ //jshint ignore:line
+            page: 1, // show first page
+            count: 1000, // count per page
+            sorting: {
+                dos_datetime: 'desc' // initial sorting
+            },
+            filter: $scope.filters,
+        }, {
+            total: 1,
+            counts: [],
+            getData: getDOS
+        });
     });
 
+    $scope.newDOS = {
+        session_result: 'Scheduled',
+        dos_repeat: 'No',
+        clientinfo: contentId
+    };
+
+    $scope.editDos = function(dos) {
+        $scope.newDOS = Restangular.copy(dos);
+    };
+
+    $scope.deleteDOS = function(dos) {
+        dos.remove().then(function() {
+            $scope.client.dosList = _.without($scope.client.dosList, dos);
+            $scope.tableParams.reload();
+        });
+    };
 
     $scope.dosTableCols = [
         {title: 'DOS Date and Time',
@@ -59,24 +101,6 @@ angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location
     $scope.getTitle = function(col) {
         return col.title;
     };
-    $scope.tableParams = new ngTableParams({ //jshint ignore:line
-        page: 1, // show first page
-        count: 1000, // count per page
-        sorting: {
-            dos_datetime: 'desc' // initial sorting
-        },
-        filter: $scope.filters,
-    }, {
-        total: 1,
-        counts: [],
-        getData: function($defer, params) {
-            mindwellRest.dos.getList().then(function(dosList) {
-                $scope.dosList = params.sorting() ? $filter('orderBy')(dosList, params.orderBy()) : dosList;
-
-                $defer.resolve($scope.dosList);
-            });
-        }
-    });
 
     $scope.otherFields = [
         {key: 'dob', display: 'DOB'},
@@ -90,8 +114,6 @@ angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location
         {key: 'reason_for_visit', display: 'Reason For Visit'},
 
     ];
-
-
 
 
 });

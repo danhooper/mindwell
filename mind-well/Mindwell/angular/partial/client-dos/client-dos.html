@@ -46,8 +46,8 @@
         <tr ng-repeat="dos in $data">
           <td ng-repeat="col in dosTableCols" sortable="col.field">
             <span ng-if="col.title === 'Actions'">
-              <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
-              <button ng-click="onDelete(client)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
+              <button ng-click="editDos(dos)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+              <button ng-click="deleteDOS(dos)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
             </span>
             <span ng-if="col.title !== 'Actions'">
               {{dos[col.field]}}

@@ -1,4 +1,10 @@
 angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $location, $timeout, $modal, mindwellCache, mindwellRest){
+    mindwellCache.getClients().then(function(clients) {
+        $scope.clients = clients;
+        $scope.client = _.find(mindwellCache.clients, function(client) {
+            return $scope.newDOS.clientinfo === client.id;
+        });
+    });
     $scope.resultChoices = [
         'Scheduled',
         'Attended',
@@ -61,10 +67,6 @@ angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $loca
 
         $scope.endOpened = true;
     };
-    $scope.newDos = {
-        session_result: 'Scheduled',
-        dos_repeat: 'No'
-    };
     mindwellCache.getCustomForm().then(function(customForm) {
         $scope.customForm = customForm;
     });
@@ -77,23 +79,35 @@ angular.module('mindwell').controller('ClientDosFormCtrl',function($scope, $loca
                     return $scope.customForm.session_type_choices.split('\r\n');
                 },
                 currValue: function() {
-                    return $scope.newDos.session_type;
+                    return $scope.newDOS.session_type;
                 },
                 title: function() {
                     return 'Session Type';
                 }
             }
         }).result.then(function(result){
-            $scope.newDos.session_type = result;
+            $scope.newDOS.session_type = result;
         });
     };
 
-    $scope.addNewDOS = function() {
-        $scope.newDos.dos_datetime_0 = moment($scope.date).format('YYYY-MM-DD');
-        $scope.newDos.dos_datetime_1_time = $scope.starttime;
-        $scope.newDos.dos_endtime_time = $scope.endtime;
-        $scope.newDos.clientinfo = $location.search().contentId;
-        mindwellRest.dos.post($scope.newDos);
+    $scope.updateDOS = function(newDOS) {
+        newDOS.dos_datetime_0 = moment($scope.date).format('YYYY-MM-DD');
+        newDOS.dos_datetime_1_time = $scope.starttime;
+        newDOS.dos_endtime_time = $scope.endtime;
+        if (newDOS.id) {
+            newDOS.put().then(function(dos) {
+                var idx = _.findIndex($scope.client.dosList, function(oldDos) {
+                    return oldDos.id === dos.id;
+                });
+                $scope.client.dosList[idx] = dos;
+                $scope.tableParams.reload();
+            });
+
+        } else {
+            mindwellRest.dos.post(newDOS).then(function(dos) {
+                $scope.client.dosList.push(dos);
+            });
+        }
     };
 
 });

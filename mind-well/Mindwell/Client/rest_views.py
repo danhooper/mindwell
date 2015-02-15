@@ -36,6 +36,33 @@ def rest_dos(request):
                                 content_type='application/json')
 
 
+def rest_indiv_dos(request, dos_id):
+    dos_id = int(dos_id)
+    dos = models.DOS.safe_get_by_id(dos_id, request)
+    if request.method == 'PUT':
+        put_dict = json.loads(request.raw_post_data)
+        form = models.DOSForm(put_dict)
+        if form.is_valid():
+            client = models.ClientInfo.safe_get_by_id(
+                int(form.cleaned_data['clientinfo']), request=request)
+            form.cleaned_data['clientinfo'] = client
+            dos.update_model(form.cleaned_data)
+            view_common.save_entity(request, dos)
+            return HttpResponse(json.dumps(dos.get_rest()),
+                                content_type='application/json')
+        else:
+            errors = [(k, unicode(v[0]))
+                      for k, v in form.errors.items()]
+            return HttpResponse(json.dumps({'success': False,
+                                            'errors': errors}),
+                                content_type='application/json',
+                                status=404)
+    elif request.method == 'DELETE':
+        dos.delete()
+        resp = HttpResponse('', content_type='application/json')
+        return resp
+
+
 def rest_clientinfo(request):
     if request.method == 'GET':
         clients = models.ClientInfo.safe_all(request=request).fetch(
@@ -56,7 +83,8 @@ def rest_clientinfo(request):
                       for k, v in form.errors.items()]
             return HttpResponse(json.dumps({'success': False,
                                             'errors': errors}),
-                                content_type='application/json')
+                                content_type='application/json',
+                                status=404)
 
 
 def rest_indiv_client(request, client_id):
@@ -79,7 +107,7 @@ def rest_indiv_client(request, client_id):
             return HttpResponse(json.dumps(client.get_rest()),
                                 content_type='application/json')
     elif request.method == 'DELETE':
-        common.delete_client(client)
+        common.delete_client(client, request=request)
         resp = HttpResponse('', content_type='application/json')
         return resp
     elif request.method == 'OPTIONS':
