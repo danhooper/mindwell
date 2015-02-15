@@ -6,7 +6,7 @@ describe('clientName', function() {
 
         var filter = $filter('clientName');
 
-		expect(filter('input')).toEqual('output');
+		expect(filter({lastname: 'lastname', 'firstname': 'firstname'})).toEqual('lastname, firstname');
 
 	}));
 
