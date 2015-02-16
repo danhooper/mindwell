@@ -1,4 +1,4 @@
-angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 'restangular', 'ngTable', 'cgPrompt', 'ngCookies', 'cgBusy']);
+angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 'restangular', 'ngTable', 'cgPrompt', 'ipCookie', 'cgBusy']);
 
 angular.module('mindwell').config(function($routeProvider, RestangularProvider) {
 
@@ -12,7 +12,7 @@ angular.module('mindwell').config(function($routeProvider, RestangularProvider) 
 
 });
 
-angular.module('mindwell').run(function($rootScope, mindwellCache, $cookies, $timeout, mindwellUtil) {
+angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, mindwellUtil, ipCookie) {
 
     $rootScope.safeApply = function(fn) {
         var phase = $rootScope.$$phase;
@@ -31,13 +31,14 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $cookies, $ti
 
     $rootScope.mindwellCache = mindwellCache;
     $rootScope.mindwellUtil = mindwellUtil;
-    $rootScope.currentUser = $cookies.current_user;
+    $rootScope.currentUser = ipCookie('current_user');
 
     $rootScope.updateUser= function() {
+        console.log($rootScope.currentUser);
         if ($rootScope.currentUser === '') {
-            delete $cookies.current_user;
+            ipCookie.remove('current_user');
         } else {
-            $cookies.current_user = $rootScope.currentUser;
+            ipCookie('current_user', $rootScope.currentUser, {path: '/'});
         }
         $timeout(function() {
             mindwellCache.clearClientCache();
