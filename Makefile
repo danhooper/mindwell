@@ -57,3 +57,6 @@ stop:
 
 run_grunt:
 	cd mind-well/Mindwell/angular && grunt serve
+
+update:
+	./google_appengine/appcfg.py update mind-well --oauth2
