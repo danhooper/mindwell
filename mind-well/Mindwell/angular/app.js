@@ -34,9 +34,8 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, min
     $rootScope.currentUser = ipCookie('current_user');
 
     $rootScope.updateUser= function() {
-        console.log($rootScope.currentUser);
         if ($rootScope.currentUser === '') {
-            ipCookie.remove('current_user');
+            ipCookie.remove('current_user', {path: '/'});
         } else {
             ipCookie('current_user', $rootScope.currentUser, {path: '/'});
         }

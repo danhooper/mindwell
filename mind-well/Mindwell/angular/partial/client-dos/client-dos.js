@@ -1,4 +1,7 @@
-angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location, mindwellCache, mindwellRest, ngTableParams, $filter, $timeout, Restangular){
+angular.module('mindwell').controller('ClientDosCtrl', function(
+    $scope, $location, mindwellCache, mindwellRest, ngTableParams, $filter,
+    $timeout, Restangular, prompt){
+
     var contentId = parseInt($location.search().contentId);
 
     var getDOS = function($defer, params) {
@@ -43,7 +46,12 @@ angular.module('mindwell').controller('ClientDosCtrl',function($scope, $location
     };
 
     $scope.deleteDOS = function(dos) {
-        dos.remove().then(function() {
+        prompt({
+            title: 'Delete DOS?',
+            message: 'Are you sure you want to delete this DOS from ' + dos.dos_datetime + '?'
+        }).then(function() {
+            return dos.remove();
+        }).then(function() {
             $scope.client.dosList = _.without($scope.client.dosList, dos);
             $scope.tableParams.reload();
         });
