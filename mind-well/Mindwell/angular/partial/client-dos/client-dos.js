@@ -1,6 +1,6 @@
 angular.module('mindwell').controller('ClientDosCtrl', function(
     $scope, $location, mindwellCache, mindwellRest, ngTableParams, $filter,
-    $timeout, Restangular, prompt){
+    $timeout, Restangular, prompt, $anchorScroll){
 
     var contentId = parseInt($location.search().contentId);
 
@@ -43,6 +43,8 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
 
     $scope.editDos = function(dos) {
         $scope.newDOS = Restangular.copy(dos);
+        $location.hash('dos-form');
+        $anchorScroll();
     };
 
     $scope.deleteDOS = function(dos) {
