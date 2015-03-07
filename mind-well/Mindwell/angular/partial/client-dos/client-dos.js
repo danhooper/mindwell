@@ -6,7 +6,7 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
 
     var getDOS = function($defer, params) {
         if ($scope.client.dosList === undefined) {
-            mindwellRest.dos.getList().then(function(dosList) {
+            mindwellRest.dos.getList({clientinfo: $scope.client.id}).then(function(dosList) {
                 $scope.client.dosList = params.sorting() ? $filter('orderBy')(dosList, params.orderBy()) : dosList;
 
                 $defer.resolve($scope.client.dosList);

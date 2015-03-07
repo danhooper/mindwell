@@ -12,7 +12,13 @@ import view_common
 
 def rest_dos(request):
     if request.method == 'GET':
-        dos = models.DOS.safe_all(request=request).fetch(
+        dos = models.DOS.safe_all(request=request)
+        clientinfo = request.GET['clientinfo']
+        if clientinfo:
+            client = models.ClientInfo.safe_get_by_id(int(clientinfo),
+                                                      request=request)
+            dos = dos.filter('clientinfo =', client.key())
+        dos = dos.fetch(
             common.get_maximum_num_dos_fetch())
         resp = HttpResponse(json.dumps([d.get_rest() for d in dos]),
                             content_type="application/json")
