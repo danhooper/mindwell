@@ -65,7 +65,7 @@ module.exports = function(grunt) {
                     }
                 },
                 proxies: [{
-                    context: ['/Mindwell', '/_ah', '/static'],
+                    context: ['/Mindwell', '/_ah', '/static', '/administrator'],
                     host: 'havok',
                     port: 9000,
                     https: false,
@@ -244,7 +244,6 @@ module.exports = function(grunt) {
 
     grunt.event.on('watch', function(action, filepath) {
         //https://github.com/gruntjs/grunt-contrib-watch/issues/156
-
         var tasksToRun = [];
 
         if (filepath.lastIndexOf('.js') !== -1 && filepath.lastIndexOf('.js') === filepath.length - 3) {

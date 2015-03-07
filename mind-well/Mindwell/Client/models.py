@@ -41,9 +41,11 @@ def get_rest(model, eager_load=False):
             output[key] = unicode(value)
         else:
             raise ValueError('cannot encode ' + repr(prop))
-
-    output['id'] = model.get_id()
-    output['key'] = str(model.key())
+    try:
+        output['id'] = model.get_id()
+        output['key'] = str(model.key())
+    except db.NotSavedError:
+        pass
 
     return output
 

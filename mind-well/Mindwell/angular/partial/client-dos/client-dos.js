@@ -35,16 +35,15 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
         });
     });
 
-    $scope.newDOS = {
-        session_result: 'Scheduled',
-        dos_repeat: 'No',
-        clientinfo: contentId
-    };
+    $scope.newDOS = {};
 
     $scope.editDos = function(dos) {
         $scope.newDOS = Restangular.copy(dos);
         $location.hash('dos-form');
         $anchorScroll();
+        $timeout(function() {
+            $scope.$apply();
+        });
     };
 
     $scope.deleteDOS = function(dos) {
@@ -124,6 +123,11 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
         {key: 'reason_for_visit', display: 'Reason For Visit'},
 
     ];
+
+    $scope.$on('mw-dos-updated', function(dos) {
+        $scope.tableParams.reload();
+        $scope.newDOS = {};
+    });
 
 
 });

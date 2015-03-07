@@ -26,8 +26,7 @@
     <div class="col-md-5" id="dos-form">
       <h3 ng-if="!newDOS.id">Add New DOS</h3>
       <h3 ng-if="newDOS.id">Update DOS</h3>
-      <div ng-include="'/angular/partial/client-dos-form/client-dos-form.html'">
-      </div>
+      <mw-dos-form ng-model="newDOS" mw-client="client"></mw-dos-form>
     </div>
     <div class="row">
       <table ng-table="tableParams" class="table" show-filter="true">
