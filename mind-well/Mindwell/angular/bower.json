@@ -26,7 +26,8 @@
     "angular-prompt": "~1.1.0",
     "lodash": "~2.4.1",
     "angular-busy": "~4.1.0",
-    "angular-cookie": "~4.0.6"
+    "angular-cookie": "~4.0.6",
+    "angular-ui-calendar": "~0.8.1"
   },
   "resolutions": {
     "angular": "~1.2"

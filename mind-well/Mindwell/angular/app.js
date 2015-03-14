@@ -1,10 +1,11 @@
-angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 'restangular', 'ngTable', 'cgPrompt', 'ipCookie', 'cgBusy']);
+angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 'restangular', 'ngTable', 'cgPrompt', 'ipCookie', 'cgBusy', 'ui.calendar']);
 
 angular.module('mindwell').config(function($routeProvider, RestangularProvider) {
 
     $routeProvider.when('/client-list',{templateUrl: 'partial/client-list/client-list.html'});
     $routeProvider.when('/client-detail',{templateUrl: 'partial/client-detail/client-detail.html'});
     $routeProvider.when('/client-dos',{templateUrl: 'partial/client-dos/client-dos.html'});
+    $routeProvider.when('/calendar',{templateUrl: 'partial/calendar/calendar.html'});
     /* Add New Routes Above */
     $routeProvider.otherwise({redirectTo:'/client-list'});
 
@@ -26,6 +27,7 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, min
     };
 
     $rootScope.getCalendarURL = function() {
+        //return '/angular/index.html#/calendar';
         return '/Mindwell/' + moment().format('YYYY/MM/DD') + '/calendar/';
     };
 
