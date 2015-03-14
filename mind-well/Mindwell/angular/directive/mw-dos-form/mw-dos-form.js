@@ -129,6 +129,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     } else {
                         mindwellRest.dos.post(newDOS).then(function(dos) {
                             scope.mwClient.dosList.push(dos);
+                            scope.$emit('mw-dos-updated', dos);
                         });
                     }
                 };
