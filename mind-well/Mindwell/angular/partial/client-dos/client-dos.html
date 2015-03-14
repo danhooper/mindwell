@@ -43,10 +43,11 @@
             </th>
           </tr>
         </thead>
-        <tr ng-repeat="dos in $data">
+        <tr ng-repeat="dos in $data" ng-class="{'curr-row': dos.id === newDOS.id}">
           <td ng-repeat="col in dosTableCols" sortable="col.field">
-            <span ng-if="col.title === 'Actions'">
+            <span ng-if="col.title === 'Actions'" class="mw-client-dos-actions">
               <button ng-click="editDos(dos)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+              <button ng-click="printReceipt(dos)" class="btn btn-default btn-sm"><i class="fa fa-print"></i> Print Receipt</button>
               <button ng-click="deleteDOS(dos)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
             </span>
             <span ng-if="col.title !== 'Actions'">

@@ -96,7 +96,7 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     };
 
     $scope.clientDos = function(client) {
-        //$location.path('client-dos').search('contentId', client.id);
-        window.location = '/Mindwell/' + client.id + '/show_specific_client/';
+        $location.path('client-dos').search('contentId', client.id);
+        //window.location = '/Mindwell/' + client.id + '/show_specific_client/';
     };
 });

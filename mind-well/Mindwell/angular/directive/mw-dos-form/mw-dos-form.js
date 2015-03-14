@@ -6,7 +6,8 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
         replace: true,
         require: 'ngModel',
         scope: {
-            mwClient: '='
+            mwClient: '=',
+            mwShowReceipt: '='
         },
         templateUrl: 'directive/mw-dos-form/mw-dos-form.html',
         link: function(scope, element, attrs, ngModel) {

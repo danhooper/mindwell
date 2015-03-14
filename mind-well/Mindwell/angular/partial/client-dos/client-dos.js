@@ -146,5 +146,9 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
         $scope.newDOS = {};
     });
 
+    $scope.printReceipt = function(dos) {
+        window.open('/Mindwell/' + dos.id + '/dos_receipt/', '_blank');
+    };
+
 
 });
