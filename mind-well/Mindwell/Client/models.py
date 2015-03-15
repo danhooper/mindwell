@@ -1594,6 +1594,12 @@ class CalendarSettings(db.Model):
         return reverse('updated_calendar_settings',
                        kwargs={'update': 'update'})
 
+    def get_id(self):
+        return str(self.key().id_or_name())
+
+    def get_rest(self):
+        return get_rest(self)
+
 
 class CalendarSettingsForm(forms.Form):
     DISPLAY_WEEKEND_CHOICES = (

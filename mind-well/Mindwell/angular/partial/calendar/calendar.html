@@ -1,6 +1,30 @@
 <div class="col-md-12" ng-controller="CalendarCtrl">
   <!--<div id="mw-calendar"></div>-->
-  <div ui-calendar="calConfig" ng-model="eventSources"></div>
+  <div class="row">
+    <div class="mw-calendar-options">
+      <div>
+        <button ng-click="toggleWeekends()" class="btn btn-default">
+          <span ng-if="calConfig.weekends">Hide Weekends</span>
+          <span ng-if="!calConfig.weekends">Show Weekends</span>
+        </button>
+      </div>
+      <div>
+        Key:
+        <span class="blocked_time">Blocked Time</span>
+        <span class="scheduleClient">Scheduled</span>
+        <span class="attendedClient">Attended</span>
+        <span class="noShow">No Show</span>
+        <span class="cancel">Cancelled</span>
+        <span class="payment_rx">Payment Received</span>
+      </div>
+    </div>
+    <div ng-class="{'col-md-8': newDOS.dos_datetime, 'col-md-12': !newDOS.dos_datetime}">
+      <div ui-calendar="calConfig" ng-model="eventSources"></div>
 
+    </div>
+    <div ng-if="newDOS.dos_datetime" class="col-md-4">
+      <mw-dos-form ng-model="newDOS"></mw-dos-form>
+    </div>
 
+  </div>
 </div>

@@ -115,5 +115,8 @@ urlpatterns += patterns(
     url(r'^Mindwell/rest/logouturl$', 'rest_logouturl', name='rest_logouturl'),
     url(r'^Mindwell/rest/custom_form$', 'rest_custom_form_settings',
         name='rest_custom_form_settings'),
+    url(r'^Mindwell/rest/calendar_settings$', 'rest_calendar_settings',
+        name='rest_calendar_settings'),
+    url(r'^Mindwell/rest/calendar_feed$', 'rest_calendar_feed',
+        name='rest_calendar_feed')
 )
-

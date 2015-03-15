@@ -8,6 +8,7 @@ import common
 import context_processors
 import models
 import view_common
+import calendar_views
 
 
 def rest_dos(request):
@@ -127,6 +128,21 @@ def rest_custom_form_settings(request):
         cf_settings = models.CustomFormSettings.GetSettings(request=request)
         return HttpResponse(json.dumps([cf_settings.get_rest()]),
                             content_type='application/json')
+
+
+def rest_calendar_settings(request):
+    if request.method == 'GET':
+        cal_settings = models.CalendarSettings.Get(request=request)
+        if cal_settings:
+            return HttpResponse(json.dumps([cal_settings.get_rest()]),
+                                content_type='application/json')
+        else:
+            return HttpResponse(json.dumps([]),
+                                content_type='application/json')
+
+
+def rest_calendar_feed(request):
+    return calendar_views.calendar_feed(request)
 
 
 def rest_user_perm(request):

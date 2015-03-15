@@ -1,4 +1,10 @@
-angular.module('mindwell').controller('CalendarCtrl',function($scope){
+angular.module('mindwell').controller('CalendarCtrl',function($scope, mindwellCache, uiCalendarConfig, mindwellRest){
+    $scope.newDOS = {};
+
+    $scope.dayClick = function(date, jsEvent, view) {
+        console.log('day clicked', arguments);
+        $scope.newDOS = {dos_datetime: date};
+    };
 
     $scope.calConfig = {
         header: {
@@ -6,30 +12,39 @@ angular.module('mindwell').controller('CalendarCtrl',function($scope){
             center: 'title',
             right: 'month,agendaWeek,agendaDay'
         },
-        scrollTime: '{{calendar_start_time}}',
         defaultEventMinutes: 15,
-        //defaultView: view,
-        //weekends: show_weekends,
+        defaultView: 'agendaWeek',
         editable: false,
         allDaySlot: false,
         slotDuration: '00:15:00',
-        //defaultDate: date,
         weekMode: 'liquid',
-        events: "/Mindwell/calendar_feed",
+        dayClick: $scope.dayClick,
         displayEventEnd: {month: true, basicWeek: true, 'default': true},
         timeFormat: 'h:mm',
-        //dayClick: function(date, allDay, jsEvent, view) {
-        //    window.location='/Mindwell/' + FormatCalendarDate(date) + '/calendar/';
-        //},
-        eventRender: function(event, element) {
-        //    element.qtip({
-        //        content: event.description,
-        //        style: 'cream'
-        //    });
-            $('.fc-event-title', element).html(event.title + '<br/>' + event.note);
-        }
+            eventRender: function(event, element) {
+                    $('.fc-event-title', element).html(event.title + '<br/>' + event.note);
+            }
     };
-    $scope.eventSources = [{url: '/Mindwell/calendar_feed'}];
+
+    mindwellCache.getCalSettings().then(function(calSettings) {
+        console.log(calSettings);
+        $scope.calConfig.weekends = calSettings.show_weekends;
+        $scope.scrollTime = calSettings.calendar_start_time;
+    });
+    var eventsFunc = function(start, end, timezone, callback) {
+        console.log(arguments);
+        start = start.format('YYYY-MM-DD');
+        end = end.format('YYYY-MM-DD');
+        mindwellRest.calEvents.getList({'start': start, 'end': end}).then(function(events) {
+            callback(events);
+        });
+    };
+
+    $scope.toggleWeekends = function() {
+        $scope.calConfig.weekends = !$scope.calConfig.weekends;
+    };
+
+    $scope.eventSources = [eventsFunc];
 
 
 });

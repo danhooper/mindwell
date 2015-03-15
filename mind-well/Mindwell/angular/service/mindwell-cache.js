@@ -38,6 +38,26 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
         mindwellCache.customFormPromise = undefined;
     };
 
+    mindwellCache.calSettingsPromise = undefined;
+    mindwellCache.getCalSettings = function() {
+        if (!mindwellCache.calSettingsPromise) {
+            mindwellCache.calSettingsPromise = mindwellRest.calSettings.getList().then(function(calSettings) {
+                if (calSettings.length === 1) {
+                    mindwellCache.calSettings = calSettings[0];
+                } else {
+                    mindwellCache.calSettings = {show_weekends: false, calendar_start_time: '6 am'};
+                }
+                $rootScope.$emit('mindwell.calSettingsUpdated');
+                return mindwellCache.calSettings;
+            });
+        }
+        return mindwellCache.calSettingsPromise;
+    };
+
+    mindwellCache.clearCalSettingsCache = function() {
+        mindwellCache.calSettingsPromise = undefined;
+    };
+
     mindwellCache._userPermPromise = undefined;
     mindwellCache.getUserPerm = function() {
         if (!mindwellCache._userPermPromise) {
@@ -72,6 +92,7 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
 
     mindwellCache.getClients();
     mindwellCache.getCustomForm();
+    mindwellCache.getCalSettings();
     mindwellCache.getUserPerm();
     mindwellCache.getLogoutUrl();
 
