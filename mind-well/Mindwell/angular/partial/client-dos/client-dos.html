@@ -51,7 +51,7 @@
               <button ng-click="deleteDOS(dos)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
             </span>
             <span ng-if="col.title === 'DOS Date and Time'">
-              {{dos[col.field] | date:'medium'}}
+              {{dos[col.field] | date:'MMM d, y h:mm a'}}
             </span>
             <span ng-if="col.title !== 'Actions' && col.title !== 'DOS Date and Time'">
               {{dos[col.field]}}
