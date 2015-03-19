@@ -7,6 +7,19 @@
           <span ng-if="calConfig.weekends">Hide Weekends</span>
           <span ng-if="!calConfig.weekends">Show Weekends</span>
         </button>
+        <select class="form-control mw-cal-generate">
+          <option>Generate a ...</option>
+          <optgroup label="----Customer Invoice----">
+            <option ng-repeat="val in customerOptions[currentView]">
+            {{val}}
+            </option>
+          </optgroup>
+          <optgroup label="----Provider Report----">
+            <option ng-repeat="val in providerOptions[currentView]">
+            {{val}}
+            </option>
+          </optgroup>
+        </select>
       </div>
       <div>
         Key:

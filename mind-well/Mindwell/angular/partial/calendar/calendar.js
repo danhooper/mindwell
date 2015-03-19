@@ -6,6 +6,22 @@ angular.module('mindwell').controller('CalendarCtrl',function($scope, mindwellCa
         $scope.newDOS = {dos_datetime: date};
     };
 
+    $scope.viewRender = function(view, element) {
+        $scope.currentView = view.name;
+    };
+
+    $scope.customerOptions = {
+        month: ['Current Month'],
+        agendaWeek: ['Current Week']
+    };
+
+    $scope.providerOptions = {
+        month: ['Current Month'],
+        agendaWeek: ['Current Week', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        agendaDay: ['Current Day']
+
+    };
+
     $scope.calConfig = {
         header: {
             left: 'prev,next today',
@@ -19,6 +35,7 @@ angular.module('mindwell').controller('CalendarCtrl',function($scope, mindwellCa
         slotDuration: '00:15:00',
         weekMode: 'liquid',
         dayClick: $scope.dayClick,
+        viewRender: $scope.viewRender,
         displayEventEnd: {month: true, basicWeek: true, 'default': true},
         timeFormat: 'h:mm',
             eventRender: function(event, element) {
