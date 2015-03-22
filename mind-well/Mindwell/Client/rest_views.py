@@ -46,7 +46,11 @@ def rest_dos(request):
 def rest_indiv_dos(request, dos_id):
     dos_id = int(dos_id)
     dos = models.DOS.safe_get_by_id(dos_id, request)
-    if request.method == 'PUT':
+    if request.method == 'GET':
+        resp = HttpResponse(json.dumps(dos.get_rest()),
+                            content_type='application/json')
+        return resp
+    elif request.method == 'PUT':
         put_dict = json.loads(request.raw_post_data)
         form = models.DOSForm(put_dict)
         if form.is_valid():

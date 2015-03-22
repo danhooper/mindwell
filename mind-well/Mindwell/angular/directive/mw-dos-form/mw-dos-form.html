@@ -3,7 +3,7 @@
     <div class="form-group">
       <label class="col-sm-4 control-label">Client</label>
       <div class="col-sm-8">
-        <select class="form-control" ng-model="selectedClient" ng-options="client as client.lastname + ',' + client.firstname for client in clients"></select>
+        <select class="form-control" ng-model="client" ng-options="client as client.lastname + ',' + client.firstname for client in clients"></select>
       </div>
     </div>
     <div class="form-group">

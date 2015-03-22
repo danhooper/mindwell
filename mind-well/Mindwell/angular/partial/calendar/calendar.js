@@ -1,9 +1,15 @@
-angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil, $timeout) {
+angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil, $timeout, $rootScope) {
     $scope.newDOS = {};
+
+    $rootScope.linkActive = {calendar:  true};
 
     var getCalendar = function() {
         return uiCalendarConfig.calendars.mwCalendar;
     };
+    $scope.$on('mw-dos-updated', function() {
+        $scope.newDOS = {};
+        getCalendar().fullCalendar('refetchEvents');
+    });
 
     $scope.dayClick = function(date, jsEvent, view) {
         console.log('day clicked', arguments);
@@ -11,9 +17,15 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
             dos_datetime: date,
             dos_endtime: moment(date).add(45, 'minutes') // make copy
         };
-        $scope.$on('mw-dos-updated', function() {
-            $scope.newDOS = {};
-            getCalendar().fullCalendar('refetchEvents');
+        $scope.client = undefined;
+    };
+
+    $scope.eventClick = function(event, jsEvent) {
+        mindwellRest.dos.get(event.id).then(function(dos) {
+            $scope.newDOS = dos;
+            return mindwellCache.getClients;
+        }).then(function() {
+            $scope.client = _.find(mindwellCache.clients, {id: $scope.newDOS.clientinfo});
         });
     };
 
@@ -56,6 +68,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
         slotDuration: '00:15:00',
         weekMode: 'liquid',
         dayClick: $scope.dayClick,
+        eventClick: $scope.eventClick,
         viewRender: $scope.viewRender,
         displayEventEnd: {
             month: true,
@@ -84,6 +97,9 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
             'start': start,
             'end': end
         }).then(function(events) {
+            _.each(events, function(event) {
+                delete event.url;
+            });
             callback(events);
         });
     };

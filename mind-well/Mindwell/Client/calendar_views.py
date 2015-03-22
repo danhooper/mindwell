@@ -15,6 +15,7 @@ def Javascript_Object_DOS(dos):
     try:
         return """
 {
+"id":%d,
 "title":"%s",
 "start":"%s",
 "end":"%s",
@@ -27,6 +28,7 @@ def Javascript_Object_DOS(dos):
 "textColor":"%s"
 },
             """ % (
+                dos.get_id(),
                 view_common.escape_json(unicode(dos)),
                 dos.get_starttime().isoformat('T'),
                 dos.get_endtime().isoformat('T'),

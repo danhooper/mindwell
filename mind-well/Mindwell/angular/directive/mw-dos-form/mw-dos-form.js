@@ -12,14 +12,14 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
         },
         templateUrl: 'directive/mw-dos-form/mw-dos-form.html',
         link: function(scope, element, attrs, ngModel) {
-            mindwellCache.getClients().then(function() {
-                scope.clients = mindwellCache.clients;
-            });
             ngModel.$render = function() {
+                mindwellCache.getClients().then(function() {
+                    scope.clients = mindwellCache.clients;
+                    if (scope.mwClient) {
+                        scope.client =_.find(mindwellCache.clients, {id: scope.mwClient.id});
+                    }
+                });
                 scope.newDOS = ngModel.$modelValue;
-                if (!scope.mwShowClientList) {
-                    scope.client = scope.mwClient;
-                }
                 if (!scope.newDOS.id) {
                     _.merge(scope.newDOS, {session_result: 'Scheduled',
                         dos_repeat: 'No',
@@ -121,28 +121,23 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     newDOS.dos_datetime_0 = moment(scope.date).format('YYYY-MM-DD');
                     newDOS.dos_datetime_1_time = scope.starttime;
                     newDOS.dos_endtime_time = scope.endtime;
-                    if (scope.mwShowClientList) {
-                        console.log(scope.selectedClient);
-                        newDOS.clientinfo = scope.selectedClient.id;
-                    } else {
-                        newDOS.clientinfo = scope.mwClient.id;
-                    }
+                    newDOS.clientinfo = scope.client.id;
 
                     if (newDOS.id) {
                         newDOS.put().then(function(dos) {
-                            var idx = _.findIndex(scope.client.dosList, function(oldDos) {
-                                return oldDos.id === dos.id;
-                            });
-                            scope.client.dosList[idx] = dos;
+                            if (scope.client.dosList) {
+                                var idx = _.findIndex(scope.client.dosList, function(oldDos) {
+                                    return oldDos.id === dos.id;
+                                });
+                                scope.client.dosList[idx] = dos;
+                            }
                             scope.$emit('mw-dos-updated', dos);
 
                         });
 
                     } else {
                         mindwellRest.dos.post(newDOS).then(function(dos) {
-                            if (scope.mwShowClientList) {
-                                delete scope.selectedClient.dosList;
-                            } else {
+                            if (scope.mwClient && scope.mwClient.dosList) {
                                 scope.mwClient.dosList.push(dos);
                             }
                             scope.$emit('mw-dos-updated', dos);
