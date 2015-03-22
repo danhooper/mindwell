@@ -1,32 +1,23 @@
 angular.module('mindwell').controller('ClientDosCtrl', function(
     $scope, $location, mindwellCache, mindwellRest, ngTableParams, $filter,
-    $timeout, Restangular, prompt, $anchorScroll){
+    $timeout, Restangular, prompt, $anchorScroll,
+    mindwellUtil){
 
     var contentId = parseInt($location.search().contentId);
 
-    var calcBalances = function(dosList) {
-        var sortedDOS = _.sortBy(dosList, 'dos_datetime');
-        _.reduceRight(dosList, function(prevDOS, dos) {
-            var amt_due = parseFloat(dos.amt_due) || 0;
-            var amt_paid = parseFloat(dos.amt_paid) || 0;
-            var balance = parseFloat(prevDOS.balance) || 0;
-            dos.balance = balance + amt_due - amt_paid;
-            return dos;
-        }, {});
-    };
 
     var getDOS = function($defer, params) {
         if ($scope.client.dosList === undefined) {
             mindwellRest.dos.getList({clientinfo: $scope.client.id}).then(function(dosList) {
                 $scope.client.dosList = params.sorting() ? $filter('orderBy')(dosList, params.orderBy()) : dosList;
 
+                mindwellUtil.calcBalances($scope.client.dosList);
                 $defer.resolve($scope.client.dosList);
-                calcBalances($scope.client.dosList);
             });
         } else {
             $scope.client.dosList = params.sorting() ? $filter('orderBy')($scope.client.dosList, params.orderBy()) : $scope.client.dosList;
+            mindwellUtil.calcBalances($scope.client.dosList);
             $defer.resolve($scope.client.dosList);
-            calcBalances($scope.client.dosList);
         }
     };
 
@@ -86,10 +77,6 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
         },
         {title: 'DMS Code',
          field: 'dsm_code',
-         visible: true
-        },
-        {title: 'Session Result',
-         field: 'session_result',
          visible: true
         },
         {title: 'Type of Payment',

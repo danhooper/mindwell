@@ -12,7 +12,6 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     });
 
     $scope.dayClick = function(date, jsEvent, view) {
-        console.log('day clicked', arguments);
         $scope.newDOS = {
             dos_datetime: date,
             dos_endtime: moment(date).add(45, 'minutes') // make copy
@@ -21,11 +20,15 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     };
 
     $scope.eventClick = function(event, jsEvent) {
-        mindwellRest.dos.get(event.id).then(function(dos) {
+        mindwellCache.getClients().then(function() {
+            $scope.client = _.find(mindwellCache.clients, {id: event.clientinfo});
+            if ($scope.client.dosList) {
+                return _.find($scope.client.dosList, {id: event.id});
+            } else {
+                return mindwellRest.dos.get(event.id);
+            }
+        }).then(function(dos) {
             $scope.newDOS = dos;
-            return mindwellCache.getClients;
-        }).then(function() {
-            $scope.client = _.find(mindwellCache.clients, {id: $scope.newDOS.clientinfo});
         });
     };
 
@@ -82,7 +85,6 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     };
 
     mindwellCache.getCalSettings().then(function(calSettings) {
-        console.log(calSettings);
         $scope.calConfig.weekends = calSettings.show_weekends;
         $scope.scrollTime = calSettings.calendar_start_time;
         $timeout(function() {
@@ -90,7 +92,6 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
         });
     });
     var eventsFunc = function(start, end, timezone, callback) {
-        console.log(arguments);
         start = start.format('YYYY-MM-DD');
         end = end.format('YYYY-MM-DD');
         mindwellRest.calEvents.getList({

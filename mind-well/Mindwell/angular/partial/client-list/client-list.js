@@ -1,4 +1,4 @@
-angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootScope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout, mindwellCache) {
+angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootScope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout, mindwellCache, mindwellUtil) {
 
     $rootScope.linkActive = {clients:  true};
     $scope.mindwellCache = mindwellCache;
@@ -60,6 +60,9 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
                     orderedData = $filter('filter')(orderedData, $location.search().search);
                 }
                 $defer.resolve(orderedData);
+                $timeout(function() {
+                    $scope.$apply();
+                });
             });
         }
     });
@@ -81,9 +84,14 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     };
     $scope.calcBalance = function() {
         _.forEach(mindwellCache.clients, function(client) {
-            mindwellRest.balance.get(client.id).then(function(balance) {
-                client.balance = balance.balance;
-            });
+            if (client.dosList) {
+                var balances = mindwellUtil.calcBalances(client.dosList);
+                client.balance = balances.length > 0 ? balances[0].balance:  0;
+            } else {
+                mindwellRest.balance.get(client.id).then(function(balance) {
+                    client.balance = balance.balance;
+                });
+            }
         });
     };
     $scope.filterByLetter = function(letter) {
