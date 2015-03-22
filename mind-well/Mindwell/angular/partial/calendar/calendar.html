@@ -7,32 +7,21 @@
           <span ng-if="calConfig.weekends">Hide Weekends</span>
           <span ng-if="!calConfig.weekends">Show Weekends</span>
         </button>
-        <select class="form-control mw-cal-generate">
-          <option>Generate a ...</option>
-          <optgroup label="----Customer Invoice----">
-            <option ng-repeat="val in customerOptions[currentView]">
-            {{val}}
-            </option>
-          </optgroup>
-          <optgroup label="----Provider Report----">
-            <option ng-repeat="val in providerOptions[currentView]">
-            {{val}}
-            </option>
-          </optgroup>
+        &nbsp;&nbsp;Generate a <select class="form-control mw-cal-generate" ng-model="generateChoice" ng-change="generate()" ng-options="opt.label group by opt.type for opt in generateOptions[currentView]">
         </select>
-      </div>
-      <div>
-        Key:
-        <span class="blocked_time">Blocked Time</span>
-        <span class="scheduleClient">Scheduled</span>
-        <span class="attendedClient">Attended</span>
-        <span class="noShow">No Show</span>
-        <span class="cancel">Cancelled</span>
-        <span class="payment_rx">Payment Received</span>
+        <span>
+          &nbsp;&nbsp;<strong>Key:</strong>
+          <span class="label blocked_time">Blocked Time</span>
+          <span class="label scheduleClient">Scheduled</span>
+          <span class="label attendedClient">Attended</span>
+          <span class="label noShow">No Show</span>
+          <span class="label cancel">Cancelled</span>
+          <span class="label payment_rx">Payment Received</span>
+        </span>
       </div>
     </div>
     <div ng-class="{'col-md-8': newDOS.dos_datetime, 'col-md-12': !newDOS.dos_datetime}">
-      <div ui-calendar="calConfig" ng-model="eventSources"></div>
+      <div ui-calendar="calConfig" ng-model="eventSources" calendar="mwCalendar"></div>
 
     </div>
     <div ng-if="newDOS.dos_datetime" class="col-md-4">
