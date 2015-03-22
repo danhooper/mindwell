@@ -1,5 +1,5 @@
 <div class="col-md-12" ng-controller="ClientDosCtrl">
-  <div class="mw-client-info-name"><h2>{{client | clientName}}</h2> <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button></div>
+  <div class="mw-client-info-name"><h2>{{client | clientName}}</h2> <button ng-click="mindwellUtil.onEditClient(client)" class="mw-faded btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button></div>
   <div class="row">
     <div class="col-md-7">
       <div class="mw-client-info row">
@@ -46,9 +46,9 @@
         <tr ng-repeat="dos in $data" ng-class="{'curr-row': dos.id === newDOS.id}">
           <td ng-repeat="col in dosTableCols" sortable="col.field">
             <span ng-if="col.title === 'Actions'" class="mw-client-dos-actions">
-              <button ng-click="editDos(dos)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
-              <button ng-click="printReceipt(dos)" class="btn btn-default btn-sm"><i class="fa fa-print"></i> Print Receipt</button>
-              <button ng-click="deleteDOS(dos)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
+              <button ng-click="editDos(dos)" class="mw-faded btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+              <button ng-click="printReceipt(dos)" class="mw-faded btn btn-default btn-sm"><i class="fa fa-print"></i> Print Receipt</button>
+              <button ng-click="deleteDOS(dos)" class="mw-faded btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
             </span>
             <span ng-if="col.title === 'DOS Date and Time'">
               {{dos[col.field] | date:'MMM d, y h:mm a'}}

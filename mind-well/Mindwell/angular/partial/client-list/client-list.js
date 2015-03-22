@@ -1,6 +1,8 @@
 angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootScope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout, mindwellCache, mindwellUtil) {
 
-    $rootScope.linkActive = {clients:  true};
+    $rootScope.linkActive = {
+        clients: true
+    };
     $scope.mindwellCache = mindwellCache;
     $scope.currentLetter = {};
     var letterMatchesLastname = function(client, letter) {
@@ -8,8 +10,10 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     };
     var buildClientLetters = function() {
         var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $scope.clientLetters = _.map(letters, function(letter){
-            var clientLetter = {letter: letter};
+        $scope.clientLetters = _.map(letters, function(letter) {
+            var clientLetter = {
+                letter: letter
+            };
             clientLetter.link = _.find(mindwellCache.clients, function(client) {
                 return letterMatchesLastname(client, letter);
             });
@@ -59,6 +63,7 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
                     console.log('filtering by', $location.search().search);
                     orderedData = $filter('filter')(orderedData, $location.search().search);
                 }
+                $scope.calcBalance(true);
                 $defer.resolve(orderedData);
                 $timeout(function() {
                     $scope.$apply();
@@ -82,12 +87,12 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     $scope.addClient = function() {
         $location.path('/client-detail');
     };
-    $scope.calcBalance = function() {
+    $scope.calcBalance = function(cachedOnly) {
         _.forEach(mindwellCache.clients, function(client) {
             if (client.dosList) {
                 var balances = mindwellUtil.calcBalances(client.dosList);
-                client.balance = balances.length > 0 ? balances[0].balance:  0;
-            } else {
+                client.balance = balances.length > 0 ? balances[0].balance : 0;
+            } else if (!cachedOnly){
                 mindwellRest.balance.get(client.id).then(function(balance) {
                     client.balance = balance.balance;
                 });

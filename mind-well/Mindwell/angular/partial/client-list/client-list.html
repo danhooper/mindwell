@@ -5,8 +5,8 @@
         <strong>Searching for "{{search}}"</strong></br></br>
       </div>
       <button class="btn btn-default" ng-click="addClient()"><i class="fa fa-plus"></i> Add New Client</button>
-      <button class="btn btn-default" ng-click="showAll()"> Show All</button>
-      <button class="btn btn-default" ng-click="calcBalance()"><i class="fa fa-plus"></i> Calculate Balances</button>
+      <button class="btn btn-default" ng-click="showAll()">Show All</button>
+      <button class="btn btn-default" ng-click="calcBalance()">Calculate Balances</button>
     </div>
   </div>
   <br/>
@@ -19,16 +19,21 @@
   </div>
   <div class="row">
     <table ng-table="tableParams" class="table" show-filter="true">
-      <tr ng-repeat="client in $data">
+      <tr ng-repeat="client in $data" class="mw-client-row">
         <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
           <a href ng-click="clientDos(client)">{{client | clientName}}</a>
         </td>
         <td data-title="'Actions'">
-          <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
-          <button ng-click="onDelete(client)" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
+          <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm mw-faded"><i class="fa fa-pencil"></i> Edit</button>
+          <button ng-click="onDelete(client)" class="btn btn-danger btn-sm mw-faded"><i class="fa fa-trash-o"></i> Delete</button>
         </td>
         <td data-title="'Balance'" sortable="'balance'" >
-          {{client.balance}}
+          <span ng-if="client.balance || client.balance === 0">
+            {{client.balance}}
+          </span>
+          <span ng-if="!client.balance && client.balance !== 0">
+            <button class="mw-faded btn btn-default" ng-click="calcBalance()">Calculate Balances</button>
+          </span>
         </td>
       </tr>
     </table>
