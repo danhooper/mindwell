@@ -1,11 +1,20 @@
 angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil, $timeout) {
     $scope.newDOS = {};
 
+    var getCalendar = function() {
+        return uiCalendarConfig.calendars.mwCalendar;
+    };
+
     $scope.dayClick = function(date, jsEvent, view) {
         console.log('day clicked', arguments);
         $scope.newDOS = {
-            dos_datetime: date
+            dos_datetime: date,
+            dos_endtime: moment(date).add(45, 'minutes') // make copy
         };
+        $scope.$on('mw-dos-updated', function() {
+            $scope.newDOS = {};
+            getCalendar().fullCalendar('refetchEvents');
+        });
     };
 
     $scope.viewRender = function(view, element) {
@@ -86,7 +95,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
 
 
     $scope.generate = function() {
-        var view = uiCalendarConfig.calendars.mwCalendar.fullCalendar('getView');
+        var view = getCalendar().fullCalendar('getView');
         var start = view.intervalStart;
         var end = view.intervalEnd.subtract(1, 'days');
         if ($scope.generateChoice.type === 'Client Invoice') {

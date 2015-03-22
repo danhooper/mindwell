@@ -7,20 +7,25 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
         require: 'ngModel',
         scope: {
             mwClient: '=',
-            mwShowReceipt: '='
+            mwShowReceipt: '=',
+            mwShowClientList: '='
         },
         templateUrl: 'directive/mw-dos-form/mw-dos-form.html',
         link: function(scope, element, attrs, ngModel) {
+            mindwellCache.getClients().then(function() {
+                scope.clients = mindwellCache.clients;
+            });
             ngModel.$render = function() {
                 scope.newDOS = ngModel.$modelValue;
-                scope.client = scope.mwClient;
-                console.log(scope.client);
-                if (!scope.newDOS.id) {
-                    scope.newDOS = {
-                        session_result: 'Scheduled',
-                        dos_repeat: 'No',
-                    };
+                if (!scope.mwShowClientList) {
+                    scope.client = scope.mwClient;
                 }
+                if (!scope.newDOS.id) {
+                    _.merge(scope.newDOS, {session_result: 'Scheduled',
+                        dos_repeat: 'No',
+                    });
+                }
+                console.log(scope.newDOS);
                 scope.date = moment(scope.newDOS.dos_datetime).toDate();
                 if (scope.newDOS.dos_datetime) {
                     scope.starttime = moment(scope.newDOS.dos_datetime).format(timeFormat);
@@ -29,6 +34,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     scope.starttime = '08:00 am';
                     scope.endtime = '08:45 am';
                 }
+                console.log(scope.date);
                 console.log(scope.starttime, scope.endtime);
 
                 scope.resultChoices = [
@@ -115,7 +121,12 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     newDOS.dos_datetime_0 = moment(scope.date).format('YYYY-MM-DD');
                     newDOS.dos_datetime_1_time = scope.starttime;
                     newDOS.dos_endtime_time = scope.endtime;
-                    newDOS.clientinfo = scope.mwClient.id;
+                    if (scope.mwShowClientList) {
+                        console.log(scope.selectedClient);
+                        newDOS.clientinfo = scope.selectedClient.id;
+                    } else {
+                        newDOS.clientinfo = scope.mwClient.id;
+                    }
 
                     if (newDOS.id) {
                         newDOS.put().then(function(dos) {
@@ -129,7 +140,11 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
 
                     } else {
                         mindwellRest.dos.post(newDOS).then(function(dos) {
-                            scope.mwClient.dosList.push(dos);
+                            if (scope.mwShowClientList) {
+                                delete scope.selectedClient.dosList;
+                            } else {
+                                scope.mwClient.dosList.push(dos);
+                            }
                             scope.$emit('mw-dos-updated', dos);
                         });
                     }
