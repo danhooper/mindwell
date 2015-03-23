@@ -13,19 +13,24 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
         templateUrl: 'directive/mw-dos-form/mw-dos-form.html',
         link: function(scope, element, attrs, ngModel) {
             ngModel.$render = function() {
-                mindwellCache.getClients().then(function() {
-                    scope.clients = mindwellCache.clients;
-                    if (scope.mwClient) {
-                        scope.client =_.find(mindwellCache.clients, {id: scope.mwClient.id});
-                    }
-                });
                 scope.newDOS = ngModel.$modelValue;
                 if (!scope.newDOS.id) {
                     _.merge(scope.newDOS, {session_result: 'Scheduled',
                         dos_repeat: 'No',
                     });
                 }
-                console.log(scope.newDOS);
+                scope.blockedTime = false;
+                scope.blockedTimeChange = function() {
+                    scope.blockedTime = !scope.blockedTime;
+                };
+                mindwellCache.getClients().then(function() {
+                    scope.clients = mindwellCache.clients;
+                    if (scope.mwClient) {
+                        scope.client =_.find(mindwellCache.clients, {id: scope.mwClient.id});
+                    } else if (scope.mwShowClientList && scope.newDOS.id) {
+                        scope.blockedTime = true;
+                    }
+                });
                 scope.date = moment(scope.newDOS.dos_datetime).toDate();
                 if (scope.newDOS.dos_datetime) {
                     scope.starttime = moment(scope.newDOS.dos_datetime).format(timeFormat);
@@ -121,7 +126,9 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     newDOS.dos_datetime_0 = moment(scope.date).format('YYYY-MM-DD');
                     newDOS.dos_datetime_1_time = scope.starttime;
                     newDOS.dos_endtime_time = scope.endtime;
-                    newDOS.clientinfo = scope.client.id;
+                    if (scope.client) {
+                        newDOS.clientinfo = scope.client.id;
+                    }
 
                     if (newDOS.id) {
                         newDOS.put().then(function(dos) {

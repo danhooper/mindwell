@@ -13,6 +13,9 @@ import view_common
 
 def Javascript_Object_DOS(dos):
     try:
+        clientinfo = dos.get_clientinfo_key()
+        if not clientinfo:
+            clientinfo = 0
         return """
 {
 "id":%d,
@@ -30,7 +33,7 @@ def Javascript_Object_DOS(dos):
 },
             """ % (
                 dos.get_id(),
-                dos.get_clientinfo_key(),
+                clientinfo,
                 view_common.escape_json(unicode(dos)),
                 dos.get_starttime().isoformat('T'),
                 dos.get_endtime().isoformat('T'),

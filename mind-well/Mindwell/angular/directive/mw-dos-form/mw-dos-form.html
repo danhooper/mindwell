@@ -1,42 +1,48 @@
 <div class="col-md-12">
   <form class="form-horizontal">
     <div class="form-group" ng-if="mwShowClientList">
+      <label class="col-sm-4 control-label">Blocked Time</label>
+      <div class="col-sm-8">
+        <input type="checkbox" ng-model="blockedTime" ng-change="blockedTimeChange()"></input>{{blockedTime}}
+      </div>
+    </div>
+    <div class="form-group" ng-show="mwShowClientList && !blockedTime">
       <label class="col-sm-4 control-label">Client</label>
       <div class="col-sm-8">
         <select class="form-control" ng-model="client" ng-options="client as client.lastname + ',' + client.firstname for client in clients"></select>
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="blockedTime">
       <label class="col-sm-4 control-label">Session Type</label>
       <div class="col-sm-8">
         <input ng-model="newDOS.session_type" ng-click="sessionTypeModal()" type="text" class="form-control">
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="blockedTime">{{blockedTime}}
       <label class="col-sm-4 control-label">Session Result</label>
       <div class="col-sm-8">
         <select ng-model="newDOS.session_result" ng-options="value for value in resultChoices" class="form-control"></select>
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="blockedTime">
       <label class="col-sm-4 control-label">DSM Code</label>
       <div class="col-sm-8">
         <input ng-model="newDOS.dsm_code" type="text" class="form-control">
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="blockedTime">
       <label class="col-sm-4 control-label">Type of Payment</label>
       <div class="col-sm-8">
         <input ng-model="newDOS.type_pay" type="text" class="form-control">
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="blockedTime">
       <label class="col-sm-4 control-label">Amount Due</label>
       <div class="col-sm-8">
         <input ng-model="newDOS.amt_due" type="text" class="form-control">
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="blockedTime">
       <label class="col-sm-4 control-label">Amount Paid</label>
       <div class="col-sm-8">
         <input ng-model="newDOS.amt_paid" type="text" class="form-control">
@@ -85,7 +91,7 @@
       </div>
     </div>
   </div>
-  <div class="form-group" ng-if="mwShowReceipt">
+  <div class="form-group" ng-if="mwShowReceipt && !blockedTime"">
     <label class="col-sm-4 control-label">Print Receipt</label>
     <div class="col-sm-8">
       <input ng-model="newDOS.print_receipt" type="checkbox">
