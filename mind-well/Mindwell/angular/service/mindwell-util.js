@@ -1,4 +1,4 @@
-angular.module('mindwell').factory('mindwellUtil', function($location) {
+angular.module('mindwell').factory('mindwellUtil', function($location, mindwellCache, $rootScope, mindwellRest) {
 
     var mindwellUtil = {};
 
@@ -35,6 +35,32 @@ angular.module('mindwell').factory('mindwellUtil', function($location) {
             return dos;
         });
         return sortedDOS;
+    };
+
+    mindwellUtil.saveClient = function(client) {
+        var savedClient;
+        if (client.id) {
+            return client.save().then(function(client) {
+                savedClient = client;
+                return mindwellCache.getClients();
+            }).then(function() {
+                var cacheId = _.findIndex(mindwellCache.clients, function(cacheClient) {
+                    return savedClient.id === cacheClient.id;
+                });
+                mindwellCache.clients[cacheId] = savedClient;
+                $rootScope.$broadcast('mw-client-updated', savedClient);
+                return savedClient;
+            });
+        } else {
+            return mindwellRest.clients.post(client).then(function(client) {
+                savedClient = client;
+                return mindwellCache.getClients();
+            }).then(function() {
+                mindwellCache.clients.push(savedClient);
+                $rootScope.$broadcast('mw-client-updated', savedClient);
+                return savedClient;
+            });
+        }
     };
 
 

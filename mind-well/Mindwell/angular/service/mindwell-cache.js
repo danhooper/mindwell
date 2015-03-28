@@ -22,10 +22,11 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
     mindwellCache.getCustomForm = function() {
         if (!mindwellCache.customFormPromise) {
             mindwellCache.customFormPromise = mindwellRest.customForm.getList().then(function(customForm) {
+                var defaultForm = {referrer_choices: '', reason_for_visit_choices: ''};
+                mindwellCache.customForm = defaultForm;
                 if (customForm.length === 1) {
                     mindwellCache.customForm = customForm[0];
-                } else {
-                    mindwellCache.customForm = {referrer_choices: '', reason_for_visit_choices: ''};
+                    _.merge(mindwellCache.customForm, defaultForm);
                 }
                 $rootScope.$emit('mindwell.customFormUpdated');
                 return mindwellCache.customForm;

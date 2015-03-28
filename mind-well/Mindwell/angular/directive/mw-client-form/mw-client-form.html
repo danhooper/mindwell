@@ -1,0 +1,111 @@
+<div>
+  <form>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Lastname</label>
+          <input ng-model="client.lastname" type="text" class="form-control" id="lastname">
+        </div>
+        <div class="form-group">
+          <label>Firstname</label>
+          <input ng-model="client.firstname" type="text" class="form-control" id="firstname">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <h3 ng-if="!mwCompactForm">Contact Info</h3>
+        <div class="form-group">
+          <label>Cell #</label><br/>
+          <input ng-model="client.cellnumber" type="text" class="form-control mindwell-phone-input">
+          <select ng-model="client.cellmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>Home #</label><br/>
+          <input ng-model="client.homenumber" type="text" class="form-control mindwell-phone-input">
+          <select ng-model="client.homemessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>Work #</label><br/>
+          <input ng-model="client.worknumber" type="text" class="form-control mindwell-phone-input">
+          <select ng-model="client.workmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
+        </div>
+        <div class="form-group">
+          <label>Email</label><br/>
+          <input ng-model="client.emailaddress" type="text" class="form-control"/>
+        </div>
+      </div>
+      <div class="col-md-4" ng-if="!mwCompactForm">
+        <h3>Address</h3>
+        <div class="form-group">
+          <label>Address</label><br/>
+          <input ng-model="client.address" type="text" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Address 2</label><br/>
+          <input ng-model="client.address2" type="text" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>City</label><br/>
+          <input ng-model="client.city" type="text" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>State</label><br/>
+          <select ng-model="client.state" ng-options="option.name as option.name for option in usStates" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Zip</label><br/>
+          <input ng-model="client.zipcode" type="text" class="form-control">
+        </div>
+      </div>
+      <div class="col-md-4">
+        <h3 ng-if="!mwCompactForm">Other</h3>
+        <div class="form-group">
+          <label>DOB</label><br/>
+          <select class="mw-month form-control" ng-model="client.dob_month" ng-options="option.value as option.name for option in months"></select>
+          <select class="mw-day form-control" ng-model="client.dob_day" ng-options="option as option for option in days"></select>
+          <select class="mw-year form-control" ng-model="client.dob_year" ng-options="option as option for option in years"></select>
+        </div>
+        <div class="form-group">
+          <label>Referrer</label><br/>
+          <input ng-click="referrerModal()" ng-model="client.referrer" type="text" class="form-control">
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>DSM Code</label><br/>
+          <input ng-model="client.dsm_code" type="text" class="form-control">
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>Client Status</label><br/>
+          <select ng-model="client.client_status" ng-options="option.name as option.name for option in statusOptions" class="form-control"></select>
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>Guardian's Name</label><br/>
+          <input ng-model="client.guardians_name" type="text" class="form-control">
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>Guardian's Phone Number</label><br/>
+          <input ng-model="client.guardians_phone_number" type="text" class="form-control">
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>Emergency Contact</label><br/>
+          <input ng-model="client.emergency_contact" type="text" class="form-control">
+        </div>
+        <div class="form-group" ng-if="!mwCompactForm">
+          <label>Emergeny Contact's Phone Number</label><br/>
+          <input ng-model="client.emergency_contact_phone_number" type="text" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Reason for Visit</label><br/>
+          <input ng-click="rfvModal()" ng-model="client.reason_for_visit" type="text" class="form-control">
+        </div>
+      </div>
+    </div>
+    <div class="row" ng-if="!mwCompactForm">
+      <div class="col-md-4">
+          <button class="btn btn-primary" ng-click="saveChanges()">Save Changes</button>
+      </div>
+    </div>
+  </form>
+
+
+</div>

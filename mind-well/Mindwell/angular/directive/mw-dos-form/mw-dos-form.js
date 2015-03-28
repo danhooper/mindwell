@@ -7,6 +7,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
         require: 'ngModel',
         scope: {
             mwClient: '=',
+            mwShowAddNewClient: '=',
             mwShowReceipt: '=',
             mwShowClientList: '='
         },
@@ -15,7 +16,8 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
             ngModel.$render = function() {
                 scope.newDOS = ngModel.$modelValue;
                 if (!scope.newDOS.id) {
-                    _.merge(scope.newDOS, {session_result: 'Scheduled',
+                    _.merge(scope.newDOS, {
+                        session_result: 'Scheduled',
                         dos_repeat: 'No',
                     });
                 }
@@ -26,7 +28,9 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                 mindwellCache.getClients().then(function() {
                     scope.clients = mindwellCache.clients;
                     if (scope.mwClient) {
-                        scope.client =_.find(mindwellCache.clients, {id: scope.mwClient.id});
+                        scope.client = _.find(mindwellCache.clients, {
+                            id: scope.mwClient.id
+                        });
                     } else if (scope.mwShowClientList && scope.newDOS.id) {
                         scope.blockedTime = true;
                     }
@@ -117,7 +121,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                                 return 'Session Type';
                             }
                         }
-                    }).result.then(function(result){
+                    }).result.then(function(result) {
                         scope.newDOS.session_type = result;
                     });
                 };
@@ -150,6 +154,17 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                             scope.$emit('mw-dos-updated', dos);
                         });
                     }
+                };
+                scope.addNewClient = function() {
+                    $modal.open({
+                        templateUrl: 'modals/mw-client-modal/mw-client-modal.html',
+                        controller: 'MwClientModalCtrl'
+                    }).result.then(function(client) {
+                        scope.client = _.find(mindwellCache.clients, {
+                            id: client.id
+                        });
+                    });
+
                 };
             };
 
