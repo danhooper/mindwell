@@ -1,4 +1,4 @@
-angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil, $timeout, $rootScope) {
+angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil, $timeout, $rootScope, $location) {
     $scope.newDOS = {};
 
     $rootScope.linkActive = {calendar:  true};
@@ -16,6 +16,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     });
 
     $scope.dayClick = function(date, jsEvent, view) {
+        $location.search('date', date.format('YYYY-MM-DD'));
         $scope.newDOS = {
             dos_datetime: date,
             dos_endtime: moment(date).add(45, 'minutes') // make copy
@@ -24,6 +25,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     };
 
     $scope.eventClick = function(event, jsEvent) {
+        $location.search('date', event.start.format('YYYY-MM-DD'));
         mindwellCache.getClients().then(function() {
             $scope.client = _.find(mindwellCache.clients, {id: event.clientinfo});
             if ($scope.client && $scope.client.dosList) {
@@ -66,6 +68,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
 
 
     $scope.calConfig = {
+        defaultDate: $location.search().date,
         header: {
             left: 'prev,next today',
             center: 'title',
