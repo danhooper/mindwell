@@ -90,7 +90,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
         },
         timeFormat: 'h:mm',
         eventRender: function(event, element) {
-            $('.fc-event-title', element).html(event.title + '<br/>' + event.note);
+            $('.fc-title', element).html(event.title + '<br/>' + event.note);
         }
     };
 
