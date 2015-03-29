@@ -95,8 +95,8 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     };
 
     mindwellCache.getCalSettings().then(function(calSettings) {
-        $scope.calConfig.weekends = calSettings.show_weekends;
-        $scope.scrollTime = calSettings.calendar_start_time;
+        $scope.calConfig.weekends = calSettings.show_weekends === 'Yes';
+        $scope.calConfig.scrollTime = moment(calSettings.calendar_start_time, 'h a').format('HH:mm:ss');
         $timeout(function() {
             $scope.eventSources.push(eventsFunc);
         });
