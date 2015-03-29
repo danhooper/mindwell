@@ -1,4 +1,4 @@
-angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwellCache, $modal, prompt, mindwellUtil) {
+angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwellCache, $modal, prompt, mindwellUtil, $q) {
     var timeFormat = 'hh:mm a';
     var mwEndTimeFormat = 'hh:mm:ss';
     return {
@@ -43,8 +43,6 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     scope.starttime = '08:00 am';
                     scope.endtime = '08:45 am';
                 }
-                console.log(scope.date);
-                console.log(scope.starttime, scope.endtime);
 
                 scope.resultChoices = [
                     'Scheduled',
@@ -127,38 +125,29 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                 };
 
                 scope.updateDOS = function(newDOS) {
-                    var client;
+                    var client = {};
                     newDOS.dos_datetime_0 = moment(scope.date).format('YYYY-MM-DD');
                     newDOS.dos_datetime_1_time = scope.starttime;
                     newDOS.dos_endtime_time = scope.endtime;
                     if (scope.client) {
                         newDOS.clientinfo = scope.client.id;
                     }
+                    var savedDOS;
 
-                    mindwellCache.getClients().then(function(clients) {
-                        client = _.find(mindwellCache.clients, {id: scope.client.id});
+                    $q.when(newDOS).then(function(newDOS) {
                         if (newDOS.id) {
                             return newDOS.put();
                         } else {
                             return mindwellRest.dos.post(newDOS);
                         }
                     }).then(function(dos) {
-                        if (newDOS.id) {
-                            if (client.dosList) {
-                                var idx = _.findIndex(client.dosList, function(oldDos) {
-                                    return oldDos.id === dos.id;
-                                });
-                                client.dosList[idx] = dos;
-                            }
-                        } else {
-                            if (client.dosList) {
-                                client.dosList.push(dos);
-                            }
-                        }
+                        savedDOS = dos;
+                        return mindwellUtil.updateDOSCache(dos, newDOS.id && newDOS.id > 0);
+                    }).then(function() {
                         if (newDOS.print_receipt) {
-                            mindwellUtil.printReceipt(dos);
+                            mindwellUtil.printReceipt(savedDOS);
                         }
-                        scope.$emit('mw-dos-updated', dos);
+                        scope.$emit('mw-dos-updated', savedDOS);
                     });
                 };
 
@@ -181,6 +170,25 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                         });
                     });
 
+                };
+
+                scope.cancelRecurr = function() {
+                    var savedDOS, date, starttime, endtime;
+                    mindwellRest.dos.get(scope.newDOS.recurrId).then(function(dos) {
+                        dos.dos_repeat = 'No';
+                        date = moment(dos.dos_datetime).toDate();
+                        starttime = moment(dos.dos_datetime).format(timeFormat);
+                        endtime = moment(dos.dos_endtime, mwEndTimeFormat).format(timeFormat);
+                        dos.dos_datetime_0 = moment(date).format('YYYY-MM-DD');
+                        dos.dos_datetime_1_time = starttime;
+                        dos.dos_endtime_time = endtime;
+                        return dos.put();
+                    }).then(function(dos) {
+                        savedDOS = dos;
+                        return mindwellUtil.updateDOSCache(dos, true);
+                    }).then(function() {
+                        scope.$emit('mw-dos-updated', savedDOS);
+                    });
                 };
             };
 

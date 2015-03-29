@@ -60,7 +60,6 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
                     });
                 }
                 if ($location.search().search) {
-                    console.log('filtering by', $location.search().search);
                     orderedData = $filter('filter')(orderedData, $location.search().search);
                 }
                 $scope.calcBalance(true);

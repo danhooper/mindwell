@@ -26,12 +26,15 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     $scope.eventClick = function(event, jsEvent) {
         mindwellCache.getClients().then(function() {
             $scope.client = _.find(mindwellCache.clients, {id: event.clientinfo});
-            if ($scope.client.dosList) {
+            if ($scope.client && $scope.client.dosList) {
                 return _.find($scope.client.dosList, {id: event.id});
-            } else {
+            } else if (event.id !== -1){
                 return mindwellRest.dos.get(event.id);
             }
         }).then(function(dos) {
+            if (!dos) {
+                dos = {dos_datetime: event.start, dos_endtime: event.end, clientinfo: event.clientinfo, recurrId: event.recurrId};
+            }
             $scope.newDOS = dos;
         });
     };

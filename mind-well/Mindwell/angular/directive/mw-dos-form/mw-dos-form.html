@@ -106,6 +106,7 @@
       <button class="btn btn-primary" ng-if="newDOS.id" ng-click="updateDOS(newDOS)">Update DOS</button>
       <button class="btn btn-default" ng-click="cancel()">Cancel</button>
       <button class="btn btn-danger" ng-if="newDOS.id" ng-click="delete()"><i class="fa fa-trash-o"></i> Delete</button>
+      <button class="btn btn-default" ng-if="newDOS.recurrId" ng-click="cancelRecurr()">Cancel Repeating Series</button>
     </div>
   </div>
 </div>

@@ -29,20 +29,22 @@ def Javascript_Object_DOS(dos):
 "description":"%s",
 "backgroundColor":"%s",
 "borderColor":"%s",
-"textColor":"%s"
+"textColor":"%s",
+"recurrId":%d
 },
-            """ % (
-                dos.get_id(),
-                clientinfo,
-                view_common.escape_json(unicode(dos)),
-                dos.get_starttime().isoformat('T'),
-                dos.get_endtime().isoformat('T'),
-                dos.get_calendar_absolute_url(),
-                view_common.escape_json(dos.get_note()),
-                view_common.escape_json(dos.get_hover_tip()),
-                dos.get_background_color(), dos.get_background_color(),
-                dos.get_text_color()
-            )
+        """ % (
+            dos.get_id(),
+            clientinfo,
+            view_common.escape_json(unicode(dos)),
+            dos.get_starttime().isoformat('T'),
+            dos.get_endtime().isoformat('T'),
+            dos.get_calendar_absolute_url(),
+            view_common.escape_json(dos.get_note()),
+            view_common.escape_json(dos.get_hover_tip()),
+            dos.get_background_color(), dos.get_background_color(),
+            dos.get_text_color(),
+            dos.get_recurr_id()
+        )
     except:
         logging.exception('Exception in Javascript_Object_DOS')
         return ''

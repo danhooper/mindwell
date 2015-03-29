@@ -63,6 +63,24 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
         }
     };
 
+    mindwellUtil.updateDOSCache = function(dos, update) {
+        return mindwellCache.getClients().then(function(clients) {
+            var client = _.find(clients, {
+                id: dos.clientinfo
+            });
+            if (client && client.dosList) {
+                if (update) {
+                    var idx = _.findIndex(client.dosList, function(oldDos) {
+                        return oldDos.id === dos.id;
+                    });
+                    client.dosList[idx] = dos;
+                } else {
+                    client.dosList.push(dos);
+                }
+            }
+        });
+    };
+
     mindwellUtil.deleteDOS = function(dos, client) {
         return prompt({
             title: 'Delete DOS?',
@@ -73,7 +91,9 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
             return mindwellCache.getClients();
         }).then(function(clients) {
             if (client && client.id) {
-                var updatedClient = _.find(mindwellCache.clients, {id: client.id});
+                var updatedClient = _.find(mindwellCache.clients, {
+                    id: client.id
+                });
                 if (updatedClient.dosList) {
                     updatedClient.dosList = _.without(updatedClient.dosList, dos);
                 }

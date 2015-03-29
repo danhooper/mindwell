@@ -1081,6 +1081,9 @@ class DOS(db.Model):
         """ Fetches the DOS by ID for a given user. """
         return global_get_by_id(DOS, ids, request=request, parent=None)
 
+    def get_recurr_id(self):
+        return -1
+
     def get_rest(self):
         return get_rest(self)
 
@@ -1259,6 +1262,9 @@ class DOSRecurr(db.Model):
                                  '%02d' % self.dos_recurr_datetime.minute,
                                  '%d' % int(self.dos_base.get_id())))
         return self.dos_base.get_absolute_url()
+
+    def get_recurr_id(self):
+        return self.dos_base.get_id()
 
     def get_id(self):
         return -1

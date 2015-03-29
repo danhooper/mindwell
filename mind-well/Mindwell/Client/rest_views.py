@@ -57,9 +57,12 @@ def rest_indiv_dos(request, dos_id):
         put_dict = json.loads(request.raw_post_data)
         form = models.DOSForm(put_dict)
         if form.is_valid():
-            client = models.ClientInfo.safe_get_by_id(
-                int(form.cleaned_data['clientinfo']), request=request)
-            form.cleaned_data['clientinfo'] = client
+            try:
+                client = models.ClientInfo.safe_get_by_id(
+                    int(form.cleaned_data['clientinfo']), request=request)
+                form.cleaned_data['clientinfo'] = client
+            except ValueError:
+                form.cleaned_data['clientinfo'] = None
             dos.update_model(form.cleaned_data)
             view_common.save_entity(request, dos)
             return HttpResponse(json.dumps(dos.get_rest()),
