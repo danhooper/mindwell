@@ -445,7 +445,7 @@ class ClientInfo(db.Model):
         'Washington DC',
         'West Virginia',
         'Wisconsin',
-    'Wyoming'
+        'Wyoming'
     )
     state = db.StringProperty(verbose_name='State', choices=STATE_CHOICES,
                               default='Maryland', indexed=False)
@@ -1261,7 +1261,7 @@ class DOSRecurr(db.Model):
         return self.dos_base.get_absolute_url()
 
     def get_id(self):
-        return self.key().id_or_name()
+        return -1
 
     def get_starttime(self):
         return self.dos_recurr_datetime
@@ -1288,6 +1288,9 @@ class DOSRecurr(db.Model):
             'dos_repeat_end_date': dos_datetime,
         })
         return form
+
+    def get_clientinfo_key(self):
+        return self.dos_base.get_clientinfo_key()
 
     @staticmethod
     def safe_all(request=None, keys_only=False):
