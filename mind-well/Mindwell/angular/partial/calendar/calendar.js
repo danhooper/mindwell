@@ -10,6 +10,10 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
         $scope.newDOS = {};
         getCalendar().fullCalendar('refetchEvents');
     });
+    $scope.$on('mw-dos-deleted', function() {
+        $scope.newDOS = {};
+        getCalendar().fullCalendar('refetchEvents');
+    });
 
     $scope.dayClick = function(date, jsEvent, view) {
         $scope.newDOS = {
@@ -121,5 +125,9 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
             mindwellUtil.generateProviderInvoicesByDate(start, end);
         }
     };
+
+    $scope.$on('mw-dos-form-cancel', function() {
+        $scope.newDOS = {};
+    });
 
 });

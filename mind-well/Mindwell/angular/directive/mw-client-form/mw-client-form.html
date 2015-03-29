@@ -1,7 +1,7 @@
 <div>
   <form>
     <div class="row">
-      <div class="col-md-4">
+      <div ng-class="{'col-md-4': !mwCompactForm, 'col-md-12': mwCompactForm}">
         <div class="form-group">
           <label>Lastname</label>
           <input ng-model="client.lastname" type="text" class="form-control" id="lastname">
@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-4">
+      <div ng-class="{'col-md-4': !mwCompactForm, 'col-md-12': mwCompactForm}">
         <h3 ng-if="!mwCompactForm">Contact Info</h3>
         <div class="form-group">
           <label>Cell #</label><br/>
@@ -58,7 +58,7 @@
           <input ng-model="client.zipcode" type="text" class="form-control">
         </div>
       </div>
-      <div class="col-md-4">
+      <div ng-class="{'col-md-4': !mwCompactForm, 'col-md-12': mwCompactForm}">
         <h3 ng-if="!mwCompactForm">Other</h3>
         <div class="form-group">
           <label>DOB</label><br/>

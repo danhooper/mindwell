@@ -1,4 +1,4 @@
-angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwellCache, $modal) {
+angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwellCache, $modal, prompt, mindwellUtil) {
     var timeFormat = 'hh:mm a';
     var mwEndTimeFormat = 'hh:mm:ss';
     return {
@@ -127,6 +127,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                 };
 
                 scope.updateDOS = function(newDOS) {
+                    var client;
                     newDOS.dos_datetime_0 = moment(scope.date).format('YYYY-MM-DD');
                     newDOS.dos_datetime_1_time = scope.starttime;
                     newDOS.dos_endtime_time = scope.endtime;
@@ -136,11 +137,12 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
 
                     if (newDOS.id) {
                         newDOS.put().then(function(dos) {
-                            if (scope.client.dosList) {
-                                var idx = _.findIndex(scope.client.dosList, function(oldDos) {
+                            client = _.find(mindwellCache.clients, {id: scope.client.id});
+                            if (client.dosList) {
+                                var idx = _.findIndex(client.dosList, function(oldDos) {
                                     return oldDos.id === dos.id;
                                 });
-                                scope.client.dosList[idx] = dos;
+                                client.dosList[idx] = dos;
                             }
                             scope.$emit('mw-dos-updated', dos);
 
@@ -148,13 +150,23 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
 
                     } else {
                         mindwellRest.dos.post(newDOS).then(function(dos) {
-                            if (scope.mwClient && scope.mwClient.dosList) {
-                                scope.mwClient.dosList.push(dos);
+                            client = _.find(mindwellCache.clients, {id: scope.client.id});
+                            if (client && client.dosList) {
+                                client.dosList.push(dos);
                             }
                             scope.$emit('mw-dos-updated', dos);
                         });
                     }
                 };
+
+                scope.cancel = function() {
+                    scope.$emit('mw-dos-form-cancel');
+                };
+
+                scope.delete = function() {
+                    mindwellUtil.deleteDOS(scope.newDOS, scope.client);
+                };
+
                 scope.addNewClient = function() {
                     $modal.open({
                         templateUrl: 'modals/mw-client-modal/mw-client-modal.html',

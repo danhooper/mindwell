@@ -94,7 +94,7 @@
       </div>
     </div>
   </div>
-  <div class="form-group" ng-if="mwShowReceipt && !blockedTime"">
+  <div class="form-group" ng-if="mwShowReceipt && !blockedTime">
     <label class="col-sm-4 control-label">Print Receipt</label>
     <div class="col-sm-8">
       <input ng-model="newDOS.print_receipt" type="checkbox">
@@ -104,6 +104,8 @@
     <div class="col-sm-8 col-sm-offset-4">
       <button class="btn btn-primary" ng-if="!newDOS.id" ng-click="updateDOS(newDOS)">Add New DOS</button>
       <button class="btn btn-primary" ng-if="newDOS.id" ng-click="updateDOS(newDOS)">Update DOS</button>
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+      <button class="btn btn-danger" ng-if="newDOS.id" ng-click="delete()"><i class="fa fa-trash-o"></i> Delete</button>
     </div>
   </div>
 </div>

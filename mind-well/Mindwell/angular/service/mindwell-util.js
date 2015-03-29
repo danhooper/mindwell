@@ -1,4 +1,4 @@
-angular.module('mindwell').factory('mindwellUtil', function($location, mindwellCache, $rootScope, mindwellRest) {
+angular.module('mindwell').factory('mindwellUtil', function($location, mindwellCache, $rootScope, mindwellRest, prompt) {
 
     var mindwellUtil = {};
 
@@ -61,6 +61,28 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
                 return savedClient;
             });
         }
+    };
+
+    mindwellUtil.deleteDOS = function(dos, client) {
+        return prompt({
+            title: 'Delete DOS?',
+            message: 'Are you sure you want to delete this DOS from ' + dos.dos_datetime + '?'
+        }).then(function() {
+            return dos.remove();
+        }).then(function(dos) {
+            return mindwellCache.getClients();
+        }).then(function(clients) {
+            if (client && client.id) {
+                var updatedClient = _.find(mindwellCache.clients, {id: client.id});
+                if (updatedClient.dosList) {
+                    updatedClient.dosList = _.without(updatedClient.dosList, dos);
+                }
+                return updatedClient.dosList;
+            }
+        }).then(function() {
+            $rootScope.$broadcast('mw-dos-deleted', dos);
+            return dos;
+        });
     };
 
 

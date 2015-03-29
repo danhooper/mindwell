@@ -51,13 +51,7 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
     };
 
     $scope.deleteDOS = function(dos) {
-        prompt({
-            title: 'Delete DOS?',
-            message: 'Are you sure you want to delete this DOS from ' + dos.dos_datetime + '?'
-        }).then(function() {
-            return dos.remove();
-        }).then(function() {
-            $scope.client.dosList = _.without($scope.client.dosList, dos);
+        mindwellUtil.deleteDOS(dos, $scope.client).then(function() {
             $scope.tableParams.reload();
         });
     };

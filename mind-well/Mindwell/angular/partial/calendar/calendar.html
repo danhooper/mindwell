@@ -20,11 +20,11 @@
         </span>
       </div>
     </div>
-    <div ng-class="{'col-md-8': newDOS.dos_datetime, 'col-md-12': !newDOS.dos_datetime}">
+    <div ng-class="{'col-md-7': newDOS.dos_datetime, 'col-md-12': !newDOS.dos_datetime}">
       <div ui-calendar="calConfig" ng-model="eventSources" calendar="mwCalendar"></div>
 
     </div>
-    <div ng-if="newDOS.dos_datetime" class="col-md-4">
+    <div ng-if="newDOS.dos_datetime" class="col-md-5">
       <mw-dos-form ng-model="newDOS" mw-show-client-list="true" mw-client="client" mw-show-add-new-client="true"></mw-dos-form>
     </div>
 
