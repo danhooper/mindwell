@@ -17,7 +17,7 @@
     "grunt-contrib-imagemin": "~0.4",
     "grunt-contrib-less": "~0.8",
     "grunt-contrib-watch": "~0.6",
-    "grunt-browser-output": "0.1.0",
+    "grunt-browser-output": "~1.0.3",
     "load-grunt-tasks": "~0.2",
     "karma": "~0.12.6",
     "grunt-karma": "~0.8.3",

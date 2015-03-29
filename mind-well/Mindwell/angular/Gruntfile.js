@@ -37,13 +37,15 @@ module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
     grunt.loadNpmTasks('grunt-connect-proxy');
     grunt.loadNpmTasks('grunt-connect-rewrite');
+    grunt.loadNpmTasks('grunt-browser-output');
 
     // Project configuration.
     grunt.initConfig({
         connect: {
-            rules: [
-                {from: '^/angular/(.*)$', to: '/$1'}
-            ],
+            rules: [{
+                from: '^/angular/(.*)$',
+                to: '/$1'
+            }],
             options: {
                 port: 10000
             },
@@ -72,6 +74,8 @@ module.exports = function(grunt) {
                 }],
 
             },
+        },
+        browser_output: {
         },
         watch: {
             main: {
@@ -239,7 +243,7 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('build', ['jshint', 'clean:before', 'less', 'dom_munger', 'ngtemplates', 'cssmin', 'concat', 'ngmin', 'uglify', 'copy', 'htmlmin', 'imagemin', 'clean:after']);
-    grunt.registerTask('serve', ['dom_munger:read', 'jshint', 'configureProxies:main', 'configureRewriteRules', 'connect', 'watch']);
+    grunt.registerTask('serve', ['dom_munger:read', 'jshint', 'configureProxies:main', 'configureRewriteRules', 'browser_output', 'connect', 'watch']);
     grunt.registerTask('test', ['dom_munger:read', 'karma:during_watch']);
 
     grunt.event.on('watch', function(action, filepath) {

@@ -14,7 +14,6 @@ angular.module('mindwell').config(function($routeProvider, RestangularProvider) 
 });
 
 angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, mindwellUtil, ipCookie) {
-
     $rootScope.safeApply = function(fn) {
         var phase = $rootScope.$$phase;
         if (phase === '$apply' || phase === '$digest') {
