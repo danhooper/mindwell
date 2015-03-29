@@ -1,5 +1,5 @@
 application: mindwellonline
-version: 3-0-0-20150329-4-angular
+version: 3-0-0-20150329-5-angular
 runtime: python27
 api_version: 1
 threadsafe: false
@@ -19,6 +19,7 @@ handlers:
   static_dir: Mindwell/static
 
 - url: /angular
+  login: required
   static_dir: Mindwell/angular/dist
 
 #- url: /test.*
