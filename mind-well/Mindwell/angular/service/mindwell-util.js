@@ -85,6 +85,10 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
         });
     };
 
+    mindwellUtil.printReceipt = function(dos) {
+        window.open('/Mindwell/' + dos.id + '/dos_receipt/', '_blank');
+    };
+
 
     return mindwellUtil;
 });

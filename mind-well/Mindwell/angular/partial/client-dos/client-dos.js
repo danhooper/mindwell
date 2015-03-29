@@ -128,7 +128,7 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
     });
 
     $scope.printReceipt = function(dos) {
-        window.open('/Mindwell/' + dos.id + '/dos_receipt/', '_blank');
+        mindwellUtil.printReceipt(dos);
     };
 
 

@@ -135,28 +135,31 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                         newDOS.clientinfo = scope.client.id;
                     }
 
-                    if (newDOS.id) {
-                        newDOS.put().then(function(dos) {
-                            client = _.find(mindwellCache.clients, {id: scope.client.id});
+                    mindwellCache.getClients().then(function(clients) {
+                        client = _.find(mindwellCache.clients, {id: scope.client.id});
+                        if (newDOS.id) {
+                            return newDOS.put();
+                        } else {
+                            return mindwellRest.dos.post(newDOS);
+                        }
+                    }).then(function(dos) {
+                        if (newDOS.id) {
                             if (client.dosList) {
                                 var idx = _.findIndex(client.dosList, function(oldDos) {
                                     return oldDos.id === dos.id;
                                 });
                                 client.dosList[idx] = dos;
                             }
-                            scope.$emit('mw-dos-updated', dos);
-
-                        });
-
-                    } else {
-                        mindwellRest.dos.post(newDOS).then(function(dos) {
-                            client = _.find(mindwellCache.clients, {id: scope.client.id});
-                            if (client && client.dosList) {
+                        } else {
+                            if (client.dosList) {
                                 client.dosList.push(dos);
                             }
-                            scope.$emit('mw-dos-updated', dos);
-                        });
-                    }
+                        }
+                        if (newDOS.print_receipt) {
+                            mindwellUtil.printReceipt(dos);
+                        }
+                        scope.$emit('mw-dos-updated', dos);
+                    });
                 };
 
                 scope.cancel = function() {
@@ -166,6 +169,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                 scope.delete = function() {
                     mindwellUtil.deleteDOS(scope.newDOS, scope.client);
                 };
+
 
                 scope.addNewClient = function() {
                     $modal.open({
