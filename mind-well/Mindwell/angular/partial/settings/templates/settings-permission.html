@@ -1,0 +1,70 @@
+<h2>My User Permissions</h2>
+	<div class="mw-my-permissions">
+  The following is a list of users you may act as (assuming they have approved you).
+  <table ng-if="userPermissions.length > 0">
+    <thead>
+      <tr>
+        <th>Permitted User</th>
+        <th>Permission Level</th>
+        <th>User Approved</th>
+        <th>Delete this Request</th>
+      </tr>
+    </thead>
+    <tbody>
+	<tr ng-repeat="permission in userPermissions">
+      <tr>
+        <td>{{permission.permitteduser}}</td>
+        <td>{{permission.permissionlevel}}</td>
+        <td>{{permission.user_approved}}</td>
+        <td><button class="btn btn-danger">Delete</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <div ng-if="userPermissions.length === 0">
+	None
+  </div>
+  </div>
+  
+
+  Fill out the following to make a request:
+  <div>
+  <form>
+	<div class="form-group">
+		<label class="control-label">User Email</label>
+		<input class="form-control mw-settings-input" type="text" ng-model="newPermission.permitteduser">
+	</div> 
+	<div class="form-group">
+		<label class="control-label">Permisson Level</label>
+		  <div>
+			<select class="form-control mw-settings-input" ng-model="newPermission.permissionlevel" ng-options="level as level for level in permissionLevels"></select>
+		  </div>
+	</div>  
+	<div>
+	<button class="btn btn-success" ng-click="saveNewPermissionRequest()">Send Request</button>
+	</div>
+  </div>
+  </form>
+  <h2>Permission Requests</h2>
+  The following is a list of users asking you for permission to act as you.
+  <table ng-if="permissionRequests.length > 0">
+    <thead>
+      <tr>
+        <th>Requesting User</th>
+        <th>Permission Level</th>
+        <th>User Approved</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="permission in permissionRequests">
+        <td>{{permission.userinfo}}</td>
+        <td>{{permission.permissionlevel}}</td>
+        <td><select ng-model="permission.user_approved" ng-options="response as response for response in permissionResponse"></select></td>
+      </tr>
+    </tbody>
+  </table>
+  <button ng-if="permissionRequests.length > 0" class="btn btn-success" ng-click="savePermissionResponse()">Save</button>
+  <div ng-if="permissionRequests.length === 0">
+	None
+  </div>
+  
+</form>

@@ -22,6 +22,13 @@
 @import "partial/calendar/calendar.less";
 @import "directive/mw-client-form/mw-client-form.less";
 @import "modals/mw-client-modal/mw-client-modal.less";
+@import "partial/settings/settings.less";
+@import "partial/reports/reports.less";
+@import "partial/reports/invoices/invoices.less";
+@import "partial/reports/provider-invoices/provider-invoices.less";
+@import "partial/reports/provider-stats/provider-statistics.less";
+@import "directive/mw-invoices-table/mw-invoices-table.less";
+@import "directive/mw-client-dropdown/mw-client-dropdown.less";
 /* Add Component LESS Above */
 
 /* Required for Angular UI Bootstrap */
@@ -36,4 +43,9 @@
 
 body {
     margin-bottom: 20px;
+}
+.form-control.mw-inline-select {
+    display: inline-block;
+    width: auto;
+    margin-left: 10px;
 }

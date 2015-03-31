@@ -118,8 +118,20 @@ urlpatterns += patterns(
     url(r'^Mindwell/rest/logouturl$', 'rest_logouturl', name='rest_logouturl'),
     url(r'^Mindwell/rest/custom_form$', 'rest_custom_form_settings',
         name='rest_custom_form_settings'),
+    url(r'^Mindwell/rest/custom_form/\d+$', 'rest_custom_form_settings',
+        name='rest_custom_form_settings_id'),
     url(r'^Mindwell/rest/calendar_settings$', 'rest_calendar_settings',
+        name='rest_calendar_settings_id'),
+    url(r'^Mindwell/rest/calendar_settings/\d+$', 'rest_calendar_settings',
         name='rest_calendar_settings'),
     url(r'^Mindwell/rest/calendar_feed$', 'rest_calendar_feed',
-        name='rest_calendar_feed')
+        name='rest_calendar_feed'),
+    url(r'^Mindwell/rest/invoice$', 'rest_invoice',
+        name='rest_invoice'),
+    url(r'^Mindwell/rest/invoice_settings$', 'rest_invoice_settings',
+        name='rest_invoice_settings'),
+    url(r'^Mindwell/rest/invoice_settings/\d+$', 'rest_invoice_settings',
+        name='rest_invoice_settings_id'),
+    url(r'^Mindwell/rest/whoami$', 'rest_whoami',
+        name='rest_whoami')
 )

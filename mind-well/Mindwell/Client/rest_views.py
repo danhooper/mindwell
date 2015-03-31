@@ -1,7 +1,9 @@
+import datetime
 import json
 import logging
 
 from django.http import HttpResponse
+from google.appengine.api import users
 from google.appengine.ext import db
 
 import common
@@ -24,11 +26,19 @@ def error_response(form):
 def rest_dos(request):
     if request.method == 'GET':
         dos = models.DOS.safe_all(request=request)
-        clientinfo = request.GET['clientinfo']
+        clientinfo = request.GET.get('clientinfo')
         if clientinfo:
             client = models.ClientInfo.safe_get_by_id(int(clientinfo),
                                                       request=request)
             dos = dos.filter('clientinfo =', client.key())
+        if request.GET.get('start'):
+            dos = dos.filter(
+                'dos_datetime >=',
+                datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'))
+        if request.GET.get('end'):
+            end = datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d')
+            end = end.replace(hour=23, minute=59)
+            dos = dos.filter('dos_datetime <=', end)
         dos = dos.fetch(
             common.get_maximum_num_dos_fetch())
         resp = HttpResponse(json.dumps([d.get_rest() for d in dos]),
@@ -83,7 +93,8 @@ def rest_indiv_dos(request, dos_id):
 
 def rest_clientinfo(request):
     if request.method == 'GET':
-        clients = models.ClientInfo.safe_all(request=request).fetch(
+        clients = models.ClientInfo.safe_all(request=request).filter(
+            'client_status =', 'Active').fetch(
             common.get_maximum_num_dos_fetch())
         resp = HttpResponse(json.dumps([c.get_rest() for c in clients]),
                             content_type="application/json")
@@ -131,35 +142,112 @@ def rest_indiv_client(request, client_id):
         return resp
 
 
-def rest_custom_form_settings(request):
+def rest_invoice(request):
     if request.method == 'GET':
-        cf_settings = models.CustomFormSettings.GetSettings(request=request)
-        return HttpResponse(json.dumps([cf_settings.get_rest()]),
+        invoices = models.Invoice.safe_all(request=request).fetch(
+            common.get_maximum_num_dos_fetch())
+        resp = HttpResponse(json.dumps([i.get_rest() for i in invoices]),
+                            content_type="application/json")
+        return resp
+    elif request.method == 'POST':
+        post_dict = json.loads(request.raw_post_data)
+        form = models.InvoiceForm(post_dict, request=request)
+        if form.is_valid():
+            form_dict = form.cleaned_data
+            try:
+                client = models.ClientInfo.safe_get_by_id(
+                    int(form.cleaned_data['clientinfo']), request=request)
+                form_dict['clientinfo'] = client
+                entity = models.Invoice(**form_dict)
+                view_common.save_entity(request, entity)
+                return HttpResponse(json.dumps(entity.get_rest()),
+                                    content_type='application/json')
+            except ValueError:   # catches calling int on non integer
+                logging.exception('Invalid client')
+        else:
+            logging.error('invoices form is invalid %s' % form)
+            errors = [(k, unicode(v[0]))
+                      for k, v in form.errors.items()]
+            return HttpResponse(json.dumps({'success': False,
+                                            'errors': errors}),
+                                content_type='application/json',
+                                status=404)
+
+
+def generic_rest_singleton(request, model_class, form_class):
+    if request.method == 'GET':
+        instance = model_class.Get(request=request)
+        return HttpResponse(json.dumps([instance.get_rest()]),
                             content_type='application/json')
+    elif request.method == 'POST' or request.method == 'PUT':
+        put_dict = json.loads(request.raw_post_data)
+        form = form_class(put_dict)
+        if form.is_valid():
+            entity = model_class.Get(request)
+            if entity:
+                entity.update_model(form.cleaned_data)
+            else:
+                entity = model_class(**form.cleaned_data)
+            view_common.save_entity(request, entity)
+            return HttpResponse(json.dumps(entity.get_rest()),
+                                content_type='application/json')
+        else:
+            errors = [(k, unicode(v[0]))
+                      for k, v in form.errors.items()]
+            return HttpResponse(json.dumps({'success': False,
+                                            'errors': errors}),
+                                content_type='application/json',
+                                status=404)
+
+
+def rest_custom_form_settings(request):
+    return generic_rest_singleton(
+        request, models.CustomFormSettings, models.CustomFormSettingsForm)
 
 
 def rest_calendar_settings(request):
-    if request.method == 'GET':
-        cal_settings = models.CalendarSettings.Get(request=request)
-        if cal_settings:
-            return HttpResponse(json.dumps([cal_settings.get_rest()]),
-                                content_type='application/json')
-        else:
-            return HttpResponse(json.dumps([]),
-                                content_type='application/json')
+    return generic_rest_singleton(
+        request, models.CalendarSettings, models.CalendarSettingsForm)
 
 
 def rest_calendar_feed(request):
     return calendar_views.calendar_feed(request)
 
 
+def rest_invoice_settings(request):
+    return generic_rest_singleton(
+        request, models.InvoiceSettings, models.InvoiceSettingsForm)
+
+
 def rest_user_perm(request):
     if request.method == 'GET':
         perm_users = context_processors.get_permitted_users(request)
-        perm_users = perm_users['permitted_users']
+        perm_users = [user.get_rest()
+                      for user in perm_users['permitted_users']]
+        their_req = models.UserPermission.get_permission_requests()
+        their_req = [req.get_rest() for req in their_req]
+        my_req = models.UserPermission.safe_all()
+        my_req = [req.get_rest() for req in my_req]
         return HttpResponse(
-            json.dumps([user.get_rest() for user in perm_users]),
+            json.dumps(perm_users + my_req + their_req),
             content_type='application/json')
+    elif request.method == 'POST':
+        post_dict = json.loads(request.raw_post_data)
+        form = models.UserPermissionForm(post_dict)
+        if form.is_valid():
+            form_dict = form.cleaned_data
+            entity = models.UserPermission(**form_dict)
+            view_common.save_entity(request, entity)
+            return HttpResponse(json.dumps(entity.get_rest()),
+                                content_type='application/json')
+        else:
+            logging.error('user permission form is invalid %s' % form)
+            errors = [(k, unicode(v[0]))
+                      for k, v in form.errors.items()]
+            return HttpResponse(json.dumps({'success': False,
+                                            'errors': errors}),
+                                content_type='application/json',
+                                status=404)
 
 
 def rest_logouturl(request):
@@ -168,3 +256,12 @@ def rest_logouturl(request):
             json.dumps(context_processors.get_logout_url(request)),
             content_type='application/json'
         )
+
+
+def rest_whoami(request):
+    if request.method == 'GET':
+        user = users.get_current_user().__dict__
+        logging.info(user)
+        return HttpResponse(
+            models.get_rest(users.get_current_user()),
+            content_type='application/json')

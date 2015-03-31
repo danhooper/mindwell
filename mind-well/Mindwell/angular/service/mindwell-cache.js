@@ -1,4 +1,4 @@
-angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $rootScope, $q) {
+angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $rootScope, $q, Restangular) {
 
     var mindwellCache = {};
 
@@ -18,50 +18,70 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
         mindwellCache._clientsPromise = undefined;
     };
 
-    mindwellCache.customFormPromise = undefined;
+    mindwellCache._customFormPromise = undefined;
     mindwellCache.getCustomForm = function() {
-        if (!mindwellCache.customFormPromise) {
-            mindwellCache.customFormPromise = mindwellRest.customForm.getList().then(function(customForm) {
+        if (!mindwellCache._customFormPromise) {
+            mindwellCache._customFormPromise = mindwellRest.customForm.getList().then(function(customForm) {
                 var defaultForm = {referrer_choices: '', reason_for_visit_choices: ''};
                 mindwellCache.customForm = defaultForm;
                 if (customForm.length === 1) {
                     mindwellCache.customForm = customForm[0];
-                    _.merge(mindwellCache.customForm, defaultForm, function(dest, src) {
-                        if (dest) {
-                            return dest;
-                        }
-                        return src;
-                    });
                 }
                 $rootScope.$emit('mindwell.customFormUpdated');
                 return mindwellCache.customForm;
             });
         }
-        return mindwellCache.customFormPromise;
+        return mindwellCache._customFormPromise;
     };
 
     mindwellCache.clearCustomFormCache = function() {
-        mindwellCache.customFormPromise = undefined;
+        mindwellCache._customFormPromise = undefined;
     };
 
-    mindwellCache.calSettingsPromise = undefined;
+    mindwellCache._calSettingsPromise = undefined;
     mindwellCache.getCalSettings = function() {
-        if (!mindwellCache.calSettingsPromise) {
-            mindwellCache.calSettingsPromise = mindwellRest.calSettings.getList().then(function(calSettings) {
+        if (!mindwellCache._calSettingsPromise) {
+            mindwellCache._calSettingsPromise = mindwellRest.calSettings.getList().then(function(calSettings) {
+                var defaultCalSettings = {display_weekends: 'No', calendar_start_time: '6 am'};
                 if (calSettings.length === 1) {
-                    mindwellCache.calSettings = calSettings[0];
-                } else {
-                    mindwellCache.calSettings = {display_weekends: 'No', calendar_start_time: '6 am'};
+                    if (calSettings[0].display_weekends) {
+                        defaultCalSettings.display_weekends = calSettings[0].display_weekends;
+                    }
+                    if (calSettings[0].calendar_start_time) {
+                        defaultCalSettings.calendar_start_time = calSettings[0].calendar_start_time;
+                    }
                 }
+
+                mindwellCache.calSettings = Restangular.restangularizeElement(null, defaultCalSettings, 'calendar_settings');
                 $rootScope.$emit('mindwell.calSettingsUpdated');
                 return mindwellCache.calSettings;
             });
         }
-        return mindwellCache.calSettingsPromise;
+        return mindwellCache._calSettingsPromise;
     };
 
     mindwellCache.clearCalSettingsCache = function() {
-        mindwellCache.calSettingsPromise = undefined;
+        mindwellCache._calSettingsPromise = undefined;
+    };
+
+    mindwellCache._invoiceSettingsPromise = undefined;
+    mindwellCache.getInvoiceSettings = function() {
+        if (!mindwellCache._invoiceSettingsPromise) {
+            mindwellCache._invoiceSettingsPromise = mindwellRest.invoiceSettings.getList().then(function(invoiceSettings) {
+                if (invoiceSettings.length === 1) {
+                    mindwellCache.invoiceSettings = invoiceSettings[0];
+                } else {
+                    mindwellCache.invoiceSettings = Restangular.restangularizeElement(null, {}, 'invoice_settings');
+                }
+                $rootScope.$emit('mindwell.invoiceSettingsUpdated');
+                return mindwellCache.invoiceSettings;
+            });
+        }
+        return mindwellCache._invoiceSettingsPromise;
+    };
+
+    mindwellCache.clearInvoiceSettingsCache = function() {
+        mindwellCache._calSettingsPromise = undefined;
     };
 
     mindwellCache._userPermPromise = undefined;
@@ -96,9 +116,22 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
         mindwellCache._logoutUrlPromise = undefined;
     };
 
-    mindwellCache.getClients();
-    mindwellCache.getCustomForm();
-    mindwellCache.getCalSettings();
+    mindwellCache._invoicesPromise = undefined;
+    mindwellCache.getInvoices = function() {
+        if (!mindwellCache._invoicesPromise) {
+            mindwellCache._invoicesPromise = mindwellRest.invoice.getList().then(function(invoices) {
+                mindwellCache.invoices = invoices;
+                $rootScope.$emit('mindwell.invoicesUpdated');
+                return mindwellCache.invoices;
+            });
+        }
+        return mindwellCache._invoicesPromise;
+    };
+
+    mindwellCache.clearinvoiceCache = function() {
+        mindwellCache._invoicesPromise = undefined;
+    };
+
     mindwellCache.getUserPerm();
     mindwellCache.getLogoutUrl();
 

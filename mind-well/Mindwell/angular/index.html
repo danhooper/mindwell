@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html ng-app="mindwell">
+
   <head>
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="bower_components/angular-busy/dist/angular-busy.css" rel="stylesheet">
     <link href="bower_components/fullcalendar/dist/fullcalendar.css" rel="stylesheet">
   </head>
+
   <body>
 
     <!-- Livereload script for development only (stripped during dist build) -->
@@ -23,8 +25,8 @@
     </script>
     <script src="bower_components/less.js/dist/less-1.6.2.js" data-concat="false"></script>
     <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/underscore.string/dist/underscore.string.js"></script>
     <script src="bower_components/moment/moment.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
@@ -61,6 +63,14 @@
     <script src="directive/mw-client-form/mw-client-form.js"></script>
     <script src="modals/mw-client-modal/mw-client-modal.js"></script>
     <script src="service/mw-export.js"></script>
+    <script src="partial/settings/settings.js"></script>
+    <script src="partial/reports/reports.js"></script>
+    <script src="partial/reports/invoices/invoices.js"></script>
+    <script src="partial/reports/provider-invoices/provider-invoices.js"></script>
+    <script src="partial/reports/provider-stats/provider-statistics.js"></script>
+    <script src="directive/mw-invoices-table/mw-invoices-table.js"></script>
+    <script src="directive/mw-client-dropdown/mw-client-dropdown.js"></script>
+    <script src="filter/titleize.js"></script>
     <!-- Add New Component JS Above -->
 
     <div>
@@ -77,31 +87,52 @@
           </div>
           <div class="collapse navbar-collapse" id="mindwell-navbar">
             <ul class="nav navbar-nav">
-              <li ng-class="{'active': linkActive.clients}"><a href="/angular/index.html#/client-list">Clients</a></li>
-              <li ng-class="{'active': linkActive.calendar}" ng-click="calendarMenuClicked()"><a href="{{ getCalendarURL() }}">Calendar</a></li>
-              <li><a href="/Mindwell/reports/">Reports</a></li>
-              <li><a href="/Mindwell/settings/">Settings</a></li>
-              <li><a href="{{mindwellCache.logoutUrl.logout_url}}">Logout</a></li>
+              <li ng-class="{'active': $location.path() === '/client-list'}"><a href="/angular/index.html#/client-list">Clients</a>
+              </li>
+              <li ng-class="{'active': $location.path() === '/calendar'}" ng-click="calendarMenuClicked()"><a href="{{ getCalendarURL() }}">Calendar</a>
+              </li>
+              <li dropdown ng-class="{'active': $location.path() === '/reports'}">
+              <a href="" dropdown-toggle>Reports <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li ng-repeat="section in sections.reports">
+                <a href="" ng-click="selectSection('reports', section)">{{section.name}}</a>
+                </li>
+              </ul>
+              </li>
+              <li dropdown ng-class="{'active': $location.path() === '/settings'}">
+              <a href="#" dropdown-toggle>Settings <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li ng-repeat="section in sections.settings">
+                <a href="" ng-click="selectSection('settings', section)">{{section.name}}</a>
+                </li>
+              </ul>
+              </li>
+              <li><a href="{{mindwellCache.logoutUrl.logout_url}}">Logout</a>
+              </li>
               <li class="divider-vertical"></li>
             </ul>
             <form class="navbar-form navbar-left">
               <div class="form-group">
                 <label>Acting as</label>
-                <select class="form-control" name="permitted_user" id="permitted_user"
-                  ng-model="currentUser" ng-change="updateUser()">
+                <select class="form-control" name="permitted_user" id="permitted_user" ng-model="currentUser"
+                  ng-change="updateUser()">
                   <option value="" ng-selected="!currentUser">Self</option>
-                  <option ng-repeat="user in mindwellCache.userPerm" ng-selected="currentUser === user.key" value="{{user.key}}">{{ user.permitteduser }}</option>
+                  <option ng-repeat="user in mindwellCache.userPerm | filter:{user_approved: 'Approved'}:true" ng-selected="currentUser === user.key"
+                  value="{{user.key}}">{{ user.permitteduser }}</option>
                 </select>
               </div>
             </form>
             <form class="navbar-form navbar-right" action="/Mindwell/search/" method="post">
-              <input class="search-query form-control" id="id_search_input" name="search_input" type="text" placeholder="Search for client" onfocus="if(this.value=='Search for client') this.value='';" onblur="if(this.value=='') this.value='Search for client';"/>
+              <input class="search-query form-control" id="id_search_input" name="search_input"
+              type="text" placeholder="Search for client" onfocus="if(this.value=='Search for client') this.value='';"
+              onblur="if(this.value=='') this.value='Search for client';"
+              />
               <input type="hidden" value="Submit" />
             </form>
           </div>
         </div>
       </div>
-      <div id="content" class="container" cg-busy="[ImindwellCache._clientsPromise, busy]">
+      <div id="content" class="container" cg-busy="[mindwellCache._clientsPromise, mindwellCache._invoicesPromise, mindwellCache._userPermPromise, mindwellCache._customFormPromise, mindwellCache._calendarSettingsPromise, busy]">
         <div class="row">
           <div ng-view>
           </div>
@@ -110,4 +141,5 @@
     </div>
 
   </body>
+
 </html>

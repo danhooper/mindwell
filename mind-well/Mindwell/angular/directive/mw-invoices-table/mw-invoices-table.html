@@ -1,0 +1,34 @@
+<div>
+	<table ng-table="tableParams" class="table" show-filter="true">
+        <thead>
+          <tr>
+            <th ng-repeat="column in invoiceTableCols" ng-show="column.visible"
+              class="text-center" ng-class="{
+              'sort-asc': tableParams.isSortBy(column.field, 'asc'),
+              'sort-desc': tableParams.isSortBy(column.field, 'desc'),
+              'sortable': column.title !== 'Actions'
+              }"
+              ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
+              <div>{{column.title}}</div>
+            </th>
+          </tr>
+        </thead>
+        <tr>
+          <td><input type="text" class="form-control" ng-model="filter.text"></td>
+        </tr>
+        <tr ng-repeat="invoice in $data | filter:invoiceFilter">
+          <td ng-repeat="col in invoiceTableCols" sortable="col.field">
+            <span ng-if="col.field === 'clientinfo'">
+              {{getClient(invoice) | clientName}}
+            </span>
+            <span ng-if="col.field === 'all_dos' || col.field === 'attended_only'">
+              <a class="btn btn-default" ng-href="{{getInvoiceURL(invoice, col.field)}}"><i class="fa fa-file-pdf-o"></i> Download Invoice</a>
+            </span>
+            <span ng-if="col.field !== 'clientinfo' && col.field !== 'all_dos && col.field !== attended_only'">
+              {{invoice[col.field]}}
+            </span>
+          </td>
+        </tr>
+      </table>
+
+</div>

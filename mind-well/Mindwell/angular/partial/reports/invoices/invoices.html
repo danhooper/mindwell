@@ -1,0 +1,44 @@
+<div class="col-md-12" ng-controller="InvoicesCtrl">
+  <h2>Generate Customer Invoices</h2>
+  <form>
+    <div class="row form-group">
+      <label class="col-sm-4 control-label">Client</label>
+      <div class="col-sm-4">
+        <select class="form-control" ng-model="client" ng-options="client as client.lastname + ', ' + client.firstname for client in clients | filter: {client_status: '!Inactive'} | orderBy: ['lastname', 'firstname']"></select>
+      </div>
+    </div>
+    <div class="row form-group">
+      <label class="col-sm-4 control-label">Start</label>
+      <div class="col-sm-4 controls">
+        <div class="input-group">
+          <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="genForm.start_date"
+          is-open="startOpened" ng-required="true" close-text="Close">
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="startOpen($event)"><i class="fa fa-calendar"></i></button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="row form-group">
+      <label class="col-sm-4 control-label">End</label>
+      <div class="col-sm-4 controls">
+        <div class="input-group">
+          <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="genForm.end_date"
+          is-open="endOpened" ng-required="true" close-text="Close">
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="endOpen($event)"><i class="fa fa-calendar"></i></button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-success" ng-click="generate()">Generate</button>
+  </form>
+  <br/>
+  <h2>Generated Invoices</h2>
+  <mw-invoices-table ng-model="generatedInvoices"></mw-invoices-table>
+  <div>
+    <h2>All Customer Invoices</h2>
+    <mw-invoices-table ng-model="allInvoices"></mw-invoices-table>
+  </div>
+
+</div>

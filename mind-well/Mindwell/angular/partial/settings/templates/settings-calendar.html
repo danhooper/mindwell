@@ -1,0 +1,15 @@
+<div class="col-xs-4">
+<form>
+	<div class="form-group">
+		<div><label>Display Weekends</label></div>
+		<select class="form-control" ng-model="calendar.display_weekends" ng-options="choice as choice for choice in displayWeekendChoices">
+		</select>
+    </div>
+	<div class="form-group">
+		<div><label>Start Time</label></div>
+		<select class="form-control" ng-model="calendar.calendar_start_time" ng-options="choice as choice for choice in calendarStartTimeChoices">
+		</select>
+    </div>
+	<button class="btn btn-success" ng-click="saveCalendarSettings()">Save</button>
+</form>
+</div>

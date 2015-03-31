@@ -1,0 +1,31 @@
+<form>
+    <div class="form-group">
+        <div>
+            <label>Reason for Visit Choices</label>
+        </div>
+        <textarea ng-model="clientForm.reason_for_visit_choices" class="mw-settings-textarea form-control">
+        </textarea>
+    </div>
+    <div class="form-group">
+        <div>
+            <label>Referrer Choices</label>
+        </div>
+        <textarea ng-model="clientForm.referrer_choices" class="mw-settings-textarea form-control">
+        </textarea>
+    </div>
+    <div class="form-group">
+        <div>
+            <label>Session Type Choices</label>
+        </div>
+        <textarea ng-model="clientForm.session_type_choices" class="mw-settings-textarea form-control">
+        </textarea>
+    </div>
+    <div class="form-group">
+        <div>
+            <label>New Client Script</label>
+        </div>
+        <textarea ng-model="clientForm.new_client_script" class="mw-settings-textarea form-control">
+        </textarea>
+    </div>
+    <button class="btn btn-success" ng-click="saveClientFormSettings()">Save</button>
+</form>

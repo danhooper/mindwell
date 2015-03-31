@@ -17,6 +17,7 @@
         "console": true,
         "$": true,
         "_": true,
+        "s": true,
         "moment": true,
         "describe": true,
         "beforeEach": true,

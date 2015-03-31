@@ -1,0 +1,46 @@
+<div class="col-xs-4">
+<form>
+	<div class="form-group">
+		<div><label>Practice Name</label></div>
+		<textarea ng-model="invoice.practice_name" class="mw-settings-textarea"></textarea>
+    </div>
+	<div class="form-group">
+		<div><label>Header</label></div>
+		<textarea ng-model="invoice.header" class="mw-settings-textarea"></textarea>
+    </div>
+	<div class="form-group">
+		<div><label>Right Header</label></div>
+		<textarea ng-model="invoice.right_header" class="mw-settings-textarea"></textarea>
+    </div>
+	<div class="form-group">
+		<div><label>Footer</label></div>
+		<textarea ng-model="invoice.footer" class="mw-settings-textarea"></textarea>
+	</div>
+	<button class="btn btn-success" ng-click="saveInvoiceSettings()">Save</button>
+</form>
+</div>
+<div class="col-xs-8">
+	<h2>Preview</h2>
+	<div class="row">
+		<div class="col-xs-12 text-center">
+		<h2>{{invoice.practice_name}}</h2>
+		<div>{{invoice.header}}</div>
+		</div>
+		
+	</div>
+	<div class="row">
+		<div class="col-xs-12 text-right">{{invoice.right_header}}</div>
+	</div>
+	<div class="row">
+		Client Information
+	<table class="table">
+		<tr><td> </td><td> </td></tr>
+		<tr><td> </td><td> </td></tr>
+		<tr><td> </td><td> </td></tr>
+		<tr><td> </td><td> </td></tr>
+	</table>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 text-center">{{invoice.footer}}</div>
+	</div>
+</div>

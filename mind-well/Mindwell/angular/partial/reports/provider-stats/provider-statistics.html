@@ -1,0 +1,25 @@
+<div class="col-md-12" ng-controller="ProviderStatisticsCtrl">
+  <h2>Provider Statistics</h2>
+  <div class="row form-group">
+    <label class="control-label">Pick a year</label>
+    <select ng-model="year" ng-options="opt.text as opt.value for opt in years"  class="form-control mw-inline-select" ng-change="onYearSelect()"></select>
+  </div>
+  <div class="row">
+    <div class="col-md-6" ng-if="DOSStats.length > 0">
+      <table ng-table="tableParams" class="table">
+        <tbody>
+          <tr>
+            <td ng-repeat="col in dosStatsCols">
+              <div>{{col.title}}</div>
+            </td>
+          </tr>
+          <tr ng-repeat="stat in DOSStats">
+            <td ng-repeat="col in dosStatsCols">
+              <span>{{stat[col.field]}}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

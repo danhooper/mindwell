@@ -23,8 +23,8 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                     };
                     scope.dob = {};
                 }
-                mindwellCache.getCustomForm().then(function(customForm) {
-                    scope.customForm = customForm;
+                mindwellCache.getCustomForm().then(function() {
+                    scope.customForm = mindwellCache.customForm;
                 });
 
                 scope.messageOptions = [{
@@ -247,7 +247,7 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                         controller: 'MultiSelectCtrl',
                         resolve: {
                             choices: function() {
-                                return scope.customForm.referrer_choices.split('\r\n');
+                                return scope.customForm.referrer_choices.split('\n');
                             },
                             currValue: function() {
                                 return scope.client.referrer;
@@ -266,7 +266,7 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                         controller: 'MultiSelectCtrl',
                         resolve: {
                             choices: function() {
-                                return scope.customForm.reason_for_visit_choices.split('\r\n');
+                                return scope.customForm.reason_for_visit_choices.split('\n');
                             },
                             currValue: function() {
                                 return scope.client.reason_for_visit;

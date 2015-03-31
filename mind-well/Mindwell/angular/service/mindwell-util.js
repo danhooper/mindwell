@@ -208,6 +208,12 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
         title: 'Adjustment'
     }];
 
+    mindwellUtil.getInvoiceURL = function(invoice, type) {
+        return '/Mindwell/' + invoice.id + '/' + type + '/invoice_display/';
+    };
+    mindwellUtil.openInvoice = function(invoice, type) {
+        window.open('/Mindwell/' + invoice.id + '/' + type + '/invoice_display/');
+    };
 
     return mindwellUtil;
 });

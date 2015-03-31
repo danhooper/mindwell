@@ -14,6 +14,21 @@ angular.module('mindwell').config(function($routeProvider, RestangularProvider) 
     $routeProvider.when('/calendar', {
         templateUrl: 'partial/calendar/calendar.html'
     });
+    $routeProvider.when('/settings', {
+        templateUrl: 'partial/settings/settings.html'
+    });
+    $routeProvider.when('/reports', {
+        templateUrl: 'partial/reports/reports.html'
+    });
+    $routeProvider.when('/reports/invoices', {
+        templateUrl: 'partial/reports/invoices/invoices.html'
+    });
+    $routeProvider.when('/reports/provider-invoices', {
+        templateUrl: 'partial/reports/provider-invoices/provider-invoices.html'
+    });
+    $routeProvider.when('/reports/provider-stats', {
+        templateUrl: 'partial/reports/provider-stats/provider-statistics.html'
+    });
     /* Add New Routes Above */
     $routeProvider.otherwise({
         redirectTo: '/client-list'
@@ -30,7 +45,7 @@ angular.module('mindwell').config(function($routeProvider, RestangularProvider) 
 
 });
 
-angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, mindwellUtil, ipCookie) {
+angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, mindwellUtil, ipCookie, $location) {
     $rootScope.safeApply = function(fn) {
         var phase = $rootScope.$$phase;
         if (phase === '$apply' || phase === '$digest') {
@@ -74,5 +89,49 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, min
         });
     };
 
+    $rootScope.sections = {
+        settings: [{
+            name: 'Invoice Settings',
+            template: 'partial/settings/templates/settings-invoice.html'
+        }, {
+            name: 'Calendar Settings',
+            template: 'partial/settings/templates/settings-calendar.html'
+        }, {
+            name: 'Permission Settings',
+            template: 'partial/settings/templates/settings-permission.html'
+        }, {
+            name: 'Client Form Settings',
+            template: 'partial/settings/templates/settings-client-form.html'
+        }],
+        reports: [{
+            name: 'Customer Invoices',
+            template: 'partial/reports/invoices/invoices.html'
+        }, {
+            name: 'Provider Invoices',
+            template: 'partial/reports/provider-invoices/provider-invoices.html'
+        }, {
+            name: 'Provider Statistics',
+            template: 'partial/reports/provider-stats/provider-statistics.html'
+        }]
+    };
+    $rootScope.selectSection = function(path, section) {
+        $location.path(path);
+        $location.search('section', section.name);
+        $rootScope.activeSection = section;
+    };
+    var activeSection;
+    if ($location.path() === '/settings') {
+        activeSection = _.find($rootScope.sections.settings, {
+            name: $location.search()['section']
+        });
+        $rootScope.selectSection('settings', activeSection ? activeSection : $rootScope.sections.settings[0]);
+    }
+    if ($location.path() === '/reports') {
+        activeSection = _.find($rootScope.sections.reports, {
+            name: $location.search()['section']
+        });
+        $rootScope.selectSection('reports', activeSection ? activeSection : $rootScope.sections.reports[0]);
+    }
+    $rootScope.$location = $location;
 
 });

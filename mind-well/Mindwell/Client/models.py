@@ -1403,6 +1403,9 @@ class Invoice(db.Model):
     def safe_get_by_id(ids, request=None, parent=None):
         return global_get_by_id(Invoice, ids, request=request, parent=None)
 
+    def get_rest(self):
+        return get_rest(self)
+
 
 class InvoiceForm(forms.Form):
     this_year = datetime.date.today().year
@@ -1454,10 +1457,16 @@ class InvoiceSettings(db.Model):
             settings = InvoiceSettings.safe_all(request=request)[0]
             return settings
         except IndexError:
-            return None
+            return InvoiceSettings()
 
     def get_saved_url(self):
         return reverse('updated_invoice_settings', kwargs={'update': 'update'})
+
+    def get_id(self):
+        return str(self.key().id_or_name())
+
+    def get_rest(self):
+        return get_rest(self)
 
 
 class InvoiceSettingsForm(forms.Form):
@@ -1587,14 +1596,14 @@ class CalendarSettings(db.Model):
         try:
             return CalendarSettings.safe_all()[0]
         except IndexError:
-            return None
+            return CalendarSettings()
 
     @staticmethod
     def Get(request=None):
         try:
             return CalendarSettings.safe_all()[0]
         except IndexError:
-            return None
+            return CalendarSettings()
 
     @staticmethod
     def GetDisplayWeekend(calendar_settings):
