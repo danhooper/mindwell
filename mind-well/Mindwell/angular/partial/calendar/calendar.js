@@ -136,4 +136,8 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
         $scope.newDOS = {};
     });
 
+    $scope.$on('mw-change-user', function() {
+        getCalendar().fullCalendar('refetchEvents');
+    });
+
 });

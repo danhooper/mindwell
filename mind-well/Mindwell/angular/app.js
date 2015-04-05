@@ -45,6 +45,7 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, min
             $rootScope.getClientsPromise = mindwellCache.getClients();
             mindwellCache.clearCustomFormCache();
             mindwellCache.getCustomForm();
+            $rootScope.$broadcast('mw-change-user');
         });
     };
 
