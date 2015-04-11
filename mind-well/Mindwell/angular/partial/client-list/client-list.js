@@ -21,7 +21,7 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
 
         });
     };
-    $scope.search = $location.search().search;
+    $scope.clientFilter = {text: $location.search().search};
     $rootScope.$on('mindwell.clientsUpdated', function() {
         buildClientLetters();
         $scope.tableParams.reload();
@@ -48,9 +48,7 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
         counts: [],
         getData: function($defer, params) {
             mindwellCache.getClients().then(function() {
-                var orderedData = params.filter() ?
-                    $filter('filter')(mindwellCache.clients, params.filter()) :
-                    mindwellCache.clients;
+                var orderedData = mindwellCache.clients;
                 orderedData = params.sorting() ?
                     $filter('orderBy')(orderedData, params.orderBy()) :
                     orderedData;
@@ -58,9 +56,6 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
                     orderedData = _.filter(orderedData, function(client) {
                         return letterMatchesLastname(client, $scope.currentLetter.letter);
                     });
-                }
-                if ($location.search().search) {
-                    orderedData = $filter('filter')(orderedData, $location.search().search);
                 }
                 $scope.calcBalance(true);
                 $defer.resolve(orderedData);
@@ -105,6 +100,7 @@ angular.module('mindwell').controller('ClientListCtrl', function($scope, $rootSc
     $scope.showAll = function() {
         $location.search('search', null);
         $scope.filterByLetter({});
+        $scope.clientFilter.text = '';
     };
 
     $scope.clientDos = function(client) {

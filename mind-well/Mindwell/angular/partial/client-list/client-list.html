@@ -19,8 +19,9 @@
   </div>
   <div class="row">
     <table ng-table="tableParams" class="table" show-filter="true">
-      <tr ng-repeat="client in $data" class="mw-client-row">
-        <td data-title="'Name'" sortable="'lastname'" filter="{ 'lastname': 'text'}">
+      <tr><td><input type="text" ng-model="clientFilter.text" class="form-control"></td></tr>
+      <tr ng-repeat="client in $data | filter:{$:clientFilter.text}" class="mw-client-row">
+        <td data-title="'Name'" sortable="'lastname'">
           <a href ng-click="clientDos(client)">{{client | clientName}}</a>
         </td>
         <td data-title="'Actions'">
