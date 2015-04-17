@@ -24,10 +24,13 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                 scope.blockedTime = false;
                 scope.blockedTimeChange = function() {
                     scope.blockedTime = !scope.blockedTime;
+                    if (scope.blockedTime) {
+                        scope.client = undefined;
+                    }
                 };
                 mindwellCache.getClients().then(function() {
                     scope.clients = mindwellCache.clients;
-                    if (scope.mwClient) {
+                    if (scope.mwClient && scope.mwClient !== 0) {
                         scope.client = _.find(mindwellCache.clients, {
                             id: scope.mwClient.id
                         });
@@ -131,6 +134,9 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     newDOS.dos_endtime_time = scope.endtime;
                     if (scope.client) {
                         newDOS.clientinfo = scope.client.id;
+                    } else {
+                        // to clear the zero for clientinfo in blocked DOS
+                        newDOS.clientinfo = undefined;
                     }
                     var savedDOS;
 

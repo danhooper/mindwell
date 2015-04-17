@@ -959,7 +959,7 @@ class DOS(db.Model):
         if self.get_clientinfo():
             uni = self.clientinfo.__unicode__()
         else:
-            uni = ''
+            uni = ' '
         return uni
 
     def get_clientinfo(self):
