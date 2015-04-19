@@ -61,7 +61,7 @@ class Test_DOS(mock_common.MockAppEngineTest):
         self.assertTrue(dos.get_blocked_time())
         self.assertFalse(dos.get_clientinfo_key())
         self.assertTrue(dos.getallfields_inc_hidden())
-        self.assertFalse(unicode(dos))
+        self.assertEqual(unicode(dos), u' ')
         self.assertTrue(dos.get_class_name())
         self.assertTrue(dos.get_background_color())
         self.assertTrue(dos.get_text_color())
