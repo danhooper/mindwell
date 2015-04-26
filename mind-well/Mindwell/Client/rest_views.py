@@ -82,7 +82,8 @@ def rest_indiv_dos(request, dos_id):
 
 def rest_clientinfo(request):
     if request.method == 'GET':
-        clients = models.ClientInfo.safe_all(request=request).fetch(
+        clients = models.ClientInfo.safe_all(request=request).filter(
+            'client_status =', 'Active').fetch(
             common.get_maximum_num_dos_fetch())
         resp = HttpResponse(json.dumps([c.get_rest() for c in clients]),
                             content_type="application/json")
