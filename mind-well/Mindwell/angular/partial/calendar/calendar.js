@@ -88,11 +88,14 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
         },
         timeFormat: 'h:mm',
         eventRender: function(event, element) {
+            var fields = [];
             if (event.title && event.title.length > 0) {
-                $('.fc-title', element).html(event.title + '<br>' + event.note);
-            } else {
-                $('.fc-title', element).html('&nbsp;<br>' + event.note);
+                fields.push(event.title);
             }
+            if (event.note && event.note.length > 0) {
+                fields.push(event.note);
+            }
+            $('.fc-title', element).html(fields.join('<br/>'));
         }
     };
 

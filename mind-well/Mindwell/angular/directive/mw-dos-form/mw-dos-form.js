@@ -34,7 +34,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                         scope.client = _.find(mindwellCache.clients, {
                             id: scope.mwClient.id
                         });
-                    } else if (scope.mwShowClientList && scope.newDOS.id) {
+                    } else if (scope.mwShowClientList) {
                         scope.blockedTime = true;
                     }
                 });
