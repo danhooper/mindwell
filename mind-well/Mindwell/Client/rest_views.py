@@ -26,7 +26,7 @@ def rest_dos(request):
         return resp
     elif request.method == 'POST':
         post_dict = json.loads(request.raw_post_data)
-        form = models.DOSForm(post_dict)
+        form = models.DOSForm(post_dict, request=request)
         if form.is_valid():
             try:
                 client = models.ClientInfo.safe_get_by_id(
@@ -55,7 +55,7 @@ def rest_indiv_dos(request, dos_id):
         return resp
     elif request.method == 'PUT':
         put_dict = json.loads(request.raw_post_data)
-        form = models.DOSForm(put_dict)
+        form = models.DOSForm(put_dict, request=request)
         if form.is_valid():
             try:
                 client = models.ClientInfo.safe_get_by_id(
