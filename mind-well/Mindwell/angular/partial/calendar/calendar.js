@@ -94,6 +94,8 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
             }
             if (event.note && event.note.length > 0) {
                 fields.push(event.note);
+            } else {
+                fields.push('&nbsp;');
             }
             $('.fc-title', element).html(fields.join('<br/>'));
         }
