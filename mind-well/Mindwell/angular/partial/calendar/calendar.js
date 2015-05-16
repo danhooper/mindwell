@@ -151,4 +151,11 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
         getCalendar().fullCalendar('refetchEvents');
     });
 
+    $scope.$on('$locationChangeStart', function(event) {
+        if (!_.isEmpty($scope.newDOS)) {
+            event.preventDefault();
+            $scope.newDOS = {};
+        }
+    });
+
 });
