@@ -13,6 +13,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
         },
         templateUrl: 'directive/mw-dos-form/mw-dos-form.html',
         link: function(scope, element, attrs, ngModel) {
+            scope.dosFormat = 'yyyy-MM-dd';
             ngModel.$render = function() {
                 scope.newDOS = ngModel.$modelValue;
                 if (!scope.newDOS.id) {
@@ -40,6 +41,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     }
                 });
                 scope.date = moment(scope.newDOS.dos_datetime).toDate();
+                scope.date = new Date(scope.date.getTime() + scope.date.getTimezoneOffset() * 60000);
                 if (scope.newDOS.dos_datetime) {
                     scope.starttime = moment(scope.newDOS.dos_datetime).format(timeFormat);
                     scope.endtime = moment(scope.newDOS.dos_endtime, mwEndTimeFormat).format(timeFormat);
