@@ -43,7 +43,8 @@ def rest_dos(request):
                       for k, v in form.errors.items()]
             return HttpResponse(json.dumps({'success': False,
                                             'errors': errors}),
-                                content_type='application/json')
+                                content_type='application/json',
+                                status=403)
 
 
 def rest_indiv_dos(request, dos_id):
@@ -73,7 +74,7 @@ def rest_indiv_dos(request, dos_id):
             return HttpResponse(json.dumps({'success': False,
                                             'errors': errors}),
                                 content_type='application/json',
-                                status=404)
+                                status=403)
     elif request.method == 'DELETE':
         dos.delete()
         resp = HttpResponse('', content_type='application/json')
@@ -101,7 +102,7 @@ def rest_clientinfo(request):
             return HttpResponse(json.dumps({'success': False,
                                             'errors': errors}),
                                 content_type='application/json',
-                                status=404)
+                                status=403)
 
 
 def rest_indiv_client(request, client_id):
