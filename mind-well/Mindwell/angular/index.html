@@ -76,7 +76,7 @@
           <div class="collapse navbar-collapse" id="mindwell-navbar">
             <ul class="nav navbar-nav">
               <li ng-class="{'active': linkActive.clients}"><a href="/angular/index.html#/client-list">Clients</a></li>
-              <li ng-class="{'active': linkActive.calendar}"><a href="{{ getCalendarURL() }}">Calendar</a></li>
+              <li ng-class="{'active': linkActive.calendar}" ng-click="calendarMenuClicked()"><a href="{{ getCalendarURL() }}">Calendar</a></li>
               <li><a href="/Mindwell/reports/">Reports</a></li>
               <li><a href="/Mindwell/settings/">Settings</a></li>
               <li><a href="{{mindwellCache.logoutUrl.logout_url}}">Logout</a></li>

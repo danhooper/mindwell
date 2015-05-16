@@ -125,6 +125,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
 
     $scope.toggleWeekends = function() {
         $scope.calConfig.weekends = !$scope.calConfig.weekends;
+        $scope.calConfig.defaultView = getCalendar().fullCalendar('getView').name;
     };
 
 
@@ -140,6 +141,9 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     };
 
     $scope.$on('mw-dos-form-cancel', function() {
+        $scope.newDOS = {};
+    });
+    $scope.$on('mw.calendarMenuClicked', function() {
         $scope.newDOS = {};
     });
 
