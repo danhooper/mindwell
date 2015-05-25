@@ -226,6 +226,7 @@ module.exports = function(grunt) {
                 files: [ //this files data is also updated in the watch handler, if updated change there too
                     '<%= dom_munger.data.appjs %>',
                     'bower_components/angular-mocks/angular-mocks.js',
+                    'service/mw-test-common.js',
                     createFolderGlobs('*-spec.js')
                 ],
                 logLevel: 'ERROR',
