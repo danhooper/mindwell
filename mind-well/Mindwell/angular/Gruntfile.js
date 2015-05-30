@@ -11,7 +11,7 @@ var rewriteRulesSnippet = require('grunt-connect-rewrite/lib/utils').rewriteRequ
 //This enables users to create any directory structure they desire.
 var createFolderGlobs = function(fileTypePatterns) {
     fileTypePatterns = Array.isArray(fileTypePatterns) ? fileTypePatterns : [fileTypePatterns];
-    var ignore = ['node_modules', 'bower_components', 'dist', 'temp'];
+    var ignore = ['node_modules', 'bower_components', 'dist', 'temp', 'coverage'];
     var fs = require('fs');
     return fs.readdirSync(process.cwd())
         .map(function(file) {

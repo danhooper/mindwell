@@ -72,6 +72,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
             center: 'title',
             right: 'month,agendaWeek,agendaDay'
         },
+        height: 'auto',
         defaultEventMinutes: 15,
         defaultView: 'agendaWeek',
         editable: false,
