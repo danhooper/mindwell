@@ -31,6 +31,11 @@ var createFolderGlobs = function(fileTypePatterns) {
         .concat(fileTypePatterns);
 };
 
+var coverageDir = function(browser) {
+    return browser.toLowerCase().split(/[ /-]/)[0];
+};
+
+
 module.exports = function(grunt) {
 
     // load all grunt tasks
@@ -75,8 +80,7 @@ module.exports = function(grunt) {
 
             },
         },
-        browser_output: {
-        },
+        browser_output: {},
         watch: {
             main: {
                 options: {
@@ -241,10 +245,10 @@ module.exports = function(grunt) {
                     'partial/**/*.js': ['coverage'],
                     'service/**/*.js': ['coverage']
                 },
-                coverageReport: {
-                    reporters: [
-                        {type: 'html', dir: 'coverage'}
-                    ]
+                coverageReporter: {
+                    type: 'lcov',
+                    dir: 'coverage',
+                    subdir: coverageDir
                 },
                 ngHtml2JsPreprocessor: {
                     moduleName: 'templates'
