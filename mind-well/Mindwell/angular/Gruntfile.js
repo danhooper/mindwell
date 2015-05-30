@@ -230,9 +230,20 @@ module.exports = function(grunt) {
                     createFolderGlobs('*-spec.js')
                 ],
                 logLevel: 'ERROR',
-                reporters: ['mocha'],
+                reporters: ['mocha', 'coverage'],
                 autoWatch: false, //watching is handled by grunt-contrib-watch
-                singleRun: true
+                singleRun: true,
+                preprocessors: {
+                    'directive/**/*.js': ['coverage'],
+                    'filter/**/*.js': ['coverage'],
+                    'partial/**/*.js': ['coverage'],
+                    'service/**/*.js': ['coverage']
+                },
+                coverageReport: {
+                    reporters: [
+                        {type: 'html', dir: 'coverage'}
+                    ]
+                }
             },
             all_tests: {
                 browsers: ['PhantomJS', 'Chrome', 'Firefox']
