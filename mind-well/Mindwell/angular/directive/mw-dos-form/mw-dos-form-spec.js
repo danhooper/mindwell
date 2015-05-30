@@ -15,8 +15,8 @@ describe('mwDosForm', function() {
 
     it('should create a form', function() {
 
-            var element = compile('<mw-dos-form ng-model="dos"></mw-dos-form>')(scope);
-            scope.$digest();
-            expect(element.find('form').length).toEqual(1);
+        var element = compile('<mw-dos-form ng-model="dos"></mw-dos-form>')(scope);
+        scope.$digest();
+        expect(element.find('form').length).toEqual(1);
     });
 });

@@ -1,23 +1,22 @@
 describe('mwClientForm', function() {
+    beforeEach(module('mindwell'));
+    beforeEach(module('templates'));
 
-  beforeEach(module('mindwell'));
+    var scope, compile, mwTestCommon;
 
-  var scope,compile;
+    beforeEach(inject(function($rootScope, $compile, _mwTestCommon_) {
+        mwTestCommon = _mwTestCommon_;
+        mwTestCommon.init();
+        scope = $rootScope.$new();
+        scope.client = {};
+        compile = $compile;
+    }));
 
-  beforeEach(inject(function($rootScope,$compile) {
-    scope = $rootScope.$new();
-    compile = $compile;
-  }));
+    it('should create a form', function() {
 
-  it('should ...', function() {
+        var element = compile('<mw-client-form ng-model="client"></mw-client-form>')(scope);
+        scope.$digest();
+        expect(element.find('form').length).toEqual(1);
 
-    /* 
-    To test your directive, you need to create some html that would use your directive,
-    send that through compile() then compare the results.
-
-    var element = compile('<div mydirective name="name">hi</div>')(scope);
-    expect(element.text()).toBe('hello, world');
-    */
-
-  });
+    });
 });
