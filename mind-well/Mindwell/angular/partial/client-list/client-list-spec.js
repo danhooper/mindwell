@@ -1,18 +1,20 @@
 describe('ClientListCtrl', function() {
 
-	beforeEach(module('mindwell'));
+    beforeEach(module('mindwell'));
 
-	var scope,ctrl;
+    var scope, ctrl, mwTestCommon;
 
-    beforeEach(inject(function($rootScope, $controller) {
-      scope = $rootScope.$new();
-      ctrl = $controller('ClientListCtrl', {$scope: scope});
-    }));	
+    beforeEach(inject(function($rootScope, $controller, _mwTestCommon_) {
+        mwTestCommon = _mwTestCommon_;
+        mwTestCommon.init();
+        scope = $rootScope.$new();
+        ctrl = $controller('ClientListCtrl', {
+            $scope: scope
+        });
+    }));
 
-	it('should ...', inject(function() {
-
-		expect(1).toEqual(1);
-		
-	}));
+    it('should ...', inject(function() {
+        scope.$digest();
+    }));
 
 });
