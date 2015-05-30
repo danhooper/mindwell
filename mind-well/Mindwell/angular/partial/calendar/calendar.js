@@ -1,4 +1,7 @@
-angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil, $timeout, $rootScope, $location) {
+angular.module('mindwell').controller('CalendarCtrl', function(
+    $scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil,
+    $timeout, $rootScope, $location) {
+
     $scope.newDOS = {};
 
     $rootScope.linkActive = {calendar:  true};
@@ -112,7 +115,7 @@ angular.module('mindwell').controller('CalendarCtrl', function($scope, mindwellC
     var eventsFunc = function(start, end, timezone, callback) {
         start = start.format('YYYY-MM-DD');
         end = end.format('YYYY-MM-DD');
-        mindwellRest.calEvents.getList({
+        $rootScope.busy = mindwellRest.calEvents.getList({
             'start': start,
             'end': end
         }).then(function(events) {
