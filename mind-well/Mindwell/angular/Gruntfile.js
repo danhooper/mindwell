@@ -227,13 +227,15 @@ module.exports = function(grunt) {
                     '<%= dom_munger.data.appjs %>',
                     'bower_components/angular-mocks/angular-mocks.js',
                     'service/mw-test-common.js',
-                    createFolderGlobs('*-spec.js')
+                    createFolderGlobs('*-spec.js'),
+                    'directive/**/*.html'
                 ],
                 logLevel: 'ERROR',
                 reporters: ['mocha', 'coverage'],
                 autoWatch: false, //watching is handled by grunt-contrib-watch
                 singleRun: true,
                 preprocessors: {
+                    'directive/**/*.html': ['ng-html2js'],
                     'directive/**/*.js': ['coverage'],
                     'filter/**/*.js': ['coverage'],
                     'partial/**/*.js': ['coverage'],
@@ -243,6 +245,9 @@ module.exports = function(grunt) {
                     reporters: [
                         {type: 'html', dir: 'coverage'}
                     ]
+                },
+                ngHtml2JsPreprocessor: {
+                    moduleName: 'templates'
                 }
             },
             all_tests: {
