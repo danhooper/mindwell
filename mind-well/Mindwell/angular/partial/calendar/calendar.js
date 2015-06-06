@@ -101,7 +101,7 @@ angular.module('mindwell').controller('CalendarCtrl', function(
             } else {
                 fields.push('&nbsp;');
             }
-            $('.fc-title', element).html(fields.join('<br/>'));
+            $('.fc-title', element).html(fields.join('<br>'));
         }
     };
 
