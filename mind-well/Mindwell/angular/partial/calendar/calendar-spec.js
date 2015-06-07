@@ -45,17 +45,14 @@ describe('CalendarCtrl', function() {
         expect(element.html()).toContain('note');
     }));
 
-    //it('should put a DOS on scope when an event is clicked', function(done) {
-    //    inject(function($q, $httpBackend) {
-    //        expect(Object.keys(scope.newDOS).length).toEqual(0);
-    //        scope.eventClick({
-    //            clientinfo: 1,
-    //            id: 2
-    //        });
-    //        mwTestCommon.$httpBackend.flush();
-    //        expect(Object.keys(scope.newDOS).length).toBeGreaterThan(0);
-    //        done();
-    //    });
-    //});
+    it('should put a DOS on scope when an event is clicked', inject(function($q, $httpBackend) {
+        expect(Object.keys(scope.newDOS).length).toEqual(0);
+        scope.eventClick({
+            clientinfo: 1,
+            id: 2
+        });
+        mwTestCommon.$httpBackend.flush();
+        expect(Object.keys(scope.newDOS).length).toBeGreaterThan(0);
+    }));
 
 });
