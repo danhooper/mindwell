@@ -12,8 +12,9 @@ describe('ClientDosCtrl', function() {
         });
     }));
 
-    it('should ...', inject(function() {
+    it('should run with no problems', inject(function() {
         scope.$digest();
+        mwTestCommon.$httpBackend.flush();
     }));
 
 });
