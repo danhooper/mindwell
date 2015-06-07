@@ -14,7 +14,19 @@ describe('ClientListCtrl', function() {
     }));
 
     it('should ...', inject(function() {
-        scope.$digest();
+        scope.$apply();
+        scope.tableParams.settings().$scope = scope;
+        mwTestCommon.$httpBackend.flush();
+    }));
+
+    it('build a list letters for clients lastnames', inject(function() {
+        scope.$apply();
+        scope.tableParams.settings().$scope = scope;
+        mwTestCommon.$httpBackend.flush();
+        // no client data so no links should be set
+        _.each(scope.clientLetters, function(letterObj) {
+            expect(letterObj.link).toBeUndefined();
+        });
     }));
 
 });
