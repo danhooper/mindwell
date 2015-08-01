@@ -1,10 +1,12 @@
 angular.module('mindwell').controller('CalendarCtrl', function(
     $scope, mindwellCache, uiCalendarConfig, mindwellRest, mindwellUtil,
-    $timeout, $rootScope, $location) {
+    $timeout, $rootScope, $location, $compile, $sce) {
 
     $scope.newDOS = {};
 
-    $rootScope.linkActive = {calendar:  true};
+    $rootScope.linkActive = {
+        calendar: true
+    };
 
     var getCalendar = function() {
         return uiCalendarConfig.calendars.mwCalendar;
@@ -28,15 +30,24 @@ angular.module('mindwell').controller('CalendarCtrl', function(
 
     $scope.eventClick = function(event, jsEvent) {
         mindwellCache.getClients().then(function() {
-            $scope.client = _.find(mindwellCache.clients, {id: event.clientinfo});
+            $scope.client = _.find(mindwellCache.clients, {
+                id: event.clientinfo
+            });
             if ($scope.client && $scope.client.dosList) {
-                return _.find($scope.client.dosList, {id: event.id});
-            } else if (event.id !== -1){
+                return _.find($scope.client.dosList, {
+                    id: event.id
+                });
+            } else if (event.id !== -1) {
                 return mindwellRest.dos.get(event.id);
             }
         }).then(function(dos) {
             if (!dos) {
-                dos = {dos_datetime: event.start, dos_endtime: event.end, clientinfo: event.clientinfo, recurrId: event.recurrId};
+                dos = {
+                    dos_datetime: event.start,
+                    dos_endtime: event.end,
+                    clientinfo: event.clientinfo,
+                    recurrId: event.recurrId
+                };
             }
             $scope.newDOS = dos;
         });
@@ -102,6 +113,12 @@ angular.module('mindwell').controller('CalendarCtrl', function(
                 fields.push('&nbsp;');
             }
             $('.fc-title', element).html(fields.join('<br>'));
+            $timeout(function() {
+                $(element).attr({
+                    'tooltip-html-unsafe': $sce.trustAsHtml(event.description)
+                });
+                $compile(element)($scope);
+            });
         }
     };
 
