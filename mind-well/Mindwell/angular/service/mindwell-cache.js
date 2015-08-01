@@ -26,7 +26,12 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
                 mindwellCache.customForm = defaultForm;
                 if (customForm.length === 1) {
                     mindwellCache.customForm = customForm[0];
-                    _.merge(mindwellCache.customForm, defaultForm);
+                    _.merge(mindwellCache.customForm, defaultForm, function(dest, src) {
+                        if (dest) {
+                            return dest;
+                        }
+                        return src;
+                    });
                 }
                 $rootScope.$emit('mindwell.customFormUpdated');
                 return mindwellCache.customForm;
