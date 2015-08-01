@@ -3411,7 +3411,7 @@ class BulkTransporterApp(object):
     self.input_generator_factory = input_generator_factory
     self.num_threads = arg_dict['num_threads']
     self.email = arg_dict['email']
-    self.passin = arg_dict['passin']
+    self.passin = False
     self.dry_run = arg_dict['dry_run']
     self.throttle_class = arg_dict['throttle_class']
     self.throttle = throttle
@@ -4142,7 +4142,7 @@ def _PerformBulkload(arg_dict,
   exporter_opts = arg_dict['exporter_opts']
   mapper_opts = arg_dict['mapper_opts']
   email = arg_dict['email']
-  passin = arg_dict['passin']
+  passin = False
   perform_map = arg_dict['map']
   dump = arg_dict['dump']
   restore = arg_dict['restore']

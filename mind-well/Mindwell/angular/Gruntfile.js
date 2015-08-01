@@ -287,6 +287,7 @@ module.exports = function(grunt) {
             if (grunt.file.exists(spec)) {
                 var files = [].concat(grunt.config('dom_munger.data.appjs'));
                 files.push('bower_components/angular-mocks/angular-mocks.js');
+                files.push('service/mw-test-common.js');
                 files.push(spec);
                 grunt.config('karma.options.files', files);
                 tasksToRun.push('karma:during_watch');

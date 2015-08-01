@@ -1,15 +1,32 @@
-angular.module('mindwell', ['ui.bootstrap','ui.utils','ngRoute','ngAnimate', 'restangular', 'ngTable', 'cgPrompt', 'ipCookie', 'cgBusy', 'ui.calendar']);
+angular.module('mindwell', ['ui.bootstrap', 'ui.utils', 'ngRoute', 'ngAnimate', 'restangular', 'ngTable', 'cgPrompt', 'ipCookie', 'cgBusy', 'ui.calendar']);
 
 angular.module('mindwell').config(function($routeProvider, RestangularProvider) {
 
-    $routeProvider.when('/client-list',{templateUrl: 'partial/client-list/client-list.html'});
-    $routeProvider.when('/client-detail',{templateUrl: 'partial/client-detail/client-detail.html'});
-    $routeProvider.when('/client-dos',{templateUrl: 'partial/client-dos/client-dos.html'});
-    $routeProvider.when('/calendar',{templateUrl: 'partial/calendar/calendar.html'});
+    $routeProvider.when('/client-list', {
+        templateUrl: 'partial/client-list/client-list.html'
+    });
+    $routeProvider.when('/client-detail', {
+        templateUrl: 'partial/client-detail/client-detail.html'
+    });
+    $routeProvider.when('/client-dos', {
+        templateUrl: 'partial/client-dos/client-dos.html'
+    });
+    $routeProvider.when('/calendar', {
+        templateUrl: 'partial/calendar/calendar.html'
+    });
     /* Add New Routes Above */
-    $routeProvider.otherwise({redirectTo:'/client-list'});
+    $routeProvider.otherwise({
+        redirectTo: '/client-list'
+    });
 
     RestangularProvider.setBaseUrl('/Mindwell/rest');
+
+    RestangularProvider.setRequestInterceptor(function(elem, operation) {
+        if (operation === "remove") {
+            return undefined;
+        }
+        return elem;
+    });
 
 });
 
@@ -38,11 +55,15 @@ angular.module('mindwell').run(function($rootScope, mindwellCache, $timeout, min
     $rootScope.mindwellUtil = mindwellUtil;
     $rootScope.currentUser = ipCookie('current_user');
 
-    $rootScope.updateUser= function() {
+    $rootScope.updateUser = function() {
         if ($rootScope.currentUser === '') {
-            ipCookie.remove('current_user', {path: '/'});
+            ipCookie.remove('current_user', {
+                path: '/'
+            });
         } else {
-            ipCookie('current_user', $rootScope.currentUser, {path: '/'});
+            ipCookie('current_user', $rootScope.currentUser, {
+                path: '/'
+            });
         }
         $timeout(function() {
             mindwellCache.clearClientCache();

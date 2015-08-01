@@ -44,7 +44,7 @@ secret_passphrase:
 	fi
 
 altrun:
-	python2.7 ~/google_appengine/dev_appserver.py mind-well --host 0.0.0.0 --port 9000 --admin_host 0.0.0.0
+	python2.7 google_appengine/dev_appserver.py mind-well --host 0.0.0.0 --port 9000 --admin_host 0.0.0.0
 
 run:
 	/usr/bin/python2.7 /usr/lib/python2.7/dist-packages/coverage/__main__.py run /var/lib/jenkins/google_appengine/dev_appserver.py mind-well --admin_host 0.0.0.0 --host 0.0.0.0 --port 9000 --clear_datastore --datastore_path=./datastore &

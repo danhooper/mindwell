@@ -120,6 +120,15 @@ angular.module('mindwell').controller('CalendarCtrl', function(
             'end': end
         }).then(function(events) {
             _.each(events, function(event) {
+                // otherwise events look too long on the calendar
+                if (event.start === event.end) {
+                    event.end = moment(event.end).add(1, 'minute');
+                }
+                // force cancelled and no show to 1 minute
+                // TODO: Add session_result to dos dictionary returned
+                if (event.backgroundColor === 'gray' || event.backgroundColor === 'red') {
+                    event.end = moment(event.start).add(1, 'minute');
+                }
                 delete event.url;
             });
             callback(events);
