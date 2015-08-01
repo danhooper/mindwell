@@ -59,6 +59,7 @@ See the ConfigDefaults class below for the full set of options available.
 
 
 
+
 import google
 import hashlib
 import logging
@@ -310,7 +311,10 @@ class ApiCallHandler(webapp.RequestHandler):
       'remote_datastore': RemoteDatastoreStub('remote_datastore'),
   }
 
-  OAUTH_SCOPE = 'https://www.googleapis.com/auth/appengine.apis'
+  OAUTH_SCOPES = [
+      'https://www.googleapis.com/auth/appengine.apis',
+      'https://www.googleapis.com/auth/cloud-platform',
+  ]
 
   def CheckIsAdmin(self):
     user_is_authorized = False
@@ -328,7 +332,7 @@ class ApiCallHandler(webapp.RequestHandler):
     if not user_is_authorized and config._ALLOW_OAUTH:
       try:
         user_is_authorized = (
-            oauth.is_current_user_admin(_scope=self.OAUTH_SCOPE))
+            oauth.is_current_user_admin(_scope=self.OAUTH_SCOPES))
       except oauth.OAuthRequestError:
 
         pass
