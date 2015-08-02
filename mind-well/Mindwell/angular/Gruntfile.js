@@ -73,7 +73,7 @@ module.exports = function(grunt) {
                 },
                 proxies: [{
                     context: ['/Mindwell', '/_ah', '/static', '/administrator'],
-                    host: 'havok',
+                    host: 'localhost',
                     port: 9000,
                     https: false,
                 }],

@@ -1022,6 +1022,11 @@ class DOS(db.Model):
 
     def get_duration(self):
         """ Gets the duration of this DOS in minutes. """
+        # if the result was a no show or cancellation set it to 0 minutes
+        if (self.session_result == 'No Show' or
+                self.session_result == 'Cancellation - Late' or
+                self.session_result == 'Cancellation - Timely'):
+            return 0
         if self.dos_endtime:
             end_minutes = self.dos_endtime.hour * 60 + self.dos_endtime.minute
             start_minutes = self.dos_datetime.time().hour * 60 + \
