@@ -20,10 +20,10 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
 
     mindwellUtil.calcBalances = function(dosList) {
         var sortedDOS = _.sortBy(dosList, 'dos_datetime');
-        _.reduceRight(dosList, function(prevDOS, dos) {
+        _.reduce(sortedDOS, function(prevDOS, dos) {
             var amt_due, amt_paid, balance;
             // calculate first DOS' balance
-            if (!prevDOS.balance) {
+            if (prevDOS.balance === undefined) {
                 amt_due = parseFloat(prevDOS.amt_due) || 0;
                 amt_paid = parseFloat(prevDOS.amt_paid) || 0;
                 prevDOS.balance = amt_due - amt_paid;
