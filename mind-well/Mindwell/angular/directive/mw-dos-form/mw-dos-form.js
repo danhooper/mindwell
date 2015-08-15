@@ -28,6 +28,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     if (scope.blockedTime) {
                         scope.client = undefined;
                     }
+                    console.log(scope.blockedTime, scope.client);
                 };
                 mindwellCache.getClients().then(function() {
                     scope.clients = mindwellCache.clients;
@@ -35,6 +36,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                         scope.client = _.find(mindwellCache.clients, {
                             id: scope.mwClient.id
                         });
+                        console.log('setting client', scope.client, mindwellCache.clients);
                     } else if (scope.mwShowClientList && (scope.newDOS.id || scope.newDOS.recurrId)) {
                         // only default to blocked if the item is a recurring DOS or has been saved
                         scope.blockedTime = true;
