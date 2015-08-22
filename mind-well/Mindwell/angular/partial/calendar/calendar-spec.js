@@ -50,7 +50,8 @@ describe('CalendarCtrl', function() {
         expect(Object.keys(scope.newDOS).length).toEqual(0);
         scope.eventClick({
             clientinfo: 1,
-            id: 2
+            id: 2,
+            recurrId: -1
         });
         mwTestCommon.$httpBackend.flush();
         expect(Object.keys(scope.newDOS).length).toBeGreaterThan(0);

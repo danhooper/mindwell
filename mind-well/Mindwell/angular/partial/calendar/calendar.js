@@ -28,17 +28,43 @@ angular.module('mindwell').controller('CalendarCtrl', function(
         $scope.client = undefined;
     };
 
+    var buildDOSRecurr = function(event, baseDos) {
+        return {
+            clientinfo: baseDos.clientinfo,
+            dos_datetime: event.start,
+            dos_endtime: event.end,
+            session_type: baseDos.session_type,
+            dsm_code: baseDos.dsm_code,
+            type_pay: baseDos.type_pay,
+            amt_due: baseDos.amt_due,
+            recurrId: baseDos.id
+        };
+    };
+
     $scope.eventClick = function(event, jsEvent) {
         mindwellCache.getClients().then(function() {
             $scope.client = _.find(mindwellCache.clients, {
                 id: event.clientinfo
             });
-            if ($scope.client && $scope.client.dosList) {
-                return _.find($scope.client.dosList, {
-                    id: event.id
-                });
-            } else if (event.id !== -1) {
-                return mindwellRest.dos.get(event.id);
+            if (event.recurrId === -1) {
+                if ($scope.client && $scope.client.dosList) {
+                    return _.find($scope.client.dosList, {
+                        id: event.id
+                    });
+                } else if (event.id !== -1) {
+                    return mindwellRest.dos.get(event.id);
+                }
+            } else {
+                if ($scope.client && $scope.client.dosList) {
+                    var baseDos = _.find($scope.client.dosList, {
+                        id: event.recurrId
+                    });
+                    return buildDOSRecurr(event, baseDos);
+                } else {
+                    return mindwellRest.dos.get(event.recurrId).then(function(baseDos) {
+                        return buildDOSRecurr(event, baseDos);
+                    });
+                }
             }
         }).then(function(dos) {
             if (!dos) {
