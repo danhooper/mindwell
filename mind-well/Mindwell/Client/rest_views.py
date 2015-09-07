@@ -11,6 +11,16 @@ import view_common
 import calendar_views
 
 
+def error_response(form):
+    errors = [(k, unicode(v[0]))
+              for k, v in form.errors.items()]
+    logging.error(errors)
+    return HttpResponse(json.dumps({'success': False,
+                                    'errors': errors}),
+                        content_type='application/json',
+                        status=403)
+
+
 def rest_dos(request):
     if request.method == 'GET':
         dos = models.DOS.safe_all(request=request)
@@ -39,12 +49,7 @@ def rest_dos(request):
             return HttpResponse(json.dumps(entity.get_rest()),
                                 content_type='application/json')
         else:
-            errors = [(k, unicode(v[0]))
-                      for k, v in form.errors.items()]
-            return HttpResponse(json.dumps({'success': False,
-                                            'errors': errors}),
-                                content_type='application/json',
-                                status=403)
+            return error_response(form)
 
 
 def rest_indiv_dos(request, dos_id):
@@ -69,12 +74,7 @@ def rest_indiv_dos(request, dos_id):
             return HttpResponse(json.dumps(dos.get_rest()),
                                 content_type='application/json')
         else:
-            errors = [(k, unicode(v[0]))
-                      for k, v in form.errors.items()]
-            return HttpResponse(json.dumps({'success': False,
-                                            'errors': errors}),
-                                content_type='application/json',
-                                status=403)
+            return error_response(form)
     elif request.method == 'DELETE':
         dos.delete()
         resp = HttpResponse('', content_type='application/json')
@@ -97,12 +97,7 @@ def rest_clientinfo(request):
             return HttpResponse(json.dumps(entity.get_rest()),
                                 content_type='application/json')
         else:
-            errors = [(k, unicode(v[0]))
-                      for k, v in form.errors.items()]
-            return HttpResponse(json.dumps({'success': False,
-                                            'errors': errors}),
-                                content_type='application/json',
-                                status=403)
+            return error_response(form)
 
 
 def rest_indiv_client(request, client_id):
@@ -124,6 +119,8 @@ def rest_indiv_client(request, client_id):
             view_common.save_entity(request, client)
             return HttpResponse(json.dumps(client.get_rest()),
                                 content_type='application/json')
+        else:
+            return error_response(form)
     elif request.method == 'DELETE':
         common.delete_client(client, request=request)
         resp = HttpResponse('', content_type='application/json')

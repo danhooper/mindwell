@@ -2,12 +2,14 @@
   <form>
     <div class="row">
       <div ng-class="{'col-md-4': !mwCompactForm, 'col-md-12': mwCompactForm}">
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.lastname}">
           <label>Lastname</label>
+          <label class="help-block" ng-if="errors.lastname">{{errors.lastname}}</label>
           <input ng-model="client.lastname" type="text" class="form-control" id="lastname">
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.firstname}">
           <label>Firstname</label>
+          <label class="help-block" ng-if="errors.firstname">{{errors.firstname}}</label>
           <input ng-model="client.firstname" type="text" class="form-control" id="firstname">
         </div>
       </div>
@@ -15,87 +17,105 @@
     <div class="row">
       <div ng-class="{'col-md-4': !mwCompactForm, 'col-md-12': mwCompactForm}">
         <h3 ng-if="!mwCompactForm">Contact Info</h3>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.cellnumber}">
           <label>Cell #</label><br/>
+          <label class="help-block" ng-if="errors.cellnumber">{{errors.cellnumber}}</label>
           <input ng-model="client.cellnumber" type="text" class="form-control mindwell-phone-input">
           <select ng-model="client.cellmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.homenumber}">
           <label>Home #</label><br/>
+          <label class="help-block" ng-if="errors.homenumber">{{errors.homenumber}}</label>
           <input ng-model="client.homenumber" type="text" class="form-control mindwell-phone-input">
           <select ng-model="client.homemessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.worknumber}">
           <label>Work #</label><br/>
+          <label class="help-block" ng-if="errors.worknumber">{{errors.worknumber}}</label>
           <input ng-model="client.worknumber" type="text" class="form-control mindwell-phone-input">
           <select ng-model="client.workmessage" ng-options="option.text as option.value for option in messageOptions" class="form-control mindwell-phone-input-mess"></select>
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.emailaddress}">
           <label>Email</label><br/>
+          <label class="help-block" ng-if="errors.emailaddress">{{errors.emailaddress}}</label>
           <input ng-model="client.emailaddress" type="text" class="form-control"/>
         </div>
       </div>
       <div class="col-md-4" ng-if="!mwCompactForm">
         <h3>Address</h3>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.address}">
           <label>Address</label><br/>
+          <label class="help-block" ng-if="errors.address">{{errors.address}}</label>
           <input ng-model="client.address" type="text" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.address2}">
           <label>Address 2</label><br/>
+          <label class="help-block" ng-if="errors.address2">{{errors.address2}}</label>
           <input ng-model="client.address2" type="text" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.city}">
           <label>City</label><br/>
+          <label class="help-block" ng-if="errors.city">{{errors.city}}</label>
           <input ng-model="client.city" type="text" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.state}">
           <label>State</label><br/>
+          <label class="help-block" ng-if="errors.state">{{errors.state}}</label>
           <select ng-model="client.state" ng-options="option.name as option.name for option in usStates" class="form-control"></select>
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.zipcode}">
           <label>Zip</label><br/>
+          <label class="help-block" ng-if="errors.zipcode">{{errors.zipcode}}</label>
           <input ng-model="client.zipcode" type="text" class="form-control">
         </div>
       </div>
       <div ng-class="{'col-md-4': !mwCompactForm, 'col-md-12': mwCompactForm}">
         <h3 ng-if="!mwCompactForm">Other</h3>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.dob_month}">
           <label>DOB</label><br/>
+          <label class="help-block" ng-if="errors.dob_month">{{errors.dob_month}}</label>
           <select class="mw-month form-control" ng-model="client.dob_month" ng-options="option.value as option.name for option in months"></select>
           <select class="mw-day form-control" ng-model="client.dob_day" ng-options="option as option for option in days"></select>
           <select class="mw-year form-control" ng-model="client.dob_year" ng-options="option as option for option in years"></select>
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.referrer}">
           <label>Referrer</label><br/>
+          <label class="help-block" ng-if="errors.referrer">{{errors.referrer}}</label>
           <input ng-click="referrerModal()" ng-model="client.referrer" type="text" class="form-control">
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.dsm_code}">
           <label>DSM Code</label><br/>
+          <label class="help-block" ng-if="errors.dsm_code">{{errors.dsm_code}}</label>
           <input ng-model="client.dsm_code" type="text" class="form-control">
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.client_status}">
           <label>Client Status</label><br/>
+          <label class="help-block" ng-if="errors.client_status">{{errors.client_status}}</label>
           <select ng-model="client.client_status" ng-options="option.name as option.name for option in statusOptions" class="form-control"></select>
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.guardians_name}">
           <label>Guardian's Name</label><br/>
+          <label class="help-block" ng-if="errors.guardians_name">{{errors.guardians_name}}</label>
           <input ng-model="client.guardians_name" type="text" class="form-control">
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.guardians_phone_number}">
           <label>Guardian's Phone Number</label><br/>
+          <label class="help-block" ng-if="errors.guardians_phone_number">{{errors.guardians_phone_number}}</label>
           <input ng-model="client.guardians_phone_number" type="text" class="form-control">
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.emergency_contact}">
           <label>Emergency Contact</label><br/>
+          <label class="help-block" ng-if="errors.emergency_contact">{{errors.emergency_contact}}</label>
           <input ng-model="client.emergency_contact" type="text" class="form-control">
         </div>
-        <div class="form-group" ng-if="!mwCompactForm">
+        <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.emergency_contact_phone_number}">
           <label>Emergeny Contact's Phone Number</label><br/>
+          <label class="help-block" ng-if="errors.emergency_contact_phone_number">{{errors.emergency_contact_phone_number}}</label>
           <input ng-model="client.emergency_contact_phone_number" type="text" class="form-control">
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{'has-error': errors.reason_for_visit}">
           <label>Reason for Visit</label><br/>
+          <label class="help-block" ng-if="errors.reason_for_visit">{{errors.reason_for_visit}}</label>
           <input ng-click="rfvModal()" ng-model="client.reason_for_visit" type="text" class="form-control">
         </div>
       </div>

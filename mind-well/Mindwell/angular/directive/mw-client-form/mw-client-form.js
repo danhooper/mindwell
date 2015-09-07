@@ -258,7 +258,9 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                     name: 'Inactive'
                 }];
                 scope.saveChanges = function() {
-                    return mindwellUtil.saveClient(scope.client);
+                    return mindwellUtil.saveClient(scope.client).catch(function(resp) {
+                        scope.errors = _.zipObject(resp.data.errors);
+                    });
                 };
                 scope.referrerModal = function() {
                     $modal.open({
