@@ -135,6 +135,9 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     newDOS.dos_datetime_0 = moment(scope.date).format('YYYY-MM-DD');
                     newDOS.dos_datetime_1_time = scope.starttime;
                     newDOS.dos_endtime_time = scope.endtime;
+                    if (newDOS.dos_repeat_end_date) {
+                        newDOS.dos_repeat_end_date = moment(newDOS.dos_repeat_end_date).format('YYYY-MM-DD');
+                    }
                     if (scope.client) {
                         newDOS.clientinfo = scope.client.id;
                     } else {
