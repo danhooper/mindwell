@@ -297,7 +297,7 @@ def render_invoice_pdf(request, invoice_dict):
       {'text_mode': 'left', 'font': 'Times-Roman', 'font_size': 12,
        'text': ''},
       {'text_mode': 'right', 'font': 'Times-Roman', 'font_size': 12,
-       'text': 'DSM IV Code: %s\n' % invoice_dict['dsm_code']},
+       'text': 'ICD 10: %s\n' % invoice_dict['dsm_code']},
       {'text_mode': 'left', 'font': 'Times-Roman', 'font_size': 12,
        'text': ''},
     )

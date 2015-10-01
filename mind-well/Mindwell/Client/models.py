@@ -463,7 +463,7 @@ class ClientInfo(db.Model):
     #Indexed for autocomplete of referrer
     referrer = EncryptedField(verbose_name='Referrered By')
     #Indexed for autocomplete of DSM code
-    dsm_code = db.StringProperty(verbose_name='dsm Code')
+    dsm_code = db.StringProperty(verbose_name='ICD 10')
     CLIENT_STATUS_CHOICES = (
         'Active',
         'Inactive',
@@ -513,7 +513,7 @@ class ClientInfo(db.Model):
             ('Zip Code', self.zipcode),
             ('DOB', self.dob),
             ('Referrer', self.referrer),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Client Status', self.client_status),
             ('Guardians Name', self.guardians_name),
             ('Guardians Phone Number', self.guardians_phone_number),
@@ -542,7 +542,7 @@ class ClientInfo(db.Model):
             ('Zip Code', self.zipcode),
             ('DOB', self.dob),
             ('Referrer', self.referrer),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Client Status', self.client_status),
             ('Guardians Name', self.guardians_name),
             ('Guardians Phone Number', self.guardians_phone_number),
@@ -578,7 +578,7 @@ class ClientInfo(db.Model):
         """ Gets all the other fields for the client."""
         return (
             ('DOB', self.dob),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Client Status', self.client_status),
             ('Referrer', self.referrer),
             ('Guardians Name', self.guardians_name),
@@ -785,7 +785,7 @@ class DOS(db.Model):
                                        choices=SESSION_RESULT_CHOICES,
                                        default='Scheduled')
     # Used to get the autocomplete field for dsm codes
-    dsm_code = db.StringProperty(verbose_name='DSM Code')
+    dsm_code = db.StringProperty(verbose_name='ICD 10')
     type_pay = db.StringProperty(verbose_name='Type Of Payment', indexed=False)
     amt_due = db.StringProperty(verbose_name='Amount Due', indexed=False)
     amt_paid = db.StringProperty(verbose_name='Amount Paid', indexed=False)
@@ -834,7 +834,7 @@ class DOS(db.Model):
             ('Client ID', client_id),
             ('Session Type', self.session_type),
             ('Session Result', self.session_result),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Type of Payment', self.type_pay),
             ('Amount Due', self.amt_due),
             ('Amount Paid', self.amt_paid),
@@ -849,7 +849,7 @@ class DOS(db.Model):
         return (
             ('Session Type', self.session_type),
             ('Session Result', self.session_result),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Type of Payment', self.type_pay),
             ('Amount Due', self.amt_due),
             ('Amount Paid', self.amt_paid),

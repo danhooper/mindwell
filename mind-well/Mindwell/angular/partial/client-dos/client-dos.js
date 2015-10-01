@@ -111,7 +111,7 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
 
     $scope.otherFields = [
         {key: 'dob', display: 'DOB'},
-        {key: 'dsm_code', display: 'DSM Code'},
+        {key: 'dsm_code', display: 'ICD 10'},
         {key: 'client_status', display: 'Client Status'},
         {key: 'referrer', display: 'Referrer'},
         {key: 'guardians_name', display: 'Guardians Name'},

@@ -84,7 +84,7 @@
           <input ng-click="referrerModal()" ng-model="client.referrer" type="text" class="form-control">
         </div>
         <div class="form-group" ng-if="!mwCompactForm" ng-class="{'has-error': errors.dsm_code}">
-          <label>DSM Code</label><br/>
+          <label>ICD 10</label><br/>
           <label class="help-block" ng-if="errors.dsm_code">{{errors.dsm_code}}</label>
           <input ng-model="client.dsm_code" type="text" class="form-control">
         </div>
