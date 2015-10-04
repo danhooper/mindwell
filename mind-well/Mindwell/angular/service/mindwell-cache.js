@@ -51,7 +51,7 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
                 if (calSettings.length === 1) {
                     mindwellCache.calSettings = calSettings[0];
                 } else {
-                    mindwellCache.calSettings = {show_weekends: 'No', calendar_start_time: '6 am'};
+                    mindwellCache.calSettings = {display_weekends: 'No', calendar_start_time: '6 am'};
                 }
                 $rootScope.$emit('mindwell.calSettingsUpdated');
                 return mindwellCache.calSettings;
