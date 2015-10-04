@@ -8,3 +8,4 @@ nose_unit_tests.xml
 .coverage.unit_test
 node_modules/
 mind-well/Mindwell/angular/coverage/
+.DS_Store
