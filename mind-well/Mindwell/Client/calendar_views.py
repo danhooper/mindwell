@@ -18,8 +18,8 @@ def Javascript_Object_DOS(dos):
             clientinfo = 0
         return """
 {
-"id":%d,
-"clientinfo":%d,
+"id":%s,
+"clientinfo":%s,
 "title":"%s",
 "start":"%s",
 "end":"%s",
@@ -30,7 +30,7 @@ def Javascript_Object_DOS(dos):
 "backgroundColor":"%s",
 "borderColor":"%s",
 "textColor":"%s",
-"recurrId":%d
+"recurrId":%s
 },
         """ % (
             dos.get_id(),
