@@ -62,20 +62,11 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                     "name": "Delaware",
                     "abbreviation": "DE"
                 }, {
-                    "name": "District Of Columbia",
-                    "abbreviation": "DC"
-                }, {
-                    "name": "Federated States Of Micronesia",
-                    "abbreviation": "FM"
-                }, {
                     "name": "Florida",
                     "abbreviation": "FL"
                 }, {
                     "name": "Georgia",
                     "abbreviation": "GA"
-                }, {
-                    "name": "Guam",
-                    "abbreviation": "GU"
                 }, {
                     "name": "Hawaii",
                     "abbreviation": "HI"
@@ -103,9 +94,6 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                 }, {
                     "name": "Maine",
                     "abbreviation": "ME"
-                }, {
-                    "name": "Marshall Islands",
-                    "abbreviation": "MH"
                 }, {
                     "name": "Maryland",
                     "abbreviation": "MD"
@@ -152,9 +140,6 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                     "name": "North Dakota",
                     "abbreviation": "ND"
                 }, {
-                    "name": "Northern Mariana Islands",
-                    "abbreviation": "MP"
-                }, {
                     "name": "Ohio",
                     "abbreviation": "OH"
                 }, {
@@ -164,14 +149,8 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                     "name": "Oregon",
                     "abbreviation": "OR"
                 }, {
-                    "name": "Palau",
-                    "abbreviation": "PW"
-                }, {
                     "name": "Pennsylvania",
                     "abbreviation": "PA"
-                }, {
-                    "name": "Puerto Rico",
-                    "abbreviation": "PR"
                 }, {
                     "name": "Rhode Island",
                     "abbreviation": "RI"
@@ -194,14 +173,14 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                     "name": "Vermont",
                     "abbreviation": "VT"
                 }, {
-                    "name": "Virgin Islands",
-                    "abbreviation": "VI"
-                }, {
                     "name": "Virginia",
                     "abbreviation": "VA"
                 }, {
                     "name": "Washington",
                     "abbreviation": "WA"
+                }, {
+                    "name": "Washington DC",
+                    "abbreviation": "DC"
                 }, {
                     "name": "West Virginia",
                     "abbreviation": "WV"
