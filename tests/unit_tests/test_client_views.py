@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import with_statement
 import datetime
 import json
@@ -54,6 +55,14 @@ class Test_add_client_standalone(mock_common.MockAppEngineTest):
         http_response = client_views.add_client_standalone(req)
         content_dict = simplejson.loads(http_response.content)
         self.assertIn('fake lastname', http_response.content)
+        self.assertTrue(content_dict['key'])
+
+    def test_post_unicode(self):
+        req = mock_common.MockRequest(method='POST',
+                                      POST={'lastname': 'é' * 10})
+        http_response = client_views.add_client_standalone(req)
+        content_dict = simplejson.loads(http_response.content)
+        self.assertIn(u'é' * 10, content_dict['name'])
         self.assertTrue(content_dict['key'])
 
 

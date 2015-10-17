@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import unittest
 from google.appengine.api import users
@@ -42,6 +43,10 @@ class MockAppEngineTest(unittest.TestCase):
         self.client = models.ClientInfo(userinfo=users.get_current_user(),
                                    lastname='fake lastname',
                                    firstname='fake firstname')
+        self.client.put()
+        self.client = models.ClientInfo(userinfo=users.get_current_user(),
+                                   lastname='é',
+                                   firstname='é')
         self.client.put()
         self.dos_start_datetime = datetime.datetime(2012, 1, 1)
         self.dos = models.DOS(userinfo=users.get_current_user(),

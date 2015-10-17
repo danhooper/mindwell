@@ -120,7 +120,7 @@ class EncryptedField(db.StringProperty):
     """ This supports a property which is encrypted with a salted hash.  See
     http://danhooper.blogspot.com/2010/06/encrypting-fields-in-google-app-engine.html
     for more information."""
-    data_type = str
+    data_type = unicode
 
     def __get_sha_digest(self, random_number=None):
         """ This function returns a sha hash of a random number
@@ -141,6 +141,7 @@ class EncryptedField(db.StringProperty):
             return None
         if data == 'None':
             return None
+        data = data.encode('utf-8')
         # need to pad the data so it is 16 bytes long for encryption
         mod_res = len(data) % 16
         if mod_res != 0:
@@ -171,7 +172,7 @@ class EncryptedField(db.StringProperty):
         alg = AES.new(sha_digest, AES.MODE_ECB)
         dec_res = alg.decrypt(hex_decoded_res[16:])
         #remove the ^ from the strings in case of padding
-        return unicode(dec_res.rstrip('^'))
+        return unicode(dec_res.rstrip('^').decode('utf-8'))
 
     def get_value_for_datastore(self, model_instance):
         """ For writing to datastore """
@@ -185,15 +186,20 @@ class EncryptedField(db.StringProperty):
     def make_value_from_datastore(self, value):
         """ For reading from datastore. """
         if value is not None:
-            return str(self.decrypt(value))
+            return self.decrypt(value)
         return ''
 
     def validate(self, value):
-        if isinstance(value, unicode):
-            value = str(value)
-        if value is not None and not isinstance(value, str):
+        try:
+            value = unicode(value)
+            if value is not None and not isinstance(value, unicode):
+                raise db.BadValueError('Property %s must be convertible '
+                                       'to a unicode instance (%s)' %
+                                       (self.name, value))
+        except UnicodeEncodeError:
+            logging.exception('Error converting to unicode')
             raise db.BadValueError('Property %s must be convertible '
-                                   'to a str instance (%s)' %
+                                   'to a unicode instance (%s)' %
                                    (self.name, value))
         return super(EncryptedField, self).validate(value)
 
