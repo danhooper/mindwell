@@ -41,8 +41,8 @@ class MockAppEngineTest(unittest.TestCase):
                                overwrite=True)
         self.testbed.init_user_stub()
         self.client1 = models.ClientInfo(userinfo=users.get_current_user(),
-                                         lastname='fake lastname',
-                                         firstname='fake firstname')
+                                         lastname='fake lastnameé',
+                                         firstname='fake firstnameé')
         self.client1.put()
         self.client2 = models.ClientInfo(userinfo=users.get_current_user(),
                                          lastname='é',

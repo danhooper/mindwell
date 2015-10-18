@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 from Mindwell.Client import models
 from django.test.utils import setup_test_environment
@@ -30,7 +31,7 @@ class Test_DOS(mock_common.MockAppEngineTest):
             '/Mindwell/2012/01/01/\d+/calendar_cancel_all_series_dos/')
 
     def test_dos_fields(self):
-        self.assertEqual('fake lastname, fake firstname',
+        self.assertEqual(u'fake lastnameé, fake firstnameé',
                          self.dos.__unicode__())
         self.assertEqual('01/01/2012', self.dos.get_dos_date_display())
         self.assertTrue(self.dos.getallfields_inc_hidden())
@@ -78,4 +79,3 @@ class Test_DOSRecurr(mock_common.MockAppEngineTest):
             ('/Mindwell/2012/01/01/00/00/%d/calendar_dos_recurr/' %
              self.dos.get_id()),
             self.dosrecurr.get_calendar_absolute_url())
-
