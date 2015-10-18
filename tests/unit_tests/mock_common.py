@@ -40,17 +40,17 @@ class MockAppEngineTest(unittest.TestCase):
                                APPLICATION_ID='testbed-test',
                                overwrite=True)
         self.testbed.init_user_stub()
-        self.client = models.ClientInfo(userinfo=users.get_current_user(),
-                                   lastname='fake lastname',
-                                   firstname='fake firstname')
-        self.client.put()
-        self.client = models.ClientInfo(userinfo=users.get_current_user(),
-                                   lastname='é',
-                                   firstname='é')
-        self.client.put()
+        self.client1 = models.ClientInfo(userinfo=users.get_current_user(),
+                                         lastname='fake lastname',
+                                         firstname='fake firstname')
+        self.client1.put()
+        self.client2 = models.ClientInfo(userinfo=users.get_current_user(),
+                                         lastname='é',
+                                         firstname='é')
+        self.client2.put()
         self.dos_start_datetime = datetime.datetime(2012, 1, 1)
         self.dos = models.DOS(userinfo=users.get_current_user(),
-                              clientinfo=self.client,
+                              clientinfo=self.client1,
                               dos_datetime=self.dos_start_datetime)
         self.dos.put()
         self.secondary_userinfo = models.UserInfo(

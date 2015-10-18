@@ -191,11 +191,11 @@ class EncryptedField(db.StringProperty):
 
     def validate(self, value):
         try:
-            value = unicode(value)
             if value is not None and not isinstance(value, unicode):
-                raise db.BadValueError('Property %s must be convertible '
-                                       'to a unicode instance (%s)' %
-                                       (self.name, value))
+                value = unicode(value.decode('utf-8'))
+                #raise db.BadValueError('Property %s must be convertible '
+                #                       'to a unicode instance (%s)' %
+                #                       (self.name, value))
         except UnicodeEncodeError:
             logging.exception('Error converting to unicode')
             raise db.BadValueError('Property %s must be convertible '

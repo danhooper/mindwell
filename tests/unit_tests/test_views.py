@@ -108,14 +108,15 @@ class Test_invoices(mock_common.MockAppEngineTest):
         views.invoices(mock_common.MockRequest())
 
     def test_post(self):
-        req = mock_common.MockRequest(method='POST',
-                                      POST={'clientinfo': self.client.get_id(),
-                                            'start_date_month': 1,
-                                            'start_date_day': 1,
-                                            'start_date_year': 2008,
-                                            'end_date_month': 1,
-                                            'end_date_day': 1,
-                                            'end_date_year': 2022})
+        req = mock_common.MockRequest(
+            method='POST',
+            POST={'clientinfo': self.client1.get_id(),
+                  'start_date_month': 1,
+                  'start_date_day': 1,
+                  'start_date_year': 2008,
+                  'end_date_month': 1,
+                  'end_date_day': 1,
+                  'end_date_year': 2022})
         resp = views.invoices(req)
         self.assertIsInstance(resp, HttpResponseRedirect)
         self.assertEqual(resp.status_code, 302)

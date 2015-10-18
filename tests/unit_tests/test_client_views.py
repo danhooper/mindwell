@@ -141,7 +141,7 @@ class Test_update_client(mock_common.MockAppEngineTest):
     def test_post(self):
         req = mock_common.MockRequest(method='POST',
                                       POST={'lastname': 'test_lastname123'})
-        resp = client_views.update_client(req, self.client.get_id())
+        resp = client_views.update_client(req, self.client1.get_id())
         self.assertIsInstance(resp, HttpResponseRedirect)
         client = models.ClientInfo.safe_all()[0]
         self.assertEqual(client.lastname, 'test_lastname123')
@@ -180,13 +180,14 @@ class Test_update_dos(mock_common.MockAppEngineTest):
 class Test_delete_client(mock_common.MockAppEngineTest):
     def test_get(self):
         req = mock_common.MockRequest()
-        resp = client_views.delete_client(req, self.client.get_id())
+        resp = client_views.delete_client(req, self.client1.get_id())
         self.assertEqual(resp.status_code, 200)
         self.assertIsInstance(resp, HttpResponse)
 
     def test_post(self):
         req = mock_common.MockRequest(method='POST')
-        resp = client_views.delete_client(req, self.client.get_id())
+        resp = client_views.delete_client(req, self.client1.get_id())
+        resp = client_views.delete_client(req, self.client2.get_id())
         self.assertEqual(resp.status_code, 200)
         self.assertIsInstance(resp, HttpResponse)
         json_data = json.loads(resp.content)
