@@ -284,9 +284,9 @@ def render_invoice_pdf(request, invoice_dict):
       {'text_mode': 'left', 'font': 'Times-Roman', 'font_size': 12,
        'text': ''},
       {'text_mode': 'left', 'font': 'Times-Roman', 'font_size': 12,
-       'text': 'Name: %s %s' % (
-        str(invoice_dict['invoice'].clientinfo.firstname),
-        str(invoice_dict['invoice'].clientinfo.lastname))},
+       'text': u'Name: %s %s' % (
+           unicode(invoice_dict['invoice'].clientinfo.firstname),
+           unicode(invoice_dict['invoice'].clientinfo.lastname))},
       {'text_mode': 'left', 'font': 'Times-Roman', 'font_size': 12,
        'text': 'Address: %s %s\n%s %s %s' % (
         invoice_dict['invoice'].clientinfo.address,
