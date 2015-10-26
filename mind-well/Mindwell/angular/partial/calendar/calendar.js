@@ -174,6 +174,7 @@ angular.module('mindwell').controller('CalendarCtrl', function(
                 delete event.url;
             });
             callback(events);
+            $(window).trigger('resize');
         });
     };
     $scope.eventSources = [];
