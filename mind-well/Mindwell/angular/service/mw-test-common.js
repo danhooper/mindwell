@@ -18,6 +18,7 @@ angular.module('mindwell').factory('mwTestCommon', function() {
             mwTestCommon.Restangular = Restangular;
             mwTestCommon.mindwellRest = mindwellRest;
             mwTestCommon.$httpBackend.when('GET', '/Mindwell/rest/clientinfo').respond([]);
+            mwTestCommon.$httpBackend.when('GET', '/Mindwell/rest/dos?clientinfo=1').respond([]);
             mwTestCommon.$httpBackend.expectGET('/Mindwell/rest/clientinfo');
             mwTestCommon.$httpBackend.when('GET', '/Mindwell/rest/dos/2').respond({});
             mwTestCommon.$httpBackend.when('GET', '/Mindwell/rest/custom_form').respond([]);

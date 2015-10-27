@@ -6,7 +6,8 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
     var contentId = parseInt($location.search().contentId);
 
 
-    var getDOS = function($defer, params) {
+    // on scope for unit tests
+    $scope.getDOS = function($defer, params) {
         if ($scope.client.dosList === undefined) {
             mindwellRest.dos.getList({clientinfo: $scope.client.id}).then(function(dosList) {
                 $scope.client.dosList = params.sorting() ? $filter('orderBy')(dosList, params.orderBy()) : dosList;
@@ -35,7 +36,7 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
         }, {
             total: 1,
             counts: [],
-            getData: getDOS
+            getData: $scope.getDOS
         });
     });
 
@@ -105,9 +106,6 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
          visible: true
         }
     ];
-    $scope.getTitle = function(col) {
-        return col.title;
-    };
 
     $scope.otherFields = [
         {key: 'dob', display: 'DOB'},
