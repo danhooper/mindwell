@@ -68,6 +68,7 @@ angular.module('mindwell').controller('CalendarCtrl', function(
             }
         }).then(function(dos) {
             if (!dos) {
+                console.log(event.start, event.start.zone());
                 dos = {
                     dos_datetime: event.start,
                     dos_endtime: event.end,
@@ -140,7 +141,8 @@ angular.module('mindwell').controller('CalendarCtrl', function(
             $('.fc-title', element).html(fields.join('<br>'));
             $timeout(function() {
                 $(element).attr({
-                    'tooltip-html-unsafe': $sce.trustAsHtml(event.description)
+                    'tooltip-html-unsafe': $sce.trustAsHtml(event.description),
+                    'tooltip-append-to-body': true
                 });
                 $compile(element)($scope);
             });

@@ -41,7 +41,9 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     }
                 });
                 scope.date = moment(scope.newDOS.dos_datetime).toDate();
-                scope.date = new Date(scope.date.getTime() + scope.date.getTimezoneOffset() * 60000);
+                if (moment(scope.newDOS.dos_datetime).zone() === 0) {
+                    scope.date = new Date(scope.date.getTime() + scope.date.getTimezoneOffset() * 60000);
+                }
                 if (scope.newDOS.dos_datetime) {
                     scope.starttime = moment(scope.newDOS.dos_datetime).format(timeFormat);
                     scope.endtime = moment(scope.newDOS.dos_endtime, mwEndTimeFormat).format(timeFormat);

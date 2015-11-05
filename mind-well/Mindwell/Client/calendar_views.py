@@ -63,8 +63,8 @@ class CalendarFeed(object):
     def __run_filters(self):
         # limiting this to 3000 allows 3000 events in a month or ~100 per day
         self.dos_list = models.DOS.safe_all(request=self.request).filter(
-            'dos_datetime >', self.starttime).filter(
-            'dos_datetime <', self.endtime)
+            'dos_datetime >=', self.starttime).filter(
+            'dos_datetime <=', self.endtime)
         # Get all models.DOS with an end date for the repeating
         self.dos_repeats = models.DOS.safe_all(request=self.request).filter(
             'dos_repeat_end_date >=', self.starttime).fetch(
