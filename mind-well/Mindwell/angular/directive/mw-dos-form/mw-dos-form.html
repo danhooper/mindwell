@@ -24,7 +24,7 @@
     <div class="form-group" ng-hide="blockedTime">
       <label class="col-sm-4 control-label">Session Result</label>
       <div class="col-sm-8">
-        <select ng-model="newDOS.session_result" ng-options="value for value in resultChoices" class="form-control"></select>
+        <select ng-model="newDOS.session_result" ng-options="value for value in resultChoices" class="form-control" ng-change="sessionResultChanged()"></select>
       </div>
     </div>
     <div class="form-group" ng-hide="blockedTime">

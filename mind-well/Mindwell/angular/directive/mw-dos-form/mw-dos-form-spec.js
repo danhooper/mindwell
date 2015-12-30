@@ -40,4 +40,20 @@ describe('mwDosForm', function() {
         mwTestCommon.$httpBackend.flush();
         $timeout.flush();
     });
+
+//    it('should update fields when cancelling sessions', function(done) {
+//        mindwellCache.getClients().then(function() {
+//            scope.testClient = {
+//                id: 1
+//            };
+//            var element = compile('<mw-dos-form mw-client="testClient" ng-model="dos"></mw-dos-form>')(scope);
+//            mindwellCache.clients = [scope.testClient];
+//        });
+//        $timeout(function() {
+//
+//            done();
+//        });
+//        mwTestCommon.$httpBackend.flush();
+//        $timeout.flush();
+//    });
 });

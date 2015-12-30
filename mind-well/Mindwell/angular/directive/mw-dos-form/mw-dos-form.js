@@ -204,6 +204,16 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                         scope.$emit('mw-dos-updated', savedDOS);
                     });
                 };
+
+                scope.sessionResultChanged = function() {
+                    if (scope.newDOS.session_result === 'Cancellation - Timely') {
+                        scope.newDOS.amt_due = 0;
+                        scope.endtime = scope.starttime;
+                    } else if (scope.newDOS.session_result === 'Cancellation - Late') {
+                        scope.endtime = scope.starttime;
+                    }
+
+                };
             };
 
 
