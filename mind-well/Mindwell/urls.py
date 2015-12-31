@@ -1,11 +1,13 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
-urlpatterns = patterns('Mindwell.Client.view_common',
+urlpatterns = patterns(
+    'Mindwell.Client.view_common',
     (r'^$', 'greetings'),
     url(r'^Mindwell/UserNotAllowed$', 'usernotallowed', name='usernotallowed')
 )
 
-urlpatterns += patterns('Mindwell.Client.views',
+urlpatterns += patterns(
+    'Mindwell.Client.views',
     (r'^Mindwell/$', 'redirect_to_base'),
     (r'^administrator/$', 'administrator'),
     (r'^administrator/clear_memcache/$', 'clear_memcache'),
@@ -86,7 +88,8 @@ urlpatterns += patterns('Mindwell.Client.client_views',
         name='client_balance')
 )
 
-urlpatterns += patterns('Mindwell.Client.calendar_views',
+urlpatterns += patterns(
+    'Mindwell.Client.calendar_views',
     #Calendar
     url(r'^Mindwell/calendar/$', 'calendar_display', name='calendar'),
     (r'^Mindwell/calendar_feed', 'calendar_feed'),

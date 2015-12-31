@@ -35,7 +35,7 @@ def rest_dos(request):
                             content_type="application/json")
         return resp
     elif request.method == 'POST':
-        post_dict = json.loads(request.raw_post_data)
+        post_dict = json.loads(request.body)
         form = models.DOSForm(post_dict, request=request)
         if form.is_valid():
             try:
@@ -60,7 +60,7 @@ def rest_indiv_dos(request, dos_id):
                             content_type='application/json')
         return resp
     elif request.method == 'PUT':
-        put_dict = json.loads(request.raw_post_data)
+        put_dict = json.loads(request.body)
         form = models.DOSForm(put_dict, request=request)
         if form.is_valid():
             try:
@@ -89,7 +89,7 @@ def rest_clientinfo(request):
                             content_type="application/json")
         return resp
     elif request.method == 'POST':
-        post_dict = json.loads(request.raw_post_data)
+        post_dict = json.loads(request.body)
         form = models.ClientForm(post_dict)
         if form.is_valid():
             entity = models.ClientInfo(**form.cleaned_data)
@@ -112,7 +112,7 @@ def rest_indiv_client(request, client_id):
                             content_type='application/json')
         return resp
     elif request.method == 'PUT':
-        put_dict = json.loads(request.raw_post_data)
+        put_dict = json.loads(request.body)
         form = models.ClientForm(put_dict)
         if form.is_valid():
             client.update_model(form.cleaned_data)
