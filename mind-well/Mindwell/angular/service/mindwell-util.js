@@ -109,6 +109,14 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
         window.open('/Mindwell/' + dos.id + '/dos_receipt/', '_blank');
     };
 
+    mindwellUtil.clientFields = [{
+        key: 'lastname',
+        title: 'Last Name'
+    }, {
+        key: 'firstname',
+        title: 'First Name'
+    }];
+
 
     return mindwellUtil;
 });
