@@ -181,6 +181,9 @@ module.exports = function(grunt) {
         },
         concat: {
             main: {
+                options: {
+                    sourceMap: true
+                },
                 src: ['<%= dom_munger.data.appjs %>', '<%= ngtemplates.main.dest %>'],
                 dest: 'temp/app.full.js'
             }
@@ -194,7 +197,11 @@ module.exports = function(grunt) {
         uglify: {
             main: {
                 src: 'temp/app.full.js',
-                dest: 'dist/app.full.min.js'
+                dest: 'dist/app.full.min.js',
+                options: {
+                    sourceMap: true,
+                    sourceMapIncludeSources: true
+                }
             }
         },
         htmlmin: {
