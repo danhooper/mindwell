@@ -616,7 +616,7 @@ class ClientInfo(db.Model):
             clients = ClientInfo.safe_all(request)
         else:
             clients = ClientInfo.safe_all()
-        clients = clients.filter('client_status =', 'Active')
+        #clients = clients.filter('client_status =', 'Active')
         choices.extend([(client.get_id(), client) for client in clients])
         return choices
 
