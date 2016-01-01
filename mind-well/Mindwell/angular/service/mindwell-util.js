@@ -115,6 +115,98 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
     }, {
         key: 'firstname',
         title: 'First Name'
+    }, {
+        key: 'cellnumber',
+        title: 'Cell'
+    }, {
+        key: 'cellmessage',
+        title: 'Cell Message'
+    }, {
+        key: 'homenumber',
+        title: 'Home'
+    }, {
+        key: 'homemessage',
+        title: 'Home Message'
+    }, {
+        key: 'worknumber',
+        title: 'Work Number'
+    }, {
+        key: 'emailaddress',
+        title: 'Email'
+    }, {
+        key: 'address',
+        title: 'Address 1'
+    }, {
+        key: 'address2',
+        title: 'Address 2'
+    }, {
+        key: 'city',
+        title: 'City'
+    }, {
+        key: 'state',
+        title: 'State'
+    }, {
+        key: 'zipcode',
+        title: 'Zip'
+    }, {
+        key: 'dob_month',
+        title: 'DOB Month'
+    }, {
+        key: 'dob_day',
+        title: 'DOB Day'
+    }, {
+        key: 'dob_year',
+        title: 'DOB Year'
+    }, {
+        key: 'referrer',
+        title: 'Referrer'
+    }, {
+        key: 'dms_code',
+        title: 'ICD 10'
+    }, {
+        key: 'client_status',
+        title: 'Client Status'
+    }, {
+        key: 'guardians_name',
+        title: 'Guardians Name'
+    }, {
+        key: 'guardians_phone_number',
+        title: 'Guardians Phone Number'
+    }, {
+        key: 'emergency_contact',
+        title: 'Emergency Contact'
+    }, {
+        key: 'emergency_contact_phone_number',
+        title: 'Emergency Contact Phone'
+    }, {
+        key: 'reason_for_visit',
+        title: 'Reason For Visit'
+    }];
+
+    mindwellUtil.dosFields = [{
+        key: 'client',
+        title: 'Client',
+    }, {
+        key: 'dos_datetime',
+        title: 'DOS Date and Time'
+    }, {
+        key: 'session_type',
+        title: 'Session Type'
+    }, {
+        key: 'session_result',
+        title: 'Session Result'
+    }, {
+        key: 'type_pay',
+        title: 'Type of Payment'
+    }, {
+        key: 'note',
+        title: 'Note'
+    }, {
+        key: 'amt_due',
+        title: 'Amount Due'
+    }, {
+        key: 'amt_paid',
+        title: 'Amount Paid'
     }];
 
 

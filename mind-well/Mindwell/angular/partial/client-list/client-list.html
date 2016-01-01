@@ -9,7 +9,14 @@
       <button class="btn btn-default" ng-click="calcBalance()">Calculate Balances</button>
       <button class="btn btn-default" ng-click="exportData()">Export All Data</button>
     </div>
-  </div>
+</div>
+<div ng-if="exportRunning" class="mw-export-progress">
+    Exporting Clients to Spreadsheet
+    <progressbar max="100" value="clientCSVPromiseProgress">{{clientCSVPromiseProgress}}%</progressbar>
+    Exporting Dates of Service to Spreadsheet
+    <progressbar max="100" value="dosCSVPromiseProgress">{{dosCSVPromiseProgress}}%</progressbar>
+</div>
+
   <br/>
   <div>
     <span ng-repeat="letter in clientLetters">
