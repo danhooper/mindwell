@@ -1,6 +1,6 @@
 angular.module('mindwell').controller('ClientListCtrl', function(
     $scope, $rootScope, $location, mindwellRest, $filter, ngTableParams, prompt, $timeout,
-    mindwellCache, mindwellUtil, mwExport) {
+    mindwellCache, mindwellUtil, mwExport, $q) {
 
     $rootScope.linkActive = {
         clients: true
@@ -111,6 +111,20 @@ angular.module('mindwell').controller('ClientListCtrl', function(
     };
 
     $scope.exportData = function() {
-        mwExport.getClientCSV();
+        $scope.exportRunning = true;
+        $scope.clientCSVPromise = mwExport.getClientCSV().then(function() {
+            $scope.clientCSVPromiseProgress = 100;
+        });
+        $scope.dosCSVPromise = mwExport.getDOSCsv().then(undefined, undefined, function(progress) {
+            $timeout(function() {
+                $scope.$apply();
+            });
+            $scope.dosCSVPromiseProgress = progress;
+        });
+        $q.all($scope.clientCSVPromise, $scope.dosCSVPromise).then(function() {
+            $timeout(function() {
+                $scope.exportRunning = false;
+            }, 10000);
+        });
     };
 });

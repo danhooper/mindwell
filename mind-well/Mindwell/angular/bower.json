@@ -24,7 +24,7 @@
     "restangular": "~1.4.0",
     "ng-table": "~0.3.3",
     "angular-prompt": "~1.1.0",
-    "lodash": "~2.4.1",
+    "lodash": "~3.10.1",
     "angular-busy": "~4.1.0",
     "angular-cookie": "~4.0.6",
     "angular-ui-calendar": "https://github.com/angular-ui/ui-calendar.git#81069d1945bea8ad1727cf5f44096f58d872a96b",
@@ -33,6 +33,7 @@
   "resolutions": {
     "angular": "~1.2",
     "fullcalendar": "~2.3.1",
-    "jquery": "~2.0"
+    "jquery": "~2.0",
+    "lodash": "~3.10.1"
   }
 }
