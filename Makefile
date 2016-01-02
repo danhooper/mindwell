@@ -50,7 +50,7 @@ run:
 	/usr/bin/python2.7 /usr/lib/python2.7/dist-packages/coverage/__main__.py run /var/lib/jenkins/google_appengine/dev_appserver.py mind-well --admin_host 0.0.0.0 --host 0.0.0.0 --port 9000 --clear_datastore --datastore_path=./datastore &
 
 upload_data:
-	echo 'XX' | python google_appengine/appcfg.py upload_data --url http://localhost:9000/remote_api --file=~/mindwell_backup_2015_10_03.bin --application=dev~mindwellonline -e test@example.com
+	echo 'XX' | python google_appengine/appcfg.py upload_data --url http://localhost:9000/remote_api --file=/Users/dhooper/mindwell_backup_2015_10_03.bin --application=dev~mindwellonline -e test@example.com
 
 stop:
 	-kill `ps | grep python | sed 's/pts\/*\w*.*//'`
