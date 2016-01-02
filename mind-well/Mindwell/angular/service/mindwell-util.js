@@ -149,19 +149,13 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
         key: 'zipcode',
         title: 'Zip'
     }, {
-        key: 'dob_month',
-        title: 'DOB Month'
-    }, {
-        key: 'dob_day',
-        title: 'DOB Day'
-    }, {
-        key: 'dob_year',
-        title: 'DOB Year'
+        key: 'dob',
+        title: 'DOB'
     }, {
         key: 'referrer',
         title: 'Referrer'
     }, {
-        key: 'dms_code',
+        key: 'dsm_code',
         title: 'ICD 10'
     }, {
         key: 'client_status',

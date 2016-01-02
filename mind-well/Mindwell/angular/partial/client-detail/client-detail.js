@@ -13,9 +13,9 @@ angular.module('mindwell').controller('ClientDetailCtrl', function($scope, $loca
     }
 
     $scope.$on('mw-client-updated', function() {
-        //$location.path('client-list').search({
-        //    'contentId': null
-        //});
+        $location.path('client-list').search({
+            'contentId': null
+        });
     });
 
 

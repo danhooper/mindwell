@@ -8,10 +8,14 @@ angular.module('mindwell').factory('mwExport', function(
         var values;
         var rows = _.map(entities, function(entity) {
             values = _.map(fields, function(field) {
+                if (!entity[field.key]) {
+                    return '';
+                }
                 return entity[field.key];
             });
             return values;
         });
+        console.log(rows);
         var header = _.map(fields, 'title');
         return csvContent + new CSV(rows, {header: header}).encode();
     };
