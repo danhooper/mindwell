@@ -121,7 +121,7 @@ angular.module('mindwell').controller('ClientListCtrl', function(
             });
             $scope.dosCSVPromiseProgress = progress;
         });
-        $q.all($scope.clientCSVPromise, $scope.dosCSVPromise).then(function() {
+        $q.all([$scope.clientCSVPromise, $scope.dosCSVPromise]).then(function() {
             $timeout(function() {
                 $scope.exportRunning = false;
             }, 10000);

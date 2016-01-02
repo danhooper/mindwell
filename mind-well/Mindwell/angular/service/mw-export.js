@@ -46,7 +46,8 @@ angular.module('mindwell').factory('mwExport', function(
             return fetchDOSChunk(0, clientsChunked, [], deferred);
         }).then(function(dosList) {
             _.each(dosList, function(dos) {
-                var client = _.find(mindwellCache.clients, {id: dos.clientinfo});
+                // TODO: Remove parseInt once issue #48 is fixed
+                var client = _.find(mindwellCache.clients, {id: parseInt(dos.clientinfo, 10)});
                 if (client) {
                     dos.client = client.lastname + ',' + client.firstname;
                 }
