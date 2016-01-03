@@ -41,23 +41,15 @@ describe('mwDosForm', function() {
         $timeout.flush();
     });
 
-    it('should update fields when cancelling sessions', function(done) {
-        // TODO: Try to update with jquery
-        mindwellCache.getClients().then(function() {
-            scope.testClient = {
-                id: 1
-            };
-            var element = compile('<mw-dos-form mw-client="testClient" ng-model="dos"></mw-dos-form>')(scope);
-            mindwellCache.clients = [scope.testClient];
-        });
-        $timeout(function() {
-            scope.$$childHead.newDOS.session_result = 'Cancellation - Timely';
-            scope.$$childHead.sessionResultChanged();
-            expect(scope.$$childHead.newDOS.amt_due).toEqual(0);
-            done();
-        });
+    it('should update fields when cancelling sessions', function() {
+        var element = compile('<mw-dos-form ng-model="dos"></mw-dos-form>')(scope);
+        scope.$digest();
         mwTestCommon.$httpBackend.flush();
-        $timeout.flush();
+        expect(scope.$$childHead.starttime).not.toEqual(scope.$$childHead.endtime);
+        angular.element($('#mw-session-result', element)[0]).val(4);
+        angular.element($('#mw-session-result', element)[0]).change();
+        expect(scope.$$childHead.newDOS.amt_due).toEqual(0);
+        expect(scope.$$childHead.starttime).toEqual(scope.$$childHead.endtime);
     });
 });
 
