@@ -219,6 +219,35 @@ def rest_invoice_settings(request):
         request, models.InvoiceSettings, models.InvoiceSettingsForm)
 
 
+def rest_indiv_user_perm(request, perm_id):
+    perm_id = int(perm_id)
+    perm = models.UserPermission.safe_get_by_id(perm_id, request)
+    if request.method == 'GET':
+        resp = HttpResponse(json.dumps(perm.get_rest()),
+                            content_type='application/json')
+        return resp
+    #elif request.method == 'PUT':
+    #    put_dict = json.loads(request.body)
+    #    form = models.DOSForm(put_dict, request=request)
+    #    if form.is_valid():
+    #        try:
+    #            client = models.ClientInfo.safe_get_by_id(
+    #                int(form.cleaned_data['clientinfo']), request=request)
+    #            form.cleaned_data['clientinfo'] = client
+    #        except ValueError:
+    #            form.cleaned_data['clientinfo'] = None
+    #        dos.update_model(form.cleaned_data)
+    #        view_common.save_entity(request, dos)
+    #        return HttpResponse(json.dumps(dos.get_rest()),
+    #                            content_type='application/json')
+    #    else:
+    #        return error_response(form)
+    elif request.method == 'DELETE':
+        perm.delete()
+        resp = HttpResponse('', content_type='application/json')
+        return resp
+
+
 def rest_user_perm(request):
     if request.method == 'GET':
         perm_users = context_processors.get_permitted_users(request)
@@ -260,8 +289,7 @@ def rest_logouturl(request):
 
 def rest_whoami(request):
     if request.method == 'GET':
-        user = users.get_current_user().__dict__
-        logging.info(user)
+        user = users.get_current_user()
         return HttpResponse(
-            models.get_rest(users.get_current_user()),
+            json.dumps({'email': user.email()}),
             content_type='application/json')

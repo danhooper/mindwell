@@ -132,8 +132,20 @@ angular.module('mindwell').factory('mindwellCache', function(mindwellRest, $root
         mindwellCache._invoicesPromise = undefined;
     };
 
+    mindwellCache.getWhoami = function() {
+        if (!mindwellCache._whoamiPromise) {
+            mindwellCache._whoamiPromise = mindwellRest.whoami.get().then(function(whoami) {
+                mindwellCache.whoami = whoami;
+                $rootScope.$emit('mindwell.whoamiUpdated');
+                return mindwellCache.whoami;
+            });
+        }
+        return mindwellCache._whoamiPromise;
+    };
+
     mindwellCache.getUserPerm();
     mindwellCache.getLogoutUrl();
+    mindwellCache.getWhoami();
 
     return mindwellCache;
 });

@@ -20,6 +20,8 @@ angular.module('mindwell').factory('mindwellRest', function(Restangular) {
 
     mindwellRest.userPerm = Restangular.all('userperm');
 
+    mindwellRest.whoami = Restangular.one('whoami');
+
     mindwellRest.logoutUrl = Restangular.all('logouturl');
 
     return mindwellRest;

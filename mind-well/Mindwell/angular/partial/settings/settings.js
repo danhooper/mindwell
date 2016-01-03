@@ -42,8 +42,14 @@ angular.module('mindwell').controller('SettingsCtrl', function($scope, mindwellC
     };
     $scope.saveNewPermissionRequest = function() {
         mindwellRest.userPerm.post($scope.newPermission).then(function(req) {
-            $scope.userPerm.push(req);
-            mindwellCache.userPerm = $scope.userPerm;
+            $scope.userPermissions.push(req);
+            mindwellCache.userPerm = $scope.userPermissions;
+        });
+    };
+
+    $scope.deletePerm = function(perm) {
+        perm.remove().then(function() {
+            $scope.userPermissions = _.remove($scope.userPermissions, {id: perm.id});
         });
     };
 

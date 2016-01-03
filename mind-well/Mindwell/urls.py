@@ -115,6 +115,8 @@ urlpatterns += patterns(
     url(r'^Mindwell/rest/dos/(?P<dos_id>\d+)$', 'rest_indiv_dos',
         name='rest_indiv_dos'),
     url(r'^Mindwell/rest/userperm$', 'rest_user_perm', name='rest_user_perm'),
+    url(r'^Mindwell/rest/userperm/(?P<perm_id>\d+)$', 'rest_indiv_user_perm',
+        name='rest_indiv_user_perm'),
     url(r'^Mindwell/rest/logouturl$', 'rest_logouturl', name='rest_logouturl'),
     url(r'^Mindwell/rest/custom_form$', 'rest_custom_form_settings',
         name='rest_custom_form_settings'),

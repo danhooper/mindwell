@@ -117,7 +117,7 @@
                 <select class="form-control" name="permitted_user" id="permitted_user" ng-model="currentUser"
                   ng-change="updateUser()">
                   <option value="" ng-selected="!currentUser">Self</option>
-                  <option ng-repeat="user in mindwellCache.userPerm | filter:{user_approved: 'Approved'}:true" ng-selected="currentUser === user.key"
+                  <option ng-repeat="user in mindwellCache.userPerm | filter:{user_approved: 'Approved', userinfo: mindwellCache.whoami.email}:true" ng-selected="currentUser === user.key"
                   value="{{user.key}}">{{ user.permitteduser }}</option>
                 </select>
               </div>
