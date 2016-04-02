@@ -11,6 +11,7 @@ import context_processors
 import models
 import view_common
 import calendar_views
+import views
 
 
 def error_response(form):
@@ -172,6 +173,19 @@ def rest_invoice(request):
                                             'errors': errors}),
                                 content_type='application/json',
                                 status=404)
+
+
+def rest_invoice_by_date(request):
+    if request.method == 'POST':
+        post_dict = json.loads(request.raw_post_data)
+        start = datetime.datetime.strptime(post_dict.get('start'), '%Y-%m-%d')
+        end = datetime.datetime.strptime(post_dict.get('end'), '%Y-%m-%d')
+        end = end.replace(hour=23, minute=59)
+        resp_dict = views.generate_invoices_dict(start, end, request=request)
+        return HttpResponse(
+            json.dumps([i.get_rest() for i in resp_dict.get('invoices')]),
+            content_type='application/json'
+        )
 
 
 def generic_rest_singleton(request, model_class, form_class):

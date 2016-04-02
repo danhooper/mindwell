@@ -9,8 +9,12 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
     };
 
     mindwellUtil.generateClientInvoicesByDate = function(start, end) {
-        var dateFormat = 'YYYY/MM/DD';
-        window.location = '/Mindwell/' + start.format(dateFormat) + '/' + end.format(dateFormat) + '/generate_client_invoices_by_date';
+        var dateFormat = 'YYYY-MM-DD';
+        $location.path('/reports').search({
+            section: 'Customer Invoices',
+            start: start.format(dateFormat),
+            end: end.format(dateFormat)
+        });
     };
 
     mindwellUtil.generateProviderInvoicesByDate = function(start, end) {

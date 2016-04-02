@@ -130,6 +130,8 @@ urlpatterns += patterns(
         name='rest_calendar_feed'),
     url(r'^Mindwell/rest/invoice$', 'rest_invoice',
         name='rest_invoice'),
+    url(r'^Mindwell/rest/invoice/by_date$', 'rest_invoice_by_date',
+        name='rest_invoice_by_date'),
     url(r'^Mindwell/rest/invoice_settings$', 'rest_invoice_settings',
         name='rest_invoice_settings'),
     url(r'^Mindwell/rest/invoice_settings/\d+$', 'rest_invoice_settings',

@@ -1,9 +1,25 @@
-angular.module('mindwell').controller('InvoicesCtrl', function($scope, mindwellCache, mindwellRest, mindwellUtil) {
+angular.module('mindwell').controller('InvoicesCtrl', function(
+    $scope, mindwellCache, mindwellRest, mindwellUtil, $location, $http) {
+
     $scope.generatedInvoices = [];
     $scope.allInvoices = [];
 
     mindwellCache.getInvoices().then(function(invoices) {
         $scope.allInvoices = invoices;
+        var search = $location.search();
+        if (search.start && search.end) {
+            $http.post('/Mindwell/rest/invoice/by_date', {
+                start: search.start,
+                end: search.end
+            }).then(function(response) {
+                _.each(response.data, function(invoice) {
+                    $scope.allInvoices.push(invoice);
+                    $scope.generatedInvoices.push(invoice);
+                });
+                $scope.allInvoices = _.uniq($scope.allInvoices, 'id');
+            });
+        }
+
     });
     mindwellCache.getClients().then(function() {
         $scope.clients = mindwellCache.clients;
@@ -39,6 +55,5 @@ angular.module('mindwell').controller('InvoicesCtrl', function($scope, mindwellC
 
     $scope.genForm = {start_date: new Date(), end_date: new Date()};
     $scope.client = {};
-
 
 });
