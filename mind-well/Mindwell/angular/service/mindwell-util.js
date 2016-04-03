@@ -18,8 +18,12 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
     };
 
     mindwellUtil.generateProviderInvoicesByDate = function(start, end) {
-        var dateFormat = 'YYYY/MM/DD';
-        window.location = '/Mindwell/' + start.format(dateFormat) + '/' + end.format(dateFormat) + '/provider_invoices';
+        var dateFormat = 'YYYY-MM-DD';
+        $location.path('/reports').search({
+            section: 'Provider Invoices',
+            start: start.format(dateFormat),
+            end: end.format(dateFormat)
+        });
     };
 
     mindwellUtil.calcBalances = function(dosList) {
