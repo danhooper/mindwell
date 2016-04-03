@@ -1,12 +1,10 @@
-angular.module('mindwell').controller('ProviderInvoicesCtrl', function($scope, mindwellRest, ngTableParams, mindwellCache, mindwellUtil, $rootScope) {
+angular.module('mindwell').controller('ProviderInvoicesCtrl', function(
+    $scope, mindwellRest, ngTableParams, mindwellCache, mindwellUtil, $rootScope, $location) {
 
 
     $scope.startOpened = false;
     $scope.endOpened = false;
 
-    mindwellCache.getClients().then(function() {
-        // noop to ensure we get clients cached for display
-    });
     $scope.dosList = [];
     $scope.generate = function() {
         var params = {
@@ -25,54 +23,20 @@ angular.module('mindwell').controller('ProviderInvoicesCtrl', function($scope, m
                 }, sum);
                 $scope.total += $scope.dosSummary[cat];
             });
-            $scope.tableParams.reload();
         });
     };
-
-    $scope.genForm = {
-        start: new Date(),
-        end: new Date()
-    };
-    $scope.invoiceTableCols = [{
-        title: 'Date of Service',
-        field: 'dos_datetime',
-        visible: true
-    }, {
-        title: 'Client',
-        field: 'clientinfo',
-        visible: true
-    }, {
-        title: 'Type of Payment',
-        field: 'type_pay',
-        visible: true
-    }, {
-        title: 'Amount Due',
-        field: 'amt_due',
-        visible: true
-    }, {
-        title: 'Amount Paid',
-        field: 'amt_paid',
-        visible: true
-    }];
-    $scope.tableParams = new ngTableParams({ //jshint ignore:line
-        page: 1, // show first page
-        count: 1000, // count per page
-        sorting: {
-            dos_datetime: 'desc' // initial sorting
-        },
-        filter: $scope.filters,
-    }, {
-        total: 1,
-        counts: [],
-        getData: function($defer, params) {
-            $defer.resolve($scope.dosList);
-        }
-    });
-    $scope.getClient = function(dos) {
-        return _.find(mindwellCache.clients, {
-            id: dos.clientinfo
-        });
-    };
+    $scope.genForm = {};
+    var search = $location.search();
+    if (search.start && search.end) {
+        $scope.genForm.start = new Date(search.start);
+        $scope.genForm.end = new Date(search.end);
+        $scope.generate();
+    } else {
+        $scope.genForm = {
+            start: new Date(),
+            end: new Date()
+        };
+    }
 
     $scope.startOpen = function($event) {
         $event.preventDefault();

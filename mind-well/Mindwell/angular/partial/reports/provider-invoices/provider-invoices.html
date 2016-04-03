@@ -1,64 +1,36 @@
 <div class="col-md-12" ng-controller="ProviderInvoicesCtrl">
 
-  <h2>Generate Provider Invoice</h2>
-  <form class="form-inline">
-      <label>Start</label>
-      <div class="input-group">
-        <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="genForm.start"
-        is-open="startOpened" ng-required="true" close-text="Close">
-        <span class="input-group-btn">
-          <button type="button" class="btn btn-default" ng-click="startOpen($event)"><i class="fa fa-calendar"></i></button>
-        </span>
-      </div>
-      <label>&nbsp;&nbsp;End</label>
-      <div class="input-group">
-        <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="genForm.end"
-        is-open="endOpened" ng-required="true" close-text="Close">
-        <span class="input-group-btn">
-          <button type="button" class="btn btn-default" ng-click="endOpen($event)"><i class="fa fa-calendar"></i></button>
-        </span>
-      </div>
-    <button class="btn btn-success" ng-click="generate()">Generate</button>
-  </form>
-  <br/><br/>
-  <div ng-if="dosList.length > 0">
-    <table ng-table="tableParams" class="table" show-filter="true">
-      <thead>
-        <tr>
-          <th ng-repeat="column in invoiceTableCols" ng-show="column.visible" class="text-center"
-            ng-class="{
-            'sort-asc': tableParams.isSortBy(column.field, 'asc'),
-            'sort-desc': tableParams.isSortBy(column.field, 'desc'),
-            'sortable': column.title !== 'Actions'
-            }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
-            <div>{{column.title}}</div>
-          </th>
-        </tr>
-      </thead>
-      <tr ng-repeat="dos in $data | filter:invoiceFilter">
-        <td ng-repeat="col in invoiceTableCols" sortable="col.field">
-          <span ng-if="col.field === 'clientinfo'">
-            {{getClient(dos) | clientName}}
-          </span>
-          <span ng-if="col.field === 'dos_datetime'">
-            {{dos.dos_datetime | date:'MMM d, y h:mm a'}}
-          </span>
-          <span ng-if="col.field !== 'clientinfo' && col.field !== 'dos_datetime'">
-            {{dos[col.field]}}
-          </span>
-        </td>
-      </tr>
-    </table>
+    <h2>Generate Provider Invoice</h2>
+    <form class="form-inline">
+        <label>Start</label>
+        <div class="input-group">
+            <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="genForm.start"
+            is-open="startOpened" ng-required="true" close-text="Close">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="startOpen($event)"><i class="fa fa-calendar"></i></button>
+            </span>
+        </div>
+        <label>&nbsp;&nbsp;End</label>
+        <div class="input-group">
+            <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="genForm.end"
+            is-open="endOpened" ng-required="true" close-text="Close">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="endOpen($event)"><i class="fa fa-calendar"></i></button>
+            </span>
+        </div>
+        <button class="btn btn-success" ng-click="generate()">Generate</button>
+    </form>
+    <br/><br/>
+    <mw-provider-invoices-table ng-model="dosList"></mw-provider-invoices-table>
     <div>
-      <div ng-repeat="(key, value) in dosSummary">
-        <span ng-if="key === ''">Other</span>
-        <span ng-if="key !== ''">{{key | titleize}}</span>
-        Total: {{value}}
-      </div>
-      <div ng-if="dosList.length > 0">
-        Total: {{total}}
-      </div>
+        <div ng-repeat="(key, value) in dosSummary">
+            <span ng-if="key === ''">Other</span>
+            <span ng-if="key !== ''">{{key | titleize}}</span>
+            Total: {{value}}
+        </div>
+        <div ng-if="dosList.length > 0">
+            Total: {{total}}
+        </div>
     </div>
-  </div>
 
 </div>

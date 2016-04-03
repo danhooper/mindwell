@@ -1,0 +1,31 @@
+<div>
+    <table ng-table="tableParams" class="table" show-filter="true">
+      <thead>
+        <tr>
+          <th ng-repeat="column in invoiceTableCols" ng-show="column.visible" class="text-center"
+            ng-class="{
+            'sort-asc': tableParams.isSortBy(column.field, 'asc'),
+            'sort-desc': tableParams.isSortBy(column.field, 'desc'),
+            'sortable': column.title !== 'Actions'
+            }" ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
+            <div>{{column.title}}</div>
+          </th>
+        </tr>
+      </thead>
+      <tr ng-repeat="dos in $data | filter:invoiceFilter">
+        <td ng-repeat="col in invoiceTableCols" sortable="col.field">
+          <span ng-if="col.field === 'clientinfo'">
+            {{getClient(dos) | clientName}}
+          </span>
+          <span ng-if="col.field === 'dos_datetime'">
+            {{dos.dos_datetime | date:'MMM d, y h:mm a'}}
+          </span>
+          <span ng-if="col.field !== 'clientinfo' && col.field !== 'dos_datetime'">
+            {{dos[col.field]}}
+          </span>
+        </td>
+      </tr>
+    </table>
+
+
+</div>
