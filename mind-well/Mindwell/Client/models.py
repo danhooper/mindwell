@@ -776,6 +776,7 @@ class DOS(db.Model):
         'Cancellation - Late',
         'Cancellation - Timely',
         'Payment Received',
+        'Attended, Not Billed'
     )
     # Used to filter DOS based upon attended DOS
     session_result = db.StringProperty(verbose_name='Session Result',
@@ -1046,6 +1047,9 @@ class DOS(db.Model):
                 return 'gray'
             elif self.session_result.lower().find('received') != -1:
                 return 'lightgreen'
+            elif self.session_result.lower().find(
+                    'attended, not billed') != -1:
+                return 'orange'
             else:
                 return 'green'
         except AttributeError:
@@ -1064,6 +1068,9 @@ class DOS(db.Model):
                 return 'white'
             elif self.session_result.lower().find('received') != -1:
                 return 'blue'
+            elif self.session_result.lower().find(
+                    'attended, not billed') != -1:
+                return 'white'
             else:
                 return 'white'
         except AttributeError:
@@ -1103,6 +1110,7 @@ class DOSForm(forms.Form):
         ('Cancellation - Late', 'Cancellation - Late'),
         ('Cancellation - Timely', 'Cancellation - Timely'),
         ('Payment Received', 'Payment Received'),
+        ('Attended, Not Billed', 'Attended, Not Billed'),
     )
     # Used to filter DOS based upon attended DOS
     session_result = forms.ChoiceField(choices=SESSION_RESULT_CHOICES,
@@ -1168,6 +1176,7 @@ class DOSFormNoClientSelect(forms.Form):
         ('Cancellation - Late', 'Cancellation - Late'),
         ('Cancellation - Timely', 'Cancellation - Timely'),
         ('Payment Received', 'Payment Received'),
+        ('Attended, Not Billed', 'Attended, Not Billed'),
     )
     # Used to filter DOS based upon attended DOS
     session_result = forms.ChoiceField(choices=SESSION_RESULT_CHOICES,

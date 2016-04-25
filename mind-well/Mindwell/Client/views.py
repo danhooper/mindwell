@@ -386,7 +386,7 @@ def invoice_display(request, invoice_id, all_dos='', attended_only='',
       'dos_datetime >=', invoice.start_date).filter(
       'dos_datetime <=', invoice_enddatetime)
     if attended_only:
-        dos = dos.filter('session_result = ', 'Attended')
+        dos = dos.filter('session_result IN ', ['Attended', 'Attended, Not Billed'])
     dos = dos.fetch(common.get_maximum_num_dos_fetch())
     dos_balance = 0
     dsm_code = invoice.clientinfo.dsm_code
@@ -542,7 +542,10 @@ def get_provider_stats(dos):
     dos_dict = {}
     # remove all except for attended and with real clients
     dos = [d for d in dos
-           if not d.get_blocked_time() and d.session_result == 'Attended']
+           if not d.get_blocked_time() and (
+               d.session_result == 'Attended' or
+               d.session_result == 'Attended, Not Billed'
+           )]
     for d in dos:
         if models.DOS.clientinfo.get_value_for_datastore(d) in dos_dict:
             dos_dict[models.DOS.clientinfo.get_value_for_datastore(d)] += 1
@@ -573,7 +576,7 @@ def get_provider_stats(dos):
 
 def provider_stats_all_time(request):
     dos = models.DOS.safe_all(request=request).filter(
-        'session_result = ', 'Attended').fetch(
+        'session_result IN ', ['Attended', 'Attended, Not Billed']).fetch(
         common.get_maximum_num_dos_fetch())
     render_to_response_dict = get_provider_stats(dos)
 

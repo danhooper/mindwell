@@ -58,7 +58,8 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                     'No Show',
                     'Cancellation - Late',
                     'Cancellation - Timely',
-                    'Payment Received'
+                    'Payment Received',
+                    'Attended, Not Billed'
                 ];
                 scope.dosRepeatChoices = [
                     'No',
