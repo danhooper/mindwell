@@ -194,11 +194,10 @@ def DOSInvoiceHeader():
     return [
         ['Date of Service',
         'CPT Code',
-        'Length of Session',
         'Amount Due',
         'Amount Paid',
         'Adjustment',
-        'Type of Payment', ]
+        'Payment Type', ]
     ]
 
 
@@ -206,7 +205,6 @@ def DOSInvoiceRow(dos):
     return (
         dos.get_dos_date_display(),
         str(dos.session_type),
-        str(dos.get_duration()),
         str(dos.amt_due),
         str(dos.amt_paid),
         str(dos.adjustment),
