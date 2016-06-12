@@ -52,6 +52,7 @@
                     <td>Length of Session</td>
                     <td>Amount Due</td>
                     <td>Amount Paid</td>
+                    <td>Adjustment</td>
                     <td>Type of Payment</td>
                 </tr>
                 {%for individual_dos in dos %}
@@ -61,6 +62,7 @@
                         <td>{{individual_dos.get_duration}}</td>
                         <td>{{individual_dos.amt_due}}</td>
                         <td>{{individual_dos.amt_paid}}</td>
+                        <td>{{individual_dos.adjustment}}</td>
                         <td>{{individual_dos.type_pay}}</td>
                     </tr>
                 {% endfor %}

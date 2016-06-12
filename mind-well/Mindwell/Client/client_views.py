@@ -159,6 +159,11 @@ def get_amount_owed(running_balance_list, dos):
         except (ValueError, TypeError):
             pass
         try:
+            if individual_dos.adjustment:
+                balance += float(individual_dos.adjustment)
+        except (ValueError, TypeError):
+            pass
+        try:
             if individual_dos.amt_paid:
                 balance -= float(individual_dos.amt_paid)
         except (ValueError, TypeError):

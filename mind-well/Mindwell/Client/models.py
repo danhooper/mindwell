@@ -787,6 +787,7 @@ class DOS(db.Model):
     type_pay = db.StringProperty(verbose_name='Type Of Payment', indexed=False)
     amt_due = db.StringProperty(verbose_name='Amount Due', indexed=False)
     amt_paid = db.StringProperty(verbose_name='Amount Paid', indexed=False)
+    adjustment = db.StringProperty(verbose_name='Amount Paid', indexed=False)
     note = db.StringProperty(verbose_name='Note', indexed=False)
     # Used to find DOS based upon start times
     dos_datetime = db.DateTimeProperty(verbose_name='DOS Date and Time')
@@ -836,6 +837,7 @@ class DOS(db.Model):
             ('Type of Payment', self.type_pay),
             ('Amount Due', self.amt_due),
             ('Amount Paid', self.amt_paid),
+            ('Adjustment', self.adjustment),
             ('Note', self.note),
             ('DOS Date and Time', self.dos_datetime),
             ('DOS Repeat', self.dos_repeat),
@@ -851,6 +853,7 @@ class DOS(db.Model):
             ('Type of Payment', self.type_pay),
             ('Amount Due', self.amt_due),
             ('Amount Paid', self.amt_paid),
+            ('Adjustment', self.adjustment),
             ('Running Balance', 0),
             ('Note', self.note),
             ('DOS Date and Time', self.dos_datetime),
@@ -1120,6 +1123,7 @@ class DOSForm(forms.Form):
     type_pay = forms.CharField(max_length=300, required=False)
     amt_due = forms.CharField(max_length=300, required=False)
     amt_paid = forms.CharField(max_length=300, required=False)
+    adjustment = forms.CharField(max_length=300, required=False)
     note = forms.CharField(max_length=300, required=False)
     # Used to find DOS based upon start times
     dos_datetime = forms.DateTimeField(
@@ -1186,6 +1190,7 @@ class DOSFormNoClientSelect(forms.Form):
     type_pay = forms.CharField(max_length=300, required=False)
     amt_due = forms.CharField(max_length=300, required=False)
     amt_paid = forms.CharField(max_length=300, required=False)
+    adjustment = forms.CharField(max_length=300, required=False)
     note = forms.CharField(max_length=300, required=False)
     # Used to find DOS based upon start times
     dos_datetime = forms.DateTimeField(

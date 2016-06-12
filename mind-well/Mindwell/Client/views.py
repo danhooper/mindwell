@@ -179,10 +179,14 @@ def get_dos_balance(dos):
         except (ValueError, TypeError):
             amt_due = 0
         try:
+            adjustment = float(individual_dos.adjustment)
+        except (ValueError, TypeError):
+            adjustment = 0
+        try:
             amt_paid = float(individual_dos.amt_paid)
         except (ValueError, TypeError):
             amt_paid = 0
-        dos_balance = dos_balance + (amt_due - amt_paid)
+        dos_balance = dos_balance + (amt_due - amt_paid + adjustment)
     return dos_balance
 
 
@@ -193,6 +197,7 @@ def DOSInvoiceHeader():
         'Length of Session',
         'Amount Due',
         'Amount Paid',
+        'Adjustment',
         'Type of Payment', ]
     ]
 
@@ -204,6 +209,7 @@ def DOSInvoiceRow(dos):
         str(dos.get_duration()),
         str(dos.amt_due),
         str(dos.amt_paid),
+        str(dos.adjustment),
         str(dos.type_pay)
     )
 
@@ -396,10 +402,14 @@ def invoice_display(request, invoice_id, all_dos='', attended_only='',
         except (ValueError, TypeError):
             amt_due = 0
         try:
+            adjustment = float(individual_dos.adjustment)
+        except (ValueError, TypeError):
+            adjustment = 0
+        try:
             amt_paid = float(individual_dos.amt_paid)
         except (ValueError, TypeError):
             amt_paid = 0
-        dos_balance = dos_balance + (amt_due - amt_paid)
+        dos_balance = dos_balance + (amt_due - amt_paid + adjustment)
         if not dsm_code:
             dsm_code = individual_dos.dsm_code
     invoice_settings_entity = models.InvoiceSettings.safe_all(request=request)
@@ -453,10 +463,10 @@ def provider_invoices(request):
 
 def provider_invoices_display(request, start_year, start_month, start_day,
                               end_year, end_month, end_day):
-    start_invoice_date = datetime.datetime(year=int(start_year),
-        month=int(start_month), day=int(start_day))
-    end_invoice_date = datetime.datetime(year=int(end_year),
-        month=int(end_month), day=int(end_day))
+    start_invoice_date = datetime.datetime(
+        year=int(start_year), month=int(start_month), day=int(start_day))
+    end_invoice_date = datetime.datetime(
+        year=int(end_year), month=int(end_month), day=int(end_day))
     end_invoice_date = end_invoice_date.replace(hour=23, minute=59)
     dos = models.DOS.safe_all(request=request).filter(
         'dos_datetime >=', start_invoice_date).filter(

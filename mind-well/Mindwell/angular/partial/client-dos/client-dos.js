@@ -1,7 +1,7 @@
 angular.module('mindwell').controller('ClientDosCtrl', function(
     $scope, $location, mindwellCache, mindwellRest, ngTableParams, $filter,
     $timeout, Restangular, prompt, $anchorScroll,
-    mindwellUtil){
+    mindwellUtil) {
 
     var contentId = parseInt($location.search().contentId);
 
@@ -9,7 +9,9 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
     // on scope for unit tests
     $scope.getDOS = function($defer, params) {
         if ($scope.client.dosList === undefined) {
-            mindwellRest.dos.getList({clientinfo: $scope.client.id}).then(function(dosList) {
+            mindwellRest.dos.getList({
+                clientinfo: $scope.client.id
+            }).then(function(dosList) {
                 $scope.client.dosList = params.sorting() ? $filter('orderBy')(dosList, params.orderBy()) : dosList;
 
                 mindwellUtil.calcBalances($scope.client.dosList);
@@ -57,66 +59,87 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
         });
     };
 
-    $scope.dosTableCols = [
-        {title: 'DOS Date and Time',
-         field: 'dos_datetime',
-         visible: true
-        },
-        {title: 'Session Type',
-         field: 'session_type',
-         visible: true
-        },
-        {title: 'Session Result',
-         field: 'session_result',
-         visible: true
-        },
-        {title: 'DMS Code',
-         field: 'dsm_code',
-         visible: true
-        },
-        {title: 'Type of Payment',
-         field: 'type_pay',
-         visible: true
-        },
-        {title: 'Amount Due',
-         field: 'amt_due',
-         visible: true
-        },
-        {title: 'Amount Paid',
-         field: 'amt_paid',
-         visible: true
-        },
-        {title: 'Running Balance',
-         field: 'balance',
-         visible: true
-        },
-        {title: 'Note',
-         field: 'note',
-         visible: true
-        },
-        {title: 'DOS Repeat',
-         field: 'dos_repeat',
-         visible: true
-        },
-        {title: 'Repeat End Date',
-         field: 'dos_repeat_end_date',
-         visible: true
-        },
-        {title: 'Actions',
-         visible: true
-        }
-    ];
+    $scope.dosTableCols = [{
+        title: 'DOS Date and Time',
+        field: 'dos_datetime',
+        visible: true
+    }, {
+        title: 'Session Type',
+        field: 'session_type',
+        visible: true
+    }, {
+        title: 'Session Result',
+        field: 'session_result',
+        visible: true
+    }, {
+        title: 'DMS Code',
+        field: 'dsm_code',
+        visible: true
+    }, {
+        title: 'Type of Payment',
+        field: 'type_pay',
+        visible: true
+    }, {
+        title: 'Amount Due',
+        field: 'amt_due',
+        visible: true
+    }, {
+        title: 'Amount Paid',
+        field: 'amt_paid',
+        visible: true
+    }, {
+        title: 'Adjustment',
+        field: 'adjustment',
+        visible: true
+    }, {
+        title: 'Running Balance',
+        field: 'balance',
+        visible: true
+    }, {
+        title: 'Note',
+        field: 'note',
+        visible: true
+    }, {
+        title: 'DOS Repeat',
+        field: 'dos_repeat',
+        visible: true
+    }, {
+        title: 'Repeat End Date',
+        field: 'dos_repeat_end_date',
+        visible: true
+    }, {
+        title: 'Actions',
+        visible: true
+    }];
 
-    $scope.otherFields = [
-        {key: 'dob', display: 'DOB'},
-        {key: 'dsm_code', display: 'ICD 10'},
-        {key: 'client_status', display: 'Client Status'},
-        {key: 'referrer', display: 'Referrer'},
-        {key: 'guardians_name', display: 'Guardians Name'},
-        {key: 'guardians_phone_number', display: 'Guardians Phone Number'},
-        {key: 'emergency_contact', display: 'Emergency Contact'},
-        {key: 'emergency_contact_phone_number', display: 'Emergency Contact Phone Number'},
-        {key: 'reason_for_visit', display: 'Reason For Visit'},
+    $scope.otherFields = [{
+            key: 'dob',
+            display: 'DOB'
+        }, {
+            key: 'dsm_code',
+            display: 'ICD 10'
+        }, {
+            key: 'client_status',
+            display: 'Client Status'
+        }, {
+            key: 'referrer',
+            display: 'Referrer'
+        }, {
+            key: 'guardians_name',
+            display: 'Guardians Name'
+        }, {
+            key: 'guardians_phone_number',
+            display: 'Guardians Phone Number'
+        }, {
+            key: 'emergency_contact',
+            display: 'Emergency Contact'
+        }, {
+            key: 'emergency_contact_phone_number',
+            display: 'Emergency Contact Phone Number'
+        }, {
+            key: 'reason_for_visit',
+            display: 'Reason For Visit'
+        },
 
     ];
 
@@ -131,3 +154,4 @@ angular.module('mindwell').controller('ClientDosCtrl', function(
 
 
 });
+

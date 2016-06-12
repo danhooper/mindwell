@@ -21,17 +21,19 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
     mindwellUtil.calcBalances = function(dosList) {
         var sortedDOS = _.sortBy(dosList, 'dos_datetime');
         _.reduce(sortedDOS, function(prevDOS, dos) {
-            var amt_due, amt_paid, balance;
+            var amt_due, amt_paid, balance, adjustment;
             // calculate first DOS' balance
             if (prevDOS.balance === undefined) {
                 amt_due = parseFloat(prevDOS.amt_due) || 0;
                 amt_paid = parseFloat(prevDOS.amt_paid) || 0;
-                prevDOS.balance = amt_due - amt_paid;
+                adjustment = parseFloat(prevDOS.adjustment) || 0;
+                prevDOS.balance = amt_due - amt_paid + adjustment;
             }
             amt_due = parseFloat(dos.amt_due) || 0;
             amt_paid = parseFloat(dos.amt_paid) || 0;
+            adjustment = parseFloat(dos.adjustment) || 0;
             balance = parseFloat(prevDOS.balance) || 0;
-            dos.balance = balance + amt_due - amt_paid;
+            dos.balance = balance + amt_due - amt_paid + adjustment;
             return dos;
         });
         return sortedDOS;
@@ -201,6 +203,9 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
     }, {
         key: 'amt_paid',
         title: 'Amount Paid'
+    }, {
+        key: 'adjustment',
+        title: 'Adjustment'
     }];
 
 

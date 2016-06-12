@@ -62,6 +62,13 @@
   <th><label for="id_{{dos_form.amt_paid.html_name}}">Amount Paid:</label></th>
   <td>{{dos_form.amt_paid}}</td>
   </tr>
+  {% if dos_form.adjustment.errors %}
+    <tr><td>{{dos_form.adjustment.errors }}</td></tr>
+  {% endif %}
+  <tr>
+  <th><label for="id_{{dos_form.adjustment.html_name}}">Adjustment:</label></th>
+  <td>{{dos_form.adjustment}}</td>
+  </tr>
   {% if dos_form.note.errors %}
     <tr><td>{{dos_form.note.errors }}</td></tr>
   {% endif %}
