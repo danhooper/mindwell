@@ -3,3 +3,8 @@ cron:
   url: /_ereporter?sender=dan.c.hooper@gmail.com&versions=latest&delete=false
   schedule: every day 00:00
 
+- description: Daily backup
+  url: /_ah/datastore_admin/backup.create?name=BackupToCloud&kind=CalendarSettings&kind=ClientInfo&kind=CustomFormSettings&kind=DOS&kind=Invoice&kind=InvoiceSettings&kind=UserInfo&kind=UserPermission&filesystem=gs&gs_bucket_name=mindwellonline.appspot.com
+  schedule: every day 22:00
+  target: ah-builtin-python-bundle
+
