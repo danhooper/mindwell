@@ -64,7 +64,7 @@ angular.module('mindwell').controller('SettingsCtrl', function($scope, mindwellC
     });
     $scope.saveClientFormSettings = function() {
         $scope.clientForm.save().then(function(clientForm) {
-            mindwellCache.customForm = clientForm[0];
+            mindwellCache.customForm = clientForm;
         });
     };
 });
