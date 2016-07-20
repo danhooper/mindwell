@@ -32,6 +32,10 @@ angular.module('mindwell').directive('mwProviderInvoicesTable', function(mindwel
                 title: 'Amount Paid',
                 field: 'amt_paid',
                 visible: true
+            }, {
+                title: 'Adjustment',
+                field: 'adjustment',
+                visible: true
             }];
 
             ngModel.$render = function() {
