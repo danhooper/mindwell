@@ -23,6 +23,7 @@
 
 
 
+
 class Error(Exception):
   """Base datastore yaml error type."""
 

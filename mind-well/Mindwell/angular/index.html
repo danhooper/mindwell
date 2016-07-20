@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html ng-app="mindwell">
+  <head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link href="app.less" type="text/css" rel="stylesheet/less">
+    <link href="bower_components/angular-busy/dist/angular-busy.css" rel="stylesheet">
+    <link href="bower_components/fullcalendar/dist/fullcalendar.css" rel="stylesheet">
+  </head>
+  <body>
+
+    <!-- Livereload script for development only (stripped during dist build) -->
+    <script src="http://localhost:35729/livereload.js" data-concat="false"></script>
+    <script src="node_modules/grunt-browser-output/client.js" data-concat="false"></script>
+
+
+    <!-- JS from Bower Components -->
+    <script>
+      less = {
+        logLevel: 1
+      }
+    </script>
+    <script src="bower_components/less.js/dist/less-1.6.2.js" data-concat="false"></script>
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
+    <script src="bower_components/restangular/dist/restangular.js"></script>
+    <script src="bower_components/ng-table/ng-table.js"></script>
+    <script src="bower_components/angular-prompt/dist/angular-prompt.js"></script>
+    <script src="bower_components/angular-busy/dist/angular-busy.js"></script>
+    <script src="bower_components/lodash/lodash.js"></script>
+    <script src="bower_components/angular-cookie/angular-cookie.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script type="text/javascript" src="bower_components/angular-ui-calendar/src/calendar.js"></script>
+    <script src="bower_components/fullcalendar/dist/fullcalendar.js"></script>
+    <script src="bower_components/comma-separated-values/csv.js"></script>
+    <script src="/static/javascript/mindwell.js"></script>
+    <!-- Add New Bower Component JS Above -->
+
+
+    <!-- Main App JS -->
+    <script src="app.js"></script>
+    <script src="service/mindwell-rest.js"></script>
+    <script src="partial/client-list/client-list.js"></script>
+    <script src="partial/client-detail/client-detail.js"></script>
+    <script src="service/mindwell-cache.js"></script>
+    <script src="modals/multi-select/multi-select.js"></script>
+    <script src="partial/client-dos/client-dos.js"></script>
+    <script src="filter/client-name.js"></script>
+    <script src="service/mindwell-util.js"></script>
+    <script src="directive/mw-dos-form/mw-dos-form.js"></script>
+    <script src="partial/calendar/calendar.js"></script>
+    <script src="directive/mw-client-form/mw-client-form.js"></script>
+    <script src="modals/mw-client-modal/mw-client-modal.js"></script>
+    <script src="service/mw-export.js"></script>
+    <!-- Add New Component JS Above -->
+
+    <div>
+      <div class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mindwell-navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/angular/index.html#/client-list">MindWell</a>
+          </div>
+          <div class="collapse navbar-collapse" id="mindwell-navbar">
+            <ul class="nav navbar-nav">
+              <li ng-class="{'active': linkActive.clients}"><a href="/angular/index.html#/client-list">Clients</a></li>
+              <li ng-class="{'active': linkActive.calendar}" ng-click="calendarMenuClicked()"><a href="{{ getCalendarURL() }}">Calendar</a></li>
+              <li><a href="/Mindwell/reports/">Reports</a></li>
+              <li><a href="/Mindwell/settings/">Settings</a></li>
+              <li><a href="{{mindwellCache.logoutUrl.logout_url}}">Logout</a></li>
+              <li class="divider-vertical"></li>
+            </ul>
+            <form class="navbar-form navbar-left">
+              <div class="form-group">
+                <label>Acting as</label>
+                <select class="form-control" name="permitted_user" id="permitted_user"
+                  ng-model="currentUser" ng-change="updateUser()">
+                  <option value="" ng-selected="!currentUser">Self</option>
+                  <option ng-repeat="user in mindwellCache.userPerm" ng-selected="currentUser === user.key" value="{{user.key}}">{{ user.permitteduser }}</option>
+                </select>
+              </div>
+            </form>
+            <form class="navbar-form navbar-right" action="/Mindwell/search/" method="post">
+              <input class="search-query form-control" id="id_search_input" name="search_input" type="text" placeholder="Search for client" onfocus="if(this.value=='Search for client') this.value='';" onblur="if(this.value=='') this.value='Search for client';"/>
+              <input type="hidden" value="Submit" />
+            </form>
+          </div>
+        </div>
+      </div>
+      <div id="content" class="container" cg-busy="[ImindwellCache._clientsPromise, busy]">
+        <div class="row">
+          <div ng-view>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

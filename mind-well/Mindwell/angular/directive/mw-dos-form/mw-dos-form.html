@@ -1,0 +1,118 @@
+<div class="col-md-12">
+  <form class="form-horizontal">
+    <div class="form-group" ng-if="mwShowAddNewClient">
+      <button class="btn btn-default" ng-click="addNewClient()"><i class="fa fa-plus"></i> Add New Client</button>
+    </div>
+    <div class="form-group" ng-if="mwShowClientList">
+      <label class="col-sm-4 control-label">Blocked Time</label>
+      <div class="col-sm-8">
+        <input type="checkbox" ng-model="blockedTime" ng-change="blockedTimeChange()"></input>
+      </div>
+    </div>
+    <div class="form-group" ng-show="mwShowClientList && !blockedTime">
+      <label class="col-sm-4 control-label">Client</label>
+      <div class="col-sm-8">
+        <select class="form-control" ng-model="client" ng-options="client as client.lastname + ', ' + client.firstname for client in clients | filter: {client_status: '!Inactive'} | orderBy: ['lastname', 'firstname']"></select>
+      </div>
+    </div>
+    <div class="form-group" ng-hide="blockedTime">
+      <label class="col-sm-4 control-label">Session Type</label>
+      <div class="col-sm-8">
+        <input ng-model="newDOS.session_type" ng-click="sessionTypeModal()" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group" ng-hide="blockedTime">
+      <label class="col-sm-4 control-label">Session Result</label>
+      <div class="col-sm-8">
+        <select id="mw-session-result" ng-model="newDOS.session_result" ng-options="value for value in resultChoices" class="form-control" ng-change="sessionResultChanged()"></select>
+      </div>
+    </div>
+    <div class="form-group" ng-hide="blockedTime">
+      <label class="col-sm-4 control-label">ICD 10</label>
+      <div class="col-sm-8">
+        <input ng-model="newDOS.dsm_code" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group" ng-hide="blockedTime">
+      <label class="col-sm-4 control-label">Type of Payment</label>
+      <div class="col-sm-8">
+        <input ng-model="newDOS.type_pay" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group" ng-hide="blockedTime">
+      <label class="col-sm-4 control-label">Amount Due</label>
+      <div class="col-sm-8">
+        <input ng-model="newDOS.amt_due" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group" ng-hide="blockedTime">
+      <label class="col-sm-4 control-label">Amount Paid</label>
+      <div class="col-sm-8">
+        <input ng-model="newDOS.amt_paid" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group" ng-hide="blockedTime">
+      <label class="col-sm-4 control-label">Adjustment</label>
+      <div class="col-sm-8">
+        <input ng-model="newDOS.adjustment" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Note</label>
+      <div class="col-sm-8">
+        <input ng-model="newDOS.note" type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-4 control-label">Date and Time</label>
+      <div class="col-sm-8 controls">
+        <div class="input-group">
+          <input type="text" class="form-control" datepicker-popup="{{dosFormat}}" ng-model="date" is-open="opened" ng-required="true" close-text="Close" >
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="open($event)"><i class="fa fa-calendar"></i></button>
+          </span>
+        </div>
+        <div class="form-group mw-dos-time">
+          <div class="mw-dos-start">
+            <select ng-model="starttime" class="form-control" ng-change="updateEndTime()" ng-options="value for value in timeChoices"></select>
+          </div> -
+          <div class="mw-dos-end">
+            <select ng-model="endtime" class="form-control" ng-options="value[0] as value[1] for value in endTimeChoices"></select>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">DOS Repeat</label>
+    <div class="col-sm-8">
+      <select ng-model="newDOS.dos_repeat" class="form-control" ng-options="value for value in dosRepeatChoices"></select>
+    </div>
+  </div>
+  <div class="form-group" ng-if="newDOS.dos_repeat !== 'No'">
+    <label class="col-sm-4 control-label">Repeat End Date</label>
+    <div class="col-sm-8">
+      <div class="input-group">
+        <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="newDOS.dos_repeat_end_date" is-open="endOpened" ng-required="false" close-text="Close" >
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-click="endOpen($event)"><i class="fa fa-calendar"></i></button>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="form-group" ng-if="mwShowReceipt && !blockedTime">
+    <label class="col-sm-4 control-label">Print Receipt</label>
+    <div class="col-sm-8">
+      <input ng-model="newDOS.print_receipt" type="checkbox">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-8 col-sm-offset-4">
+      <button class="btn btn-primary" ng-if="!newDOS.id" ng-click="updateDOS(newDOS)">Add New DOS</button>
+      <button class="btn btn-primary" ng-if="newDOS.id" ng-click="updateDOS(newDOS)">Update DOS</button>
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+      <button class="btn btn-danger" ng-if="newDOS.id" ng-click="delete()"><i class="fa fa-trash-o"></i> Delete</button>
+      <button class="btn btn-default" ng-if="newDOS.recurrId" ng-click="cancelRecurr()">Cancel Repeating Series</button>
+    </div>
+  </div>
+</div>

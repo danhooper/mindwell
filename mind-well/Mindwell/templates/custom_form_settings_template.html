@@ -8,7 +8,7 @@
     <strong>Please correct the errors below</strong>
   {% endif %}
   <table>
-    <form action="{% url custom_form_settings %}" method="post">
+    <form action="{% url 'custom_form_settings' %}" method="post">
       {{ form.as_table }}
       <tr><td><input type="submit" value="Submit" /></td></tr>
     </form>

@@ -1,5 +1,5 @@
 application: mindwellonline
-version: 3-0-0-20141014-bower
+version: 3-2-0-20160612-adjustment
 runtime: python27
 api_version: 1
 threadsafe: false
@@ -17,6 +17,10 @@ handlers:
 
 - url: /static
   static_dir: Mindwell/static
+
+- url: /angular
+  login: required
+  static_dir: Mindwell/angular/dist
 
 #- url: /test.*
 #  script: Mindwell/gaeunit/gaeunit.py
@@ -44,7 +48,7 @@ handlers:
 
 libraries:
 - name: django
-  version: "1.2"
+  version: "1.5"
 - name: pycrypto
   version: "2.3"
 skip_files:

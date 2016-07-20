@@ -21,6 +21,7 @@ module is the sandboxed version.
 """
 
 
+
 import cStringIO
 import os
 import sys
@@ -48,6 +49,14 @@ from google.appengine.tools.devappserver2.python import request_state
 # Copied from httplib; done so we don't have to import httplib which breaks
 # our httplib "forwarder" as the environment variable that controls which
 # implementation we get is not yet set.
+
+
+
+
+
+
+
+
 
 httplib_responses = {
     100: 'Continue',
@@ -96,6 +105,7 @@ httplib_responses = {
     504: 'Gateway Timeout',
     505: 'HTTP Version Not Supported',
 }
+
 
 class RequestHandler(object):
   """A WSGI application that forwards requests to a user-provided app."""
@@ -253,10 +263,14 @@ class RequestHandler(object):
       logs: A list of tuples (timestamp_usec, level, message).
     """
     logs_group = log_service_pb.UserAppLogGroup()
-    for timestamp_usec, level, message in logs:
+    for timestamp_usec, level, message, source_location in logs:
       log_line = logs_group.add_log_line()
       log_line.set_timestamp_usec(timestamp_usec)
       log_line.set_level(level)
+      if source_location:
+        log_line.mutable_source_location().set_file(source_location[0])
+        log_line.mutable_source_location().set_line(source_location[1])
+        log_line.mutable_source_location().set_function_name(source_location[2])
       log_line.set_message(message)
     request = log_service_pb.FlushRequest()
     request.set_logs(logs_group.Encode())

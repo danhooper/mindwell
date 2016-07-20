@@ -44,23 +44,23 @@
                 <br/>
             {% endif %}
             {{invoice.clientinfo.city}}, {{invoice.clientinfo.state}} {{ invoice.clientinfo.zipcode}}<br/><br/>
-            DSM IV Code: {{dsm_code}}<br/><br/>
+            ICD 10: {{dsm_code}}<br/><br/>
             <table border=1>
                 <tr>
                     <td>Date of Service</td>
                     <td>CPT Code</td>
-                    <td>Length of Session</td>
                     <td>Amount Due</td>
                     <td>Amount Paid</td>
+                    <td>Adjustment</td>
                     <td>Type of Payment</td>
                 </tr>
                 {%for individual_dos in dos %}
                     <tr>
                         <td>{{individual_dos.get_dos_date_display}}</td>
                         <td>{{individual_dos.session_type}}</td>
-                        <td>{{individual_dos.get_duration}}</td>
                         <td>{{individual_dos.amt_due}}</td>
                         <td>{{individual_dos.amt_paid}}</td>
+                        <td>{{individual_dos.adjustment}}</td>
                         <td>{{individual_dos.type_pay}}</td>
                     </tr>
                 {% endfor %}

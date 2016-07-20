@@ -13,8 +13,13 @@ import view_common
 
 def Javascript_Object_DOS(dos):
     try:
+        clientinfo = dos.get_clientinfo_key()
+        if not clientinfo:
+            clientinfo = 0
         return """
 {
+"id":%s,
+"clientinfo":%s,
 "title":"%s",
 "start":"%s",
 "end":"%s",
@@ -24,18 +29,22 @@ def Javascript_Object_DOS(dos):
 "description":"%s",
 "backgroundColor":"%s",
 "borderColor":"%s",
-"textColor":"%s"
+"textColor":"%s",
+"recurrId":%s
 },
-            """ % (
-                view_common.escape_json(unicode(dos)),
-                dos.get_starttime().isoformat('T'),
-                dos.get_endtime().isoformat('T'),
-                dos.get_calendar_absolute_url(),
-                view_common.escape_json(dos.get_note()),
-                view_common.escape_json(dos.get_hover_tip()),
-                dos.get_background_color(), dos.get_background_color(),
-                dos.get_text_color()
-            )
+        """ % (
+            dos.get_id(),
+            clientinfo,
+            view_common.escape_json(unicode(dos)),
+            dos.get_starttime().isoformat('T'),
+            dos.get_endtime().isoformat('T'),
+            dos.get_calendar_absolute_url(),
+            view_common.escape_json(dos.get_note()),
+            view_common.escape_json(dos.get_hover_tip()),
+            dos.get_background_color(), dos.get_background_color(),
+            dos.get_text_color(),
+            dos.get_recurr_id()
+        )
     except:
         logging.exception('Exception in Javascript_Object_DOS')
         return ''
@@ -54,8 +63,8 @@ class CalendarFeed(object):
     def __run_filters(self):
         # limiting this to 3000 allows 3000 events in a month or ~100 per day
         self.dos_list = models.DOS.safe_all(request=self.request).filter(
-            'dos_datetime >', self.starttime).filter(
-            'dos_datetime <', self.endtime)
+            'dos_datetime >=', self.starttime).filter(
+            'dos_datetime <=', self.endtime)
         # Get all models.DOS with an end date for the repeating
         self.dos_repeats = models.DOS.safe_all(request=self.request).filter(
             'dos_repeat_end_date >=', self.starttime).fetch(

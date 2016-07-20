@@ -41,6 +41,11 @@ def get_rest(model, eager_load=False):
             output[key] = unicode(value)
         else:
             raise ValueError('cannot encode ' + repr(prop))
+    try:
+        output['id'] = int(model.get_id())
+        output['key'] = str(model.key())
+    except db.NotSavedError:
+        pass
 
     return output
 
@@ -314,6 +319,9 @@ class UserPermission(db.Model):
         for k, v in values.iteritems():
             setattr(self, k, v)
 
+    def get_rest(self):
+        return get_rest(self)
+
 
 class UserPermissionForm(forms.Form):
     """ Creates the userpermission form for requesters to use.
@@ -390,8 +398,7 @@ class ClientInfo(db.Model):
         'Alabama',
         'Alaska',
         'Alabama',
-        'Alabama',
-        'Alabama',
+        'California',
         'Colorado',
         'Connecticut',
         'Delaware',
@@ -437,7 +444,7 @@ class ClientInfo(db.Model):
         'Washington DC',
         'West Virginia',
         'Wisconsin',
-    'Wyoming'
+        'Wyoming'
     )
     state = db.StringProperty(verbose_name='State', choices=STATE_CHOICES,
                               default='Maryland', indexed=False)
@@ -455,7 +462,7 @@ class ClientInfo(db.Model):
     #Indexed for autocomplete of referrer
     referrer = EncryptedField(verbose_name='Referrered By')
     #Indexed for autocomplete of DSM code
-    dsm_code = db.StringProperty(verbose_name='dsm Code')
+    dsm_code = db.StringProperty(verbose_name='ICD 10')
     CLIENT_STATUS_CHOICES = (
         'Active',
         'Inactive',
@@ -505,7 +512,7 @@ class ClientInfo(db.Model):
             ('Zip Code', self.zipcode),
             ('DOB', self.dob),
             ('Referrer', self.referrer),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Client Status', self.client_status),
             ('Guardians Name', self.guardians_name),
             ('Guardians Phone Number', self.guardians_phone_number),
@@ -534,7 +541,7 @@ class ClientInfo(db.Model):
             ('Zip Code', self.zipcode),
             ('DOB', self.dob),
             ('Referrer', self.referrer),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Client Status', self.client_status),
             ('Guardians Name', self.guardians_name),
             ('Guardians Phone Number', self.guardians_phone_number),
@@ -570,7 +577,7 @@ class ClientInfo(db.Model):
         """ Gets all the other fields for the client."""
         return (
             ('DOB', self.dob),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Client Status', self.client_status),
             ('Referrer', self.referrer),
             ('Guardians Name', self.guardians_name),
@@ -609,7 +616,7 @@ class ClientInfo(db.Model):
             clients = ClientInfo.safe_all(request)
         else:
             clients = ClientInfo.safe_all()
-        clients = clients.filter('client_status =', 'Active')
+        #clients = clients.filter('client_status =', 'Active')
         choices.extend([(client.get_id(), client) for client in clients])
         return choices
 
@@ -646,9 +653,7 @@ class ClientForm(forms.Form):
     STATE_CHOICES = (
         ('Alabama', 'Alabama'),
         ('Alaska', 'Alaska'),
-        ('Alabama', 'Alabama'),
-        ('Alabama', 'Alabama'),
-        ('Alabama', 'Alabama'),
+        ('California', 'California'),
         ('Colorado', 'Colorado'),
         ('Connecticut', 'Connecticut'),
         ('Delaware', 'Delaware'),
@@ -771,16 +776,18 @@ class DOS(db.Model):
         'Cancellation - Late',
         'Cancellation - Timely',
         'Payment Received',
+        'Attended, Not Billed'
     )
     # Used to filter DOS based upon attended DOS
     session_result = db.StringProperty(verbose_name='Session Result',
                                        choices=SESSION_RESULT_CHOICES,
                                        default='Scheduled')
     # Used to get the autocomplete field for dsm codes
-    dsm_code = db.StringProperty(verbose_name='DSM Code')
+    dsm_code = db.StringProperty(verbose_name='ICD 10')
     type_pay = db.StringProperty(verbose_name='Type Of Payment', indexed=False)
     amt_due = db.StringProperty(verbose_name='Amount Due', indexed=False)
     amt_paid = db.StringProperty(verbose_name='Amount Paid', indexed=False)
+    adjustment = db.StringProperty(verbose_name='Amount Paid', indexed=False)
     note = db.StringProperty(verbose_name='Note', indexed=False)
     # Used to find DOS based upon start times
     dos_datetime = db.DateTimeProperty(verbose_name='DOS Date and Time')
@@ -826,10 +833,11 @@ class DOS(db.Model):
             ('Client ID', client_id),
             ('Session Type', self.session_type),
             ('Session Result', self.session_result),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Type of Payment', self.type_pay),
             ('Amount Due', self.amt_due),
             ('Amount Paid', self.amt_paid),
+            ('Adjustment', self.adjustment),
             ('Note', self.note),
             ('DOS Date and Time', self.dos_datetime),
             ('DOS Repeat', self.dos_repeat),
@@ -841,10 +849,11 @@ class DOS(db.Model):
         return (
             ('Session Type', self.session_type),
             ('Session Result', self.session_result),
-            ('DSM Code', self.dsm_code),
+            ('ICD 10', self.dsm_code),
             ('Type of Payment', self.type_pay),
             ('Amount Due', self.amt_due),
             ('Amount Paid', self.amt_paid),
+            ('Adjustment', self.adjustment),
             ('Running Balance', 0),
             ('Note', self.note),
             ('DOS Date and Time', self.dos_datetime),
@@ -951,7 +960,7 @@ class DOS(db.Model):
         if self.get_clientinfo():
             uni = self.clientinfo.__unicode__()
         else:
-            uni = ''
+            uni = ' '
         return uni
 
     def get_clientinfo(self):
@@ -1014,6 +1023,11 @@ class DOS(db.Model):
 
     def get_duration(self):
         """ Gets the duration of this DOS in minutes. """
+        # if the result was a no show or cancellation set it to 0 minutes
+        if (self.session_result == 'No Show' or
+                self.session_result == 'Cancellation - Late' or
+                self.session_result == 'Cancellation - Timely'):
+            return 0
         if self.dos_endtime:
             end_minutes = self.dos_endtime.hour * 60 + self.dos_endtime.minute
             start_minutes = self.dos_datetime.time().hour * 60 + \
@@ -1036,6 +1050,9 @@ class DOS(db.Model):
                 return 'gray'
             elif self.session_result.lower().find('received') != -1:
                 return 'lightgreen'
+            elif self.session_result.lower().find(
+                    'attended, not billed') != -1:
+                return 'orange'
             else:
                 return 'green'
         except AttributeError:
@@ -1054,6 +1071,9 @@ class DOS(db.Model):
                 return 'white'
             elif self.session_result.lower().find('received') != -1:
                 return 'blue'
+            elif self.session_result.lower().find(
+                    'attended, not billed') != -1:
+                return 'white'
             else:
                 return 'white'
         except AttributeError:
@@ -1073,6 +1093,9 @@ class DOS(db.Model):
         """ Fetches the DOS by ID for a given user. """
         return global_get_by_id(DOS, ids, request=request, parent=None)
 
+    def get_recurr_id(self):
+        return -1
+
     def get_rest(self):
         return get_rest(self)
 
@@ -1090,6 +1113,7 @@ class DOSForm(forms.Form):
         ('Cancellation - Late', 'Cancellation - Late'),
         ('Cancellation - Timely', 'Cancellation - Timely'),
         ('Payment Received', 'Payment Received'),
+        ('Attended, Not Billed', 'Attended, Not Billed'),
     )
     # Used to filter DOS based upon attended DOS
     session_result = forms.ChoiceField(choices=SESSION_RESULT_CHOICES,
@@ -1099,6 +1123,7 @@ class DOSForm(forms.Form):
     type_pay = forms.CharField(max_length=300, required=False)
     amt_due = forms.CharField(max_length=300, required=False)
     amt_paid = forms.CharField(max_length=300, required=False)
+    adjustment = forms.CharField(max_length=300, required=False)
     note = forms.CharField(max_length=300, required=False)
     # Used to find DOS based upon start times
     dos_datetime = forms.DateTimeField(
@@ -1155,6 +1180,7 @@ class DOSFormNoClientSelect(forms.Form):
         ('Cancellation - Late', 'Cancellation - Late'),
         ('Cancellation - Timely', 'Cancellation - Timely'),
         ('Payment Received', 'Payment Received'),
+        ('Attended, Not Billed', 'Attended, Not Billed'),
     )
     # Used to filter DOS based upon attended DOS
     session_result = forms.ChoiceField(choices=SESSION_RESULT_CHOICES,
@@ -1164,6 +1190,7 @@ class DOSFormNoClientSelect(forms.Form):
     type_pay = forms.CharField(max_length=300, required=False)
     amt_due = forms.CharField(max_length=300, required=False)
     amt_paid = forms.CharField(max_length=300, required=False)
+    adjustment = forms.CharField(max_length=300, required=False)
     note = forms.CharField(max_length=300, required=False)
     # Used to find DOS based upon start times
     dos_datetime = forms.DateTimeField(
@@ -1252,8 +1279,11 @@ class DOSRecurr(db.Model):
                                  '%d' % int(self.dos_base.get_id())))
         return self.dos_base.get_absolute_url()
 
+    def get_recurr_id(self):
+        return self.dos_base.get_id()
+
     def get_id(self):
-        return self.key().id_or_name()
+        return -1
 
     def get_starttime(self):
         return self.dos_recurr_datetime
@@ -1280,6 +1310,9 @@ class DOSRecurr(db.Model):
             'dos_repeat_end_date': dos_datetime,
         })
         return form
+
+    def get_clientinfo_key(self):
+        return self.dos_base.get_clientinfo_key()
 
     @staticmethod
     def safe_all(request=None, keys_only=False):
@@ -1505,6 +1538,12 @@ class CustomFormSettings(db.Model):
         return reverse('updated_custom_form_settings',
                        kwargs={'update': 'update'})
 
+    def get_id(self):
+        return str(self.key().id_or_name())
+
+    def get_rest(self):
+        return get_rest(self)
+
 
 class CustomFormSettingsForm(forms.Form):
     reason_for_visit_choices = forms.CharField(widget=forms.Textarea(),
@@ -1579,6 +1618,12 @@ class CalendarSettings(db.Model):
     def get_saved_url(self):
         return reverse('updated_calendar_settings',
                        kwargs={'update': 'update'})
+
+    def get_id(self):
+        return str(self.key().id_or_name())
+
+    def get_rest(self):
+        return get_rest(self)
 
 
 class CalendarSettingsForm(forms.Form):

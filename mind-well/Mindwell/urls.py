@@ -1,11 +1,13 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
-urlpatterns = patterns('Mindwell.Client.view_common',
+urlpatterns = patterns(
+    'Mindwell.Client.view_common',
     (r'^$', 'greetings'),
     url(r'^Mindwell/UserNotAllowed$', 'usernotallowed', name='usernotallowed')
 )
 
-urlpatterns += patterns('Mindwell.Client.views',
+urlpatterns += patterns(
+    'Mindwell.Client.views',
     (r'^Mindwell/$', 'redirect_to_base'),
     (r'^administrator/$', 'administrator'),
     (r'^administrator/clear_memcache/$', 'clear_memcache'),
@@ -80,10 +82,14 @@ urlpatterns += patterns('Mindwell.Client.client_views',
     url(r'^Mindwell/(?P<client_id>\d+)/delete_client/$', 'delete_client',
         name='delete_client'),
     url(r'Mindwell/(?P<client_id>\d+)/balance/$', 'client_balance',
+        name='client_balance'),
+    # REST ENDPOINT
+    url(r'Mindwell/rest/balance/(?P<client_id>\d+)$', 'client_balance',
         name='client_balance')
 )
 
-urlpatterns += patterns('Mindwell.Client.calendar_views',
+urlpatterns += patterns(
+    'Mindwell.Client.calendar_views',
     #Calendar
     url(r'^Mindwell/calendar/$', 'calendar_display', name='calendar'),
     (r'^Mindwell/calendar_feed', 'calendar_feed'),
@@ -101,8 +107,19 @@ urlpatterns += patterns('Mindwell.Client.calendar_views',
 
 urlpatterns += patterns(
     'Mindwell.Client.rest_views',
-    url(r'^Mindwell/rest/clientinfo', 'rest_clientinfo',
+    url(r'^Mindwell/rest/clientinfo$', 'rest_clientinfo',
         name='rest_clientinfo'),
-    url(r'^Mindwell/rest/dos', 'rest_dos', name='rest_dos'),
+    url(r'^Mindwell/rest/clientinfo/(?P<client_id>\d+)$', 'rest_indiv_client',
+        name='rest_indiv_client'),
+    url(r'^Mindwell/rest/dos$', 'rest_dos', name='rest_dos'),
+    url(r'^Mindwell/rest/dos/(?P<dos_id>\d+)$', 'rest_indiv_dos',
+        name='rest_indiv_dos'),
+    url(r'^Mindwell/rest/userperm$', 'rest_user_perm', name='rest_user_perm'),
+    url(r'^Mindwell/rest/logouturl$', 'rest_logouturl', name='rest_logouturl'),
+    url(r'^Mindwell/rest/custom_form$', 'rest_custom_form_settings',
+        name='rest_custom_form_settings'),
+    url(r'^Mindwell/rest/calendar_settings$', 'rest_calendar_settings',
+        name='rest_calendar_settings'),
+    url(r'^Mindwell/rest/calendar_feed$', 'rest_calendar_feed',
+        name='rest_calendar_feed')
 )
-

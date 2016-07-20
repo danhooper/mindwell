@@ -54,10 +54,10 @@ def prefetch_refprops(entities, *props):
 
 def greetings(request):
     if 'current_user' in request.COOKIES:
-        response = HttpResponseRedirect('/Mindwell/show_client/')
+        response = HttpResponseRedirect('angular/index.html#/')
         response.delete_cookie('current_user')
     else:
-        response = HttpResponseRedirect('/Mindwell/show_client/')
+        response = HttpResponseRedirect('angular/index.html#/')
 
     return response
 

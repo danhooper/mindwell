@@ -1,0 +1,50 @@
+<div class="col-md-12" ng-controller="ClientListCtrl">
+  <div class="row">
+    <div class="col-md-12">
+      <div ng-if="search">
+        <strong>Searching for "{{search}}"</strong></br></br>
+      </div>
+      <button class="btn btn-default" ng-click="addClient()"><i class="fa fa-plus"></i> Add New Client</button>
+      <button class="btn btn-default" ng-click="showAll()">Show All</button>
+      <button class="btn btn-default" ng-click="calcBalance()">Calculate Balances</button>
+      <button class="btn btn-default" ng-click="exportData()">Export All Data</button>
+    </div>
+</div>
+<div ng-if="exportRunning" class="mw-export-progress">
+    Exporting Clients to Spreadsheet
+    <progressbar max="100" value="clientCSVPromiseProgress">{{clientCSVPromiseProgress}}%</progressbar>
+    Exporting Dates of Service to Spreadsheet
+    <progressbar max="100" value="dosCSVPromiseProgress">{{dosCSVPromiseProgress}}%</progressbar>
+</div>
+
+  <br/>
+  <div>
+    <span ng-repeat="letter in clientLetters">
+      <a ng-if="letter.link" href="" ng-click="filterByLetter(letter)">{{letter.letter}}</a>
+      <span ng-if="!letter.link">{{letter.letter}}</span>
+      &nbsp;
+    </span>
+  </div>
+  <div class="row">
+    <table ng-table="tableParams" class="table" show-filter="true">
+      <tr><td><input type="text" ng-model="clientFilter.text" class="form-control"></td></tr>
+      <tr ng-repeat="client in $data | filter:{$:clientFilter.text}" class="mw-client-row">
+        <td data-title="'Name'" sortable="'lastname'">
+          <a href ng-click="clientDos(client)">{{client | clientName}}</a>
+        </td>
+        <td data-title="'Actions'">
+          <button ng-click="mindwellUtil.onEditClient(client)" class="btn btn-success btn-sm mw-faded"><i class="fa fa-pencil"></i> Edit</button>
+          <button ng-click="onDelete(client)" class="btn btn-danger btn-sm mw-faded"><i class="fa fa-trash-o"></i> Delete</button>
+        </td>
+        <td data-title="'Balance'" sortable="'balance'" >
+          <span ng-if="client.balance || client.balance === 0">
+            {{client.balance}}
+          </span>
+          <span ng-if="!client.balance && client.balance !== 0">
+            <button class="mw-faded btn btn-default" ng-click="calcBalance()">Calculate Balances</button>
+          </span>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

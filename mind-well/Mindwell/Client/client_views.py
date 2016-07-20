@@ -159,6 +159,11 @@ def get_amount_owed(running_balance_list, dos):
         except (ValueError, TypeError):
             pass
         try:
+            if individual_dos.adjustment:
+                balance += float(individual_dos.adjustment)
+        except (ValueError, TypeError):
+            pass
+        try:
             if individual_dos.amt_paid:
                 balance -= float(individual_dos.amt_paid)
         except (ValueError, TypeError):
@@ -282,9 +287,8 @@ def search(request):
     if request.method == 'POST':
         form = models.SearchForm(request.POST)
         if form.is_valid():
-            return HttpResponseRedirect(reverse(
-                'search_result', kwargs={'search_input':
-                                         form.cleaned_data['search_input']}))
+            return HttpResponseRedirect('%sclient-list?search=%s' % (
+                common.get_mwa_root(), form.cleaned_data['search_input']))
     else:
         form = models.SearchForm()
     render_to_response_dict = {
@@ -323,13 +327,7 @@ def delete_client(request, client_id):
         view_common.log_access_violation('delete_client')
         return HttpResponseRedirect(reverse('show_client'))
     if request.method == 'POST':
-        db.delete(models.DOS.safe_all().filter(
-            "clientinfo =", client.key()).fetch(
-            common.get_maximum_num_dos_fetch()))
-        db.delete(models.Invoice.safe_all().filter(
-            "clientinfo =", client.key()).fetch(
-            common.get_maximum_num_dos_fetch()))
-        client.delete()
+        common.delete_client(client)
         json_data = json.dumps({"message": 'Success'})
         return HttpResponse(json_data, mimetype="application/json")
     return render_to_response('delete_client.html', {'client': client},

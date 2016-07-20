@@ -179,10 +179,14 @@ def get_dos_balance(dos):
         except (ValueError, TypeError):
             amt_due = 0
         try:
+            adjustment = float(individual_dos.adjustment)
+        except (ValueError, TypeError):
+            adjustment = 0
+        try:
             amt_paid = float(individual_dos.amt_paid)
         except (ValueError, TypeError):
             amt_paid = 0
-        dos_balance = dos_balance + (amt_due - amt_paid)
+        dos_balance = dos_balance + (amt_due - amt_paid + adjustment)
     return dos_balance
 
 
@@ -190,10 +194,10 @@ def DOSInvoiceHeader():
     return [
         ['Date of Service',
         'CPT Code',
-        'Length of Session',
         'Amount Due',
         'Amount Paid',
-        'Type of Payment', ]
+        'Adjustment',
+        'Payment Type', ]
     ]
 
 
@@ -201,9 +205,9 @@ def DOSInvoiceRow(dos):
     return (
         dos.get_dos_date_display(),
         str(dos.session_type),
-        str(dos.get_duration()),
         str(dos.amt_due),
         str(dos.amt_paid),
+        str(dos.adjustment),
         str(dos.type_pay)
     )
 
@@ -297,7 +301,7 @@ def render_invoice_pdf(request, invoice_dict):
       {'text_mode': 'left', 'font': 'Times-Roman', 'font_size': 12,
        'text': ''},
       {'text_mode': 'right', 'font': 'Times-Roman', 'font_size': 12,
-       'text': 'DSM IV Code: %s\n' % invoice_dict['dsm_code']},
+       'text': 'ICD 10: %s\n' % invoice_dict['dsm_code']},
       {'text_mode': 'left', 'font': 'Times-Roman', 'font_size': 12,
        'text': ''},
     )
@@ -386,7 +390,7 @@ def invoice_display(request, invoice_id, all_dos='', attended_only='',
       'dos_datetime >=', invoice.start_date).filter(
       'dos_datetime <=', invoice_enddatetime)
     if attended_only:
-        dos = dos.filter('session_result = ', 'Attended')
+        dos = dos.filter('session_result IN ', ['Attended', 'Attended, Not Billed'])
     dos = dos.fetch(common.get_maximum_num_dos_fetch())
     dos_balance = 0
     dsm_code = invoice.clientinfo.dsm_code
@@ -396,10 +400,14 @@ def invoice_display(request, invoice_id, all_dos='', attended_only='',
         except (ValueError, TypeError):
             amt_due = 0
         try:
+            adjustment = float(individual_dos.adjustment)
+        except (ValueError, TypeError):
+            adjustment = 0
+        try:
             amt_paid = float(individual_dos.amt_paid)
         except (ValueError, TypeError):
             amt_paid = 0
-        dos_balance = dos_balance + (amt_due - amt_paid)
+        dos_balance = dos_balance + (amt_due - amt_paid + adjustment)
         if not dsm_code:
             dsm_code = individual_dos.dsm_code
     invoice_settings_entity = models.InvoiceSettings.safe_all(request=request)
@@ -453,10 +461,10 @@ def provider_invoices(request):
 
 def provider_invoices_display(request, start_year, start_month, start_day,
                               end_year, end_month, end_day):
-    start_invoice_date = datetime.datetime(year=int(start_year),
-        month=int(start_month), day=int(start_day))
-    end_invoice_date = datetime.datetime(year=int(end_year),
-        month=int(end_month), day=int(end_day))
+    start_invoice_date = datetime.datetime(
+        year=int(start_year), month=int(start_month), day=int(start_day))
+    end_invoice_date = datetime.datetime(
+        year=int(end_year), month=int(end_month), day=int(end_day))
     end_invoice_date = end_invoice_date.replace(hour=23, minute=59)
     dos = models.DOS.safe_all(request=request).filter(
         'dos_datetime >=', start_invoice_date).filter(
@@ -542,7 +550,10 @@ def get_provider_stats(dos):
     dos_dict = {}
     # remove all except for attended and with real clients
     dos = [d for d in dos
-           if not d.get_blocked_time() and d.session_result == 'Attended']
+           if not d.get_blocked_time() and (
+               d.session_result == 'Attended' or
+               d.session_result == 'Attended, Not Billed'
+           )]
     for d in dos:
         if models.DOS.clientinfo.get_value_for_datastore(d) in dos_dict:
             dos_dict[models.DOS.clientinfo.get_value_for_datastore(d)] += 1
@@ -573,7 +584,7 @@ def get_provider_stats(dos):
 
 def provider_stats_all_time(request):
     dos = models.DOS.safe_all(request=request).filter(
-        'session_result = ', 'Attended').fetch(
+        'session_result IN ', ['Attended', 'Attended, Not Billed']).fetch(
         common.get_maximum_num_dos_fetch())
     render_to_response_dict = get_provider_stats(dos)
 

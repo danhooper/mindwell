@@ -4,14 +4,14 @@
         $("table").tablesorter({
             sortList: [[0,0]],
             textExtraction: "complex",
-    widgets : [ "uitheme", "filter", "zebra" ], 
- 
-    widgetOptions : { 
- 
-      // set the uitheme widget to use the bootstrap theme class names 
-      uitheme : "bootstrap" 
- 
-    } 
+    widgets : [ "uitheme", "filter", "zebra" ],
+
+    widgetOptions : {
+
+      // set the uitheme widget to use the bootstrap theme class names
+      uitheme : "bootstrap"
+
+    }
     });
 {% endblock document_ready_javascript %}
 {% block content %}
@@ -24,6 +24,7 @@
                 <th>Type of Payment</th>
                 <th>Amt Due</th>
                 <th>Amt Paid</th>
+                <th>Adjustment</th>
             </tr>
         </thead>
         {%for d in dos%}
@@ -33,6 +34,7 @@
             <td>{{d.type_pay}}</td>
             <td>{{d.amt_due}}</td>
             <td>{{d.amt_paid}}</td>
+            <td>{{d.adjustment}}</td>
         </tr>
         {%endfor%}
     </table>

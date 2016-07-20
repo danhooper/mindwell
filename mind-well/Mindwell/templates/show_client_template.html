@@ -7,9 +7,9 @@
 {% block content %}
 
   <h2>Clients</h2>
-  <a class="btn" href="{% url add_client %}"><i class="icon-plus"></i> Add New Client</a>
-  <a class="btn" href="{% url show_client %}">Show All</a>
-  <a id="calc_balances" class="btn" href="{% url show_client %}">Calculate Balances</a><br/>
+  <a class="btn" href="{% url 'add_client' %}"><i class="icon-plus"></i> Add New Client</a>
+  <a class="btn" href="{% url 'show_client' %}">Show All</a>
+  <a id="calc_balances" class="btn" href="{% url 'show_client' %}">Calculate Balances</a><br/>
   {% for found,letter in letters %}
     {% if found %}
       <a href="/Mindwell/{{ letter }}/show_client_letter/">{{letter}}</a>
@@ -28,7 +28,7 @@
         </td>
         <td><a title="Edit Client" class="btn btn-success btn-sm" href="{{client.get_update_url}}"><i class="fa fa-pencil fa-lg" ></i></a>
         <a title="Delete Client" class="btn btn-danger btn-sm uimodal" href="{{client.get_delete_url}}"><i class="fa fa-trash-o fa-lg" ></i></a></td>
-        <td data-balance-url="{%url client_balance client_id=client.get_id %}" class="client_balance"></td>
+        <td data-balance-url="{%url 'client_balance' client_id=client.get_id %}" class="client_balance"></td>
 
         </tr>
       {% endfor %}

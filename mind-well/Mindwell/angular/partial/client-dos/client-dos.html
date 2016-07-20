@@ -1,0 +1,63 @@
+<div class="col-md-12" ng-controller="ClientDosCtrl">
+  <div class="mw-client-info-name"><h2>{{client | clientName}}</h2> <button ng-click="mindwellUtil.onEditClient(client)" class="mw-faded btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button></div>
+  <div class="row">
+    <div class="col-md-7">
+      <div class="mw-client-info row">
+        <div class="mw-client-info-col col-md-4">
+          <h3>Contact Info</h3></br>
+          <span ng-if="client.cellnumber"><strong>Cell Number: </strong>{{client.cellnumber}} {{client.cellmessage}}</br></span>
+          <span ng-if="client.homenumber"><strong>Home Number: </strong>{{client.homenumber}} {{client.homemessage}}</br></span>
+          <span ng-if="client.worknumber"><strong>Work Number: </strong>{{client.worknumber}} {{client.workmessage}}</br></span>
+          <span ng-if="client.emailaddress"><strong>Email: </strong>{{client.emailaddress}}</span>
+        </div>
+        <div class="mw-client-info-col col-md-3">
+          <h3>Address</h3><br/>
+          <span ng-if="client.address">{{client.address}}</br></span>
+          <span ng-if="client.address2">{{client.address2}}</br></span>
+          <span ng-if="client.city">{{client.city}}<span ng-if="client.state">, {{client.state}}</span></br></span>
+          <span ng-if="client.zipcode">{{client.zipcode}}</br></span>
+        </div>
+        <div class="mw-client-info-col col-md-4">
+          <h3>Other</h3><br/>
+          <span ng-repeat="field in otherFields" ng-if="client[field.key]"><strong>{{field.display}}: </strong>{{client[field.key]}}</br></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5" id="dos-form">
+      <h3 ng-if="!newDOS.id">Add New DOS</h3>
+      <h3 ng-if="newDOS.id">Update DOS</h3>
+      <mw-dos-form ng-model="newDOS" mw-client="client"></mw-dos-form>
+    </div>
+    <div class="row">
+      <table ng-table="tableParams" class="table" show-filter="true">
+        <thead>
+          <tr>
+            <th ng-repeat="column in dosTableCols" ng-show="column.visible"
+              class="text-center" ng-class="{
+              'sort-asc': tableParams.isSortBy(column.field, 'asc'),
+              'sort-desc': tableParams.isSortBy(column.field, 'desc'),
+              'sortable': column.title !== 'Actions'
+              }"
+              ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
+              <div>{{column.title}}</div>
+            </th>
+          </tr>
+        </thead>
+        <tr ng-repeat="dos in $data" ng-class="{'curr-row': dos.id === newDOS.id}">
+          <td ng-repeat="col in dosTableCols" sortable="col.field">
+            <span ng-if="col.title === 'Actions'" class="mw-client-dos-actions">
+              <button ng-click="editDos(dos)" class="mw-faded btn btn-success btn-sm"><i class="fa fa-pencil"></i> Edit</button>
+              <button ng-click="printReceipt(dos)" class="mw-faded btn btn-default btn-sm"><i class="fa fa-print"></i> Print Receipt</button>
+              <button ng-click="deleteDOS(dos)" class="mw-faded btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Delete</button>
+            </span>
+            <span ng-if="col.title === 'DOS Date and Time'">
+              {{dos[col.field] | date:'MMM d, y h:mm a'}}
+            </span>
+            <span ng-if="col.title !== 'Actions' && col.title !== 'DOS Date and Time'">
+              {{dos[col.field]}}
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
