@@ -223,5 +223,14 @@ angular.module('mindwell').factory('mindwellUtil', function($location, mindwellC
         window.open('/Mindwell/' + invoice.id + '/' + type + '/invoice_display/');
     };
 
+    mindwellUtil.createDatePickerDate = function(date) {
+        if (!date) {
+            return new Date();
+        }
+        var newDate = new Date(date);
+        newDate = new Date(newDate.getTime() + newDate.getTimezoneOffset() * 60000);
+        return newDate;
+    };
+
     return mindwellUtil;
 });

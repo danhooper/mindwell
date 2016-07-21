@@ -42,7 +42,7 @@ angular.module('mindwell').directive('mwDosForm', function(mindwellRest, mindwel
                 });
                 scope.date = moment(scope.newDOS.dos_datetime).toDate();
                 if (moment(scope.newDOS.dos_datetime).zone() === 0) {
-                    scope.date = new Date(scope.date.getTime() + scope.date.getTimezoneOffset() * 60000);
+                    mindwellUtil.createDatePickerDate(scope.date);
                 }
                 if (scope.newDOS.dos_datetime) {
                     scope.starttime = moment(scope.newDOS.dos_datetime).format(timeFormat);

@@ -53,7 +53,12 @@ angular.module('mindwell').controller('InvoicesCtrl', function(
         });
     };
 
-    $scope.genForm = {start_date: new Date(), end_date: new Date()};
+    var search = $location.search();
+    $scope.genForm = {
+        start_date: mindwellUtil.createDatePickerDate(search.start),
+        end_date: mindwellUtil.createDatePickerDate(search.end)
+    };
     $scope.client = {};
 
 });
+
