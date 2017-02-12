@@ -18,8 +18,10 @@
 # source: google/appengine/datastore/datastore_v4.proto
 
 namespace dummy {
-  require_once 'google/appengine/runtime/proto/ProtocolMessage.php';
-  require_once 'google/appengine/datastore/entity_v4_pb.php';
+  if (!defined('GOOGLE_APPENGINE_CLASSLOADER')) {
+    require_once 'google/appengine/runtime/proto/ProtocolMessage.php';
+    require_once 'google/appengine/datastore/entity_v4_pb.php';
+  }
 }
 namespace google\appengine\datastore\v4\Error {
   class ErrorCode {
@@ -35,6 +37,9 @@ namespace google\appengine\datastore\v4\Error {
     const TRY_ALTERNATE_BACKEND = 10;
     const SAFE_TIME_TOO_OLD = 11;
     const RESOURCE_EXHAUSTED = 12;
+    const NOT_FOUND = 13;
+    const ALREADY_EXISTS = 14;
+    const FAILED_PRECONDITION = 15;
   }
 }
 namespace google\appengine\datastore\v4 {

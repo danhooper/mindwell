@@ -29,6 +29,9 @@ namespace google\appengine\ext\session;
  */
 final class MemcacheContainer {
 
+  /**
+   * The memcache object for storing sessions.
+   */
   private $memcache = null;
 
   /**
@@ -83,7 +86,14 @@ final class MemcacheSessionHandler implements \SessionHandlerInterface {
 
   const SESSION_PREFIX = '_ah_sess_';
 
+  /**
+   * The number of seconds before session objects expire.
+   */
   private $expire = null;
+
+  /**
+   * The memcacheContainer to use for storing and retrieving session data.
+   */
   private $memcacheContainer = null;
 
   /**
@@ -126,7 +136,6 @@ final class MemcacheSessionHandler implements \SessionHandlerInterface {
    * @return string data associated with that ID or bool false on failure
    */
   public function read($id) {
-    // TODO: Implement locking. b/7701850
     return $this->memcacheContainer->get(self::SESSION_PREFIX . $id);
   }
 
@@ -137,7 +146,6 @@ final class MemcacheSessionHandler implements \SessionHandlerInterface {
    * @return bool true if successful, false otherwise
    */
   public function write($id, $data) {
-    // TODO: Implement locking. b/7701850
     return $this->memcacheContainer->set(
         self::SESSION_PREFIX . $id, $data, $this->expire);
   }

@@ -130,11 +130,14 @@ class AppEngineWebXmlParser(object):
   def ProcessVersionNode(self, node):
     self.app_engine_web_xml.version_id = node.text
 
-  def ProcessSourceLanguageNode(self, node):
-    self.app_engine_web_xml.source_language = node.text
+  def ProcessRuntimeNode(self, node):
+    self.app_engine_web_xml.runtime = node.text
 
   def ProcessModuleNode(self, node):
     self.app_engine_web_xml.module = node.text
+
+  def ProcessServiceNode(self, node):
+    self.app_engine_web_xml.service = node.text
 
   def ProcessInstanceClassNode(self, node):
     self.app_engine_web_xml.instance_class = node.text
@@ -285,6 +288,9 @@ class AppEngineWebXmlParser(object):
   def ProcessVmNode(self, node):
     self.app_engine_web_xml.vm = xml_parser_utils.BooleanValue(node.text)
 
+  def ProcessEnvNode(self, node):
+    self.app_engine_web_xml.env = node.text
+
   def ProcessApiConfigNode(self, node):
     servlet = xml_parser_utils.GetAttribute(node, 'servlet-class').strip()
     url = xml_parser_utils.GetAttribute(node, 'url-pattern').strip()
@@ -299,21 +305,8 @@ class AppEngineWebXmlParser(object):
         self.app_engine_web_xml.api_endpoint_ids.append(api_id)
 
   def ProcessPagespeedNode(self, node):
-    """Processes URLs and puts them into the Pagespeed object."""
-    pagespeed = Pagespeed()
-    pagespeed.url_blacklist = [
-        sub_node.text for sub_node in xml_parser_utils.GetNodes(
-            node, 'url-blacklist')]
-    pagespeed.domains_to_rewrite = [
-        sub_node.text for sub_node in xml_parser_utils.GetNodes(
-            node, 'domain-to-rewrite')]
-    pagespeed.enabled_rewriters = [
-        sub_node.text for sub_node in xml_parser_utils.GetNodes(
-            node, 'enabled-rewriter')]
-    pagespeed.disabled_rewriters = [
-        sub_node.text for sub_node in xml_parser_utils.GetNodes(
-            node, 'disabled-rewriter')]
-    self.app_engine_web_xml.pagespeed = pagespeed
+    """Ignore pagespeed node."""
+    pass
 
   def ProcessClassLoaderConfigNode(self, node):
     for node in xml_parser_utils.GetNodes(node, 'priority-specifier'):
@@ -455,8 +448,9 @@ class AppEngineWebXml(ValueMixin):
     """Initializes an empty AppEngineWebXml object."""
     self.app_id = None
     self.version_id = None
-    self.source_language = None
+    self.runtime = None
     self.module = None
+    self.service = None
     self.system_properties = {}
     self.beta_settings = {}
     self.vm_settings = {}
@@ -483,9 +477,9 @@ class AppEngineWebXml(ValueMixin):
     self.threadsafe_value_provided = False
     self.codelock = None
     self.vm = False
+    self.env = '1'
     self.api_config = None
     self.api_endpoint_ids = []
-    self.pagespeed = None
     self.class_loader_config = []
     self.url_stream_handler_type = None
     self.use_google_connector_j = None
@@ -646,10 +640,6 @@ class ErrorHandler(ValueMixin):
 class ApiConfig(ValueMixin):
   """Instances contain information about the API config settings."""
   pass
-
-
-class Pagespeed(ValueMixin):
-  """Instances contain information about the pagespeed settings."""
 
 
 class PrioritySpecifierEntry(ValueMixin):

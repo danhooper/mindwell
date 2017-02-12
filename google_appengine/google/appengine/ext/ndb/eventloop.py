@@ -1,3 +1,18 @@
+#
+# Copyright 2008 The ndb Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """An event loop.
 
 This event loop should handle both asynchronous App Engine RPC objects
@@ -24,7 +39,7 @@ __all__ = ['EventLoop',
            'add_idle', 'queue_call', 'queue_rpc',
            'get_event_loop',
            'run', 'run0', 'run1',
-           ]
+          ]
 
 _logging_debug = utils.logging_debug
 
@@ -33,12 +48,26 @@ _RUNNING = apiproxy_rpc.RPC.RUNNING
 _FINISHING = apiproxy_rpc.RPC.FINISHING
 
 
+class _Clock(object):
+  """A clock to determine the current time, in seconds."""
+
+  def now(self):
+    """Returns the number of seconds since epoch."""
+    return time.time()
+
+  def sleep(self, seconds):
+    """Sleeps for the desired number of seconds."""
+    time.sleep(seconds)
+
+
 class EventLoop(object):
   """An event loop."""
 
-  def __init__(self):
+  def __init__(self, clock=None):
     """Constructor.
 
+    Args:
+      clock: an eventloop._Clock object. Defaults to a time-based clock.
     Fields:
       current: a FIFO list of (callback, args, kwds). These callbacks
         run immediately when the eventloop runs.
@@ -51,6 +80,7 @@ class EventLoop(object):
       rpcs: a map from rpc to (callback, args, kwds). Callback is called
         when the rpc finishes.
     """
+    self.clock = clock or _Clock()
     self.current = collections.deque()
     self.idlers = collections.deque()
     self.inactive = 0  # How many idlers in a row were no-ops
@@ -94,13 +124,15 @@ class EventLoop(object):
     """
 
     if lo < 0:
-        raise ValueError('lo must be non-negative')
+      raise ValueError('lo must be non-negative')
     if hi is None:
-        hi = len(self.queue)
+      hi = len(self.queue)
     while lo < hi:
-        mid = (lo + hi) // 2
-        if event[0] < self.queue[mid][0]: hi = mid
-        else: lo = mid + 1
+      mid = (lo + hi) // 2
+      if event[0] < self.queue[mid][0]:
+        hi = mid
+      else:
+        lo = mid + 1
     self.queue.insert(lo, event)
 
   def queue_call(self, delay, callback, *args, **kwds):
@@ -109,7 +141,7 @@ class EventLoop(object):
       self.current.append((callback, args, kwds))
       return
     if delay < 1e9:
-      when = delay + time.time()
+      when = delay + self.clock.now()
     else:
       # Times over a billion seconds are assumed to be absolute.
       when = delay
@@ -133,6 +165,7 @@ class EventLoop(object):
       if len(rpcs) > 1:
         # Don't call the callback until all sub-rpcs have completed.
         rpc.__done = False
+
         def help_multi_rpc_along(r=rpc, c=callback, a=args, k=kwds):
           if r.state == _FINISHING and not r.__done:
             r.__done = True
@@ -200,7 +233,7 @@ class EventLoop(object):
       return 0
     delay = None
     if self.queue:
-      delay = self.queue[0][0] - time.time()
+      delay = self.queue[0][0] - self.clock.now()
       if delay <= 0:
         self.inactive = 0
         _, callback, args, kwds = self.queue.pop(0)
@@ -236,7 +269,7 @@ class EventLoop(object):
     if delay is None:
       return False
     if delay > 0:
-      time.sleep(delay)
+      self.clock.sleep(delay)
     return True
 
   def run(self):

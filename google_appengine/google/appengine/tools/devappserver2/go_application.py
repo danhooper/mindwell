@@ -32,9 +32,20 @@ import google
 from google.appengine.tools.devappserver2 import go_errors
 from google.appengine.tools.devappserver2 import safe_subprocess
 
-
-_SDKROOT = os.path.dirname(os.path.dirname(google.__file__))
-GOROOT = os.path.join(_SDKROOT, 'goroot')
+# The location of devappserver2 changes infrequently enough we can be fairly
+# confident depending on the goroot and gopath being in the same place relative
+# to it.
+#
+# This gopath will be used in the event that the user does not already have a
+# GOPATH in their os.environ.
+#
+# devappserver2: $HOME/go_appengine/google/appengine/tools/devappserver2
+# goroot:        $HOME/go_appengine/goroot
+# gopath:        $HOME/go_appengine/gopath
+GOROOT = os.path.normpath(os.path.join(
+    os.path.dirname(__file__), '..', '..', '..', '..', 'goroot'))
+GOPATH = os.path.normpath(os.path.join(
+    os.path.dirname(__file__), '..', '..', '..', '..', 'gopath'))
 
 _GAB_PATH = os.path.join(GOROOT, 'bin', 'go-app-builder')
 if sys.platform.startswith('win'):
@@ -78,11 +89,12 @@ def _get_base_gab_args(application_root, nobuild_files, arch):
       '-arch', arch,
       '-dynamic',
       '-goroot', GOROOT,
+      '-gopath', os.environ.get('GOPATH', GOPATH),
       '-nobuild_files', '^' + str(nobuild_files),
+      '-incremental_rebuild',
       '-unsafe',
   ]
-  if 'GOPATH' in os.environ:
-    gab_args.extend(['-gopath', os.environ['GOPATH']])
+
   return gab_args
 
 
@@ -143,35 +155,6 @@ def list_go_files(application_root, nobuild_files, skip_files):
 
       go_files.append(rel_path)
   return go_files
-
-
-def get_app_extras_for_vm(application_root, nobuild_files, skip_files):
-  """Returns an iterable describing extra Go files needed to build VM apps.
-
-  The Go files are decided based on the production environment linux/amd64.
-
-  Args:
-    application_root: string path to the root dir of the application.
-    nobuild_files: regexp identifying which files to not build.
-    skip_files: regexp identifying which files to omit from app.
-
-  Returns:
-    An iterable of pairs, one per extra Go file. The first pair element
-    is the relative path at which to import the Go file; the second is its
-    absolute path.
-
-  Raises:
-    BuildError: if the go application builder fails.
-  """
-  gab_args = ['-print_extras', '-vm']
-  gab_args.extend(list_go_files(application_root, nobuild_files, skip_files))
-  env = {
-      'GOOS': 'linux',
-      'GOARCH': 'amd64',
-  }
-  gab_stdout, _ = _run_gab(application_root, nobuild_files, '6', gab_args, env)
-
-  return [l.split('|') for l in gab_stdout.split('\n') if l]
 
 
 class GoApplication(object):

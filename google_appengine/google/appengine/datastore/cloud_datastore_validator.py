@@ -41,6 +41,7 @@ This module is internal and should not be used by client applications.
 
 import re
 
+from google.appengine.api import datastore_types
 from google.appengine.datastore import datastore_pbs
 if datastore_pbs._CLOUD_DATASTORE_ENABLED:
   from google.appengine.datastore.datastore_pbs import googledatastore
@@ -69,6 +70,12 @@ _RESERVED_NAME_RE = re.compile('^__(.*)__$')
 
 _PARTITION_DIMENSION_RE = re.compile(r'^[0-9A-Za-z\._\-]{0,%d}$'
                                      % datastore_pbs.MAX_PARTITION_ID_LENGTH)
+
+
+_INTEGER_VALUE_MEANINGS = frozenset([
+    datastore_pbs.MEANING_NON_RFC_3339_TIMESTAMP,
+    datastore_pbs.MEANING_PERCENT,
+    ])
 
 
 _STRING_VALUE_MEANINGS = frozenset([
@@ -572,6 +579,8 @@ class _EntityValidator(object):
     """
     if value.HasField('string_value'):
       _assert_valid_utf8(value.string_value, 'string value')
+    elif value.HasField('timestamp_value'):
+      self.validate_timestamp(value.timestamp_value)
     elif value.HasField('key_value'):
       self.validate_key(KEY_IN_VALUE, value.key_value)
     elif value.HasField('geo_point_value'):
@@ -625,7 +634,7 @@ class _EntityValidator(object):
     elif meaning == datastore_pbs.MEANING_POINT_WITHOUT_V3_MEANING:
       _assert_condition(field == 'geo_point_value',
                         message % (meaning, 'geo_point_value'))
-    elif meaning == datastore_pbs.MEANING_PERCENT:
+    elif meaning in _INTEGER_VALUE_MEANINGS:
       _assert_condition(field == 'integer_value',
                         message % (meaning, 'integer_value'))
     elif meaning == datastore_pbs.MEANING_INDEX_ONLY:
@@ -669,6 +678,12 @@ class _EntityValidator(object):
                          <= datastore_pbs.MAX_URL_CHARS),
                         'URL value has more than permitted %d characters.'
                         % datastore_pbs.MAX_URL_CHARS)
+    elif meaning == datastore_pbs.MEANING_NON_RFC_3339_TIMESTAMP:
+      _assert_condition(
+          not datastore_pbs.is_in_rfc_3339_bounds(value.integer_value),
+          ('A timestamp in range [0001-01-01T00:00:00Z, '
+           '9999-12-31T23:59:59.999999Z] must be stored as a timestamp '
+           'value.'))
     elif meaning == datastore_pbs.MEANING_PERCENT:
       _assert_condition((value.integer_value >= 0
                          and value.integer_value <= 100),
@@ -774,6 +789,13 @@ class _EntityValidator(object):
     if not constraint.reserved_property_name_allowed:
       _assert_string_not_reserved(property_name, desc)
 
+  def validate_timestamp(self, timestamp):
+    _assert_condition(0 <= timestamp.nanos < 1000000000,
+                      'Timestamp nanos exceeds limit for field')
+    _assert_condition(
+        datastore_pbs.is_in_rfc_3339_bounds(timestamp.seconds * 1000 * 1000),
+        'Timestamp seconds exceeds limit for field')
+
 
 
 __entity_validator = _EntityValidator()
@@ -803,7 +825,7 @@ class _QueryValidator(object):
       ValidationError: if the query is invalid
     """
     _assert_condition((not is_strong_read_consistency
-                       or self._has_ancestor(query.filter)),
+                       or self._has_ancestor_or_parent(query.filter)),
                       'Global queries do not support strong consistency.')
     if query.HasField('filter'):
       self.validate_filter(query.filter)
@@ -889,7 +911,7 @@ class _QueryValidator(object):
     """
     self.__validate_property_reference(property_order.property)
 
-  def _has_ancestor(self, filt):
+  def _has_ancestor_or_parent(self, filt):
     """Determines if a filter includes an ancestor filter.
 
     Args:
@@ -901,13 +923,16 @@ class _QueryValidator(object):
     if filt.HasField('property_filter'):
       op = filt.property_filter.op
       name = filt.property_filter.property.name
-      return (op == googledatastore.PropertyFilter.HAS_ANCESTOR
+      value = filt.property_filter.value
+      return ((op == googledatastore.PropertyFilter.HAS_ANCESTOR or
+               op == googledatastore.PropertyFilter.HAS_PARENT)
+              and value.HasField('key_value')
               and name == datastore_pbs.PROPERTY_NAME_KEY)
     if filt.HasField('composite_filter'):
       if (filt.composite_filter.op
           == googledatastore.CompositeFilter.AND):
         for sub_filter in filt.composite_filter.filters:
-          if self._has_ancestor(sub_filter):
+          if self._has_ancestor_or_parent(sub_filter):
             return True
     return False
 
@@ -924,9 +949,10 @@ def get_query_validator():
 class _ServiceValidator(object):
   """Validator for request/response protos."""
 
-  def __init__(self, entity_validator, query_validator):
+  def __init__(self, entity_validator, query_validator, id_resolver):
     self.__entity_validator = entity_validator
     self.__query_validator = query_validator
+    self.__id_resolver = id_resolver
 
   def validate_begin_transaction_req(self, req):
     """Validates a normalized BeginTransactionRequest.
@@ -963,12 +989,43 @@ class _ServiceValidator(object):
     _assert_initialized(req)
     if (req.mode == googledatastore.CommitRequest.MODE_UNSPECIFIED or
         req.mode == googledatastore.CommitRequest.TRANSACTIONAL):
-      _assert_condition(req.transaction,
+      _assert_condition(req.WhichOneof('transaction_selector'),
                         'Transactional commit requires a transaction.')
+      if req.WhichOneof('transaction_selector') == 'transaction':
+        _assert_condition(req.transaction, 'a transaction cannot be the empty '
+                                           'string.')
+
+
+      seen_base_versions = {}
+      for mutation in req.mutations:
+        v1_key, _ = datastore_pbs.get_v1_mutation_key_and_entity(mutation)
+        if datastore_pbs.is_complete_v1_key(v1_key):
+          mutation_base_version = None
+          if mutation.HasField('base_version'):
+            mutation_base_version = mutation.base_version
+
+          key = datastore_types.ReferenceToKeyValue(v1_key, self.__id_resolver)
+          if key in seen_base_versions:
+            _assert_condition(seen_base_versions[key] == mutation_base_version,
+                              'Mutations for the same entity must have the '
+                              'same base version.')
+          seen_base_versions[key] = mutation_base_version
+
     elif req.mode == googledatastore.CommitRequest.NON_TRANSACTIONAL:
-      _assert_condition(not req.transaction,
-                        ('Non-transactional commit cannot specify a '
-                         'transaction.'))
+      _assert_condition(not req.WhichOneof('transaction_selector'),
+                        'Non-transactional commit cannot specify a '
+                        'transaction.')
+
+      seen_complete_keys = set()
+      for mutation in req.mutations:
+        v1_key, _ = datastore_pbs.get_v1_mutation_key_and_entity(mutation)
+        if datastore_pbs.is_complete_v1_key(v1_key):
+          key = datastore_types.ReferenceToKeyValue(v1_key, self.__id_resolver)
+          _assert_condition(key not in seen_complete_keys,
+                            'A non-transactional commit may not contain '
+                            'multiple mutations affecting the same entity.')
+          seen_complete_keys.add(key)
+
     for mutation in req.mutations:
       self.__validate_mutation(mutation)
 
@@ -986,6 +1043,7 @@ class _ServiceValidator(object):
 
     _assert_condition(not req.HasField('gql_query'), 'GQL not supported.')
     _assert_initialized(req)
+    self.__validate_read_options(req.read_options)
     self.__entity_validator.validate_partition_id(READ,
                                                   req.partition_id)
     _assert_condition(req.HasField('query'),
@@ -1006,6 +1064,7 @@ class _ServiceValidator(object):
       ValidationError: if the request is invalid
     """
     _assert_initialized(req)
+    self.__validate_read_options(req.read_options)
     self.__entity_validator.validate_keys(READ, req.keys)
 
   def validate_allocate_ids_req(self, req):
@@ -1025,25 +1084,40 @@ class _ServiceValidator(object):
     if mutation.HasField('insert'):
 
       self.__entity_validator.validate_entity(UPSERT, mutation.insert)
+      mutation_key = mutation.insert.key
     elif mutation.HasField('update'):
       self.__entity_validator.validate_entity(UPDATE, mutation.update)
+      mutation_key = mutation.update.key
     elif mutation.HasField('upsert'):
       self.__entity_validator.validate_entity(UPSERT, mutation.upsert)
+      mutation_key = mutation.upsert.key
     elif mutation.HasField('delete'):
       self.__entity_validator.validate_key(DELETE, mutation.delete)
+      mutation_key = mutation.delete
     else:
       _assert_condition(False, 'mutation lacks required op')
 
+    if mutation.WhichOneof('conflict_detection_strategy') != None:
+      _assert_condition(datastore_pbs.is_complete_v1_key(mutation_key),
+                        'conflict detection is not allowed for incomplete keys')
+    if mutation.HasField('base_version'):
+      _assert_condition(mutation.base_version >= 0,
+                        'Invalid base_version: %d, '
+                        'it should be >= 0' % mutation.base_version)
+
+  def __validate_read_options(self, read_options):
+    if read_options.WhichOneof('consistency_type') == 'transaction':
+      _assert_condition(read_options.transaction, 'a transaction cannot be the '
+                                                  'the empty string.')
 
 
-__service_validator = _ServiceValidator(__entity_validator,
-                                        __query_validator)
-
-
-def get_service_validator():
+def get_service_validator(id_resolver):
   """Returns a validator for v1 service request/response protos.
+
+  Args:
+    id_resolver: a datastore_pbs.IdResolver.
 
   Returns:
     a _ServiceValidator
   """
-  return __service_validator
+  return _ServiceValidator(__entity_validator, __query_validator, id_resolver)

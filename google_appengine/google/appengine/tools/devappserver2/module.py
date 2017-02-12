@@ -47,32 +47,24 @@ from google.appengine.tools.devappserver2 import blob_image
 from google.appengine.tools.devappserver2 import blob_upload
 from google.appengine.tools.devappserver2 import channel
 from google.appengine.tools.devappserver2 import constants
-from google.appengine.tools.devappserver2 import custom_runtime
 from google.appengine.tools.devappserver2 import endpoints
 from google.appengine.tools.devappserver2 import errors
 from google.appengine.tools.devappserver2 import file_watcher
 from google.appengine.tools.devappserver2 import gcs_server
-from google.appengine.tools.devappserver2 import go_runtime
-from google.appengine.tools.devappserver2 import health_check_service
+from google.appengine.tools.devappserver2 import grpc_port
 from google.appengine.tools.devappserver2 import http_proxy
 from google.appengine.tools.devappserver2 import http_runtime
 from google.appengine.tools.devappserver2 import http_runtime_constants
 from google.appengine.tools.devappserver2 import instance
-try:
-  from google.appengine.tools.devappserver2 import java_runtime
-except ImportError:
-  java_runtime = None
 from google.appengine.tools.devappserver2 import login
-from google.appengine.tools.devappserver2 import php_runtime
-from google.appengine.tools.devappserver2 import python_runtime
 from google.appengine.tools.devappserver2 import request_rewriter
 from google.appengine.tools.devappserver2 import runtime_config_pb2
+from google.appengine.tools.devappserver2 import runtime_factories
 from google.appengine.tools.devappserver2 import start_response_utils
 from google.appengine.tools.devappserver2 import static_files_handler
 from google.appengine.tools.devappserver2 import thread_executor
 from google.appengine.tools.devappserver2 import url_handler
 from google.appengine.tools.devappserver2 import util
-from google.appengine.tools.devappserver2 import vm_runtime_factory
 from google.appengine.tools.devappserver2 import wsgi_handler
 from google.appengine.tools.devappserver2 import wsgi_server
 
@@ -141,6 +133,8 @@ _FILESAPI_DEPRECATION_WARNING_GO = (
     ' is available here: https://cloud.google.com/appengine/docs/deprecations'
     '/files_api')
 
+_ALLOWED_RUNTIMES_ENV_FLEX = (
+    'python-compat', 'java', 'java7', 'go', 'custom')
 
 def _static_files_regex_from_handlers(handlers):
   patterns = []
@@ -191,22 +185,6 @@ class _ScriptHandler(url_handler.UserConfiguredURLHandler):
 class Module(object):
   """The abstract base for all instance pool implementations."""
 
-  _RUNTIME_INSTANCE_FACTORIES = {
-      'go': go_runtime.GoRuntimeInstanceFactory,
-      'php': php_runtime.PHPRuntimeInstanceFactory,
-      'php55': php_runtime.PHPRuntimeInstanceFactory,
-      'python': python_runtime.PythonRuntimeInstanceFactory,
-      'python27': python_runtime.PythonRuntimeInstanceFactory,
-      'custom': custom_runtime.CustomRuntimeInstanceFactory,
-      # TODO: uncomment for GA.
-      # 'vm': vm_runtime_factory.VMRuntimeInstanceFactory,
-  }
-  if java_runtime:
-    _RUNTIME_INSTANCE_FACTORIES.update({
-        'java': java_runtime.JavaRuntimeInstanceFactory,
-        'java7': java_runtime.JavaRuntimeInstanceFactory,
-    })
-
   _MAX_REQUEST_WAIT_TIME = 10
 
   def _get_wait_time(self):
@@ -215,8 +193,6 @@ class Module(object):
     Returns:
       The timeout value in seconds.
     """
-    if self.vm_enabled():
-      return self._MAX_REQUEST_WAIT_TIME * _VMENGINE_SLOWDOWN_FACTOR
     return self._MAX_REQUEST_WAIT_TIME
 
   def _create_instance_factory(self,
@@ -233,23 +209,27 @@ class Module(object):
 
     Raises:
       RuntimeError: if the configuration specifies an unknown runtime.
+      errors.InvalidAppConfigError: if using removed runtimes for env: 2
     """
-    # TODO: Remove this when we have sandboxing disabled for all
-    # runtimes.
-    if (os.environ.get('GAE_LOCAL_VM_RUNTIME') != '0' and
-        module_configuration.runtime == 'vm'):
+    runtime = module_configuration.runtime
+    if runtime == 'vm':
       runtime = module_configuration.effective_runtime
-    else:
-      runtime = module_configuration.runtime
+      # NOTE(bryanmau): b/24139391
+      # If in env: 2, users either use a compat runtime or custom.
+      if util.is_env_flex(module_configuration.env):
+        if runtime not in _ALLOWED_RUNTIMES_ENV_FLEX:
+          raise errors.InvalidAppConfigError(
+              'In env: {0}, only the following runtimes '
+              'are allowed: {1}'
+              .format(module_configuration.env, _ALLOWED_RUNTIMES_ENV_FLEX))
 
-    # TODO: a bad runtime should be caught before we get here.
-    if runtime not in self._RUNTIME_INSTANCE_FACTORIES:
+    if runtime not in runtime_factories.FACTORIES:
       raise RuntimeError(
           'Unknown runtime %r; supported runtimes are %s.' %
           (runtime,
            ', '.join(
-               sorted(repr(k) for k in self._RUNTIME_INSTANCE_FACTORIES))))
-    instance_factory = self._RUNTIME_INSTANCE_FACTORIES[runtime]
+               sorted(repr(k) for k in runtime_factories.FACTORIES))))
+    instance_factory = runtime_factories.FACTORIES[runtime]
     return instance_factory(
         request_data=self._request_data,
         runtime_config_getter=self._get_runtime_config,
@@ -286,10 +266,21 @@ class Module(object):
     handlers.append(
         wsgi_handler.WSGIHandler(gcs_server.Application(), url_pattern))
 
-    url_pattern = '/%s' % endpoints.API_SERVING_PATTERN
-    handlers.append(
-        wsgi_handler.WSGIHandler(
-            endpoints.EndpointsDispatcher(self._dispatcher), url_pattern))
+    # Add a handler for Endpoints, only if version == 1.0
+    runtime_config = self._get_runtime_config()
+    for library in runtime_config.libraries:
+      if library.name == 'endpoints' and library.version == '1.0':
+        url_pattern = '/%s' % endpoints.API_SERVING_PATTERN
+        handlers.append(
+            wsgi_handler.WSGIHandler(
+                endpoints.EndpointsDispatcher(self._dispatcher), url_pattern))
+
+    # Add a handler for getting the port running gRPC, only if there are APIs
+    # speaking gRPC.
+    if runtime_config.grpc_apis:
+      url_pattern = '/%s' % grpc_port.GRPC_PORT_URL_PATTERN
+      handlers.append(
+          wsgi_handler.WSGIHandler(grpc_port.Application(), url_pattern))
 
     found_start_handler = False
     found_warmup_handler = False
@@ -333,10 +324,6 @@ class Module(object):
       A runtime_config_pb2.Config instance representing the configuration to be
       passed to an instance. NOTE: This does *not* include the instance_id
       field, which must be populated elsewhere.
-
-    Raises:
-      ValueError: The runtime type is "custom" with vm: true and
-        --custom_entrypoint is not specified.
     """
     runtime_config = runtime_config_pb2.Config()
     runtime_config.app_id = self._module_configuration.application
@@ -353,6 +340,7 @@ class Module(object):
           self._module_configuration.handlers)
     runtime_config.api_host = self._api_host
     runtime_config.api_port = self._api_port
+    runtime_config.grpc_apis.extend(self._grpc_apis)
     runtime_config.server_port = self._balanced_port
     runtime_config.stderr_log_level = self._runtime_stderr_loglevel
     runtime_config.datacenter = 'us1'
@@ -376,22 +364,14 @@ class Module(object):
         self._module_configuration.runtime.startswith('python')):
       runtime_config.python_config.CopyFrom(self._python_config)
     if (self._java_config and
-        self._module_configuration.runtime.startswith('java')):
+        (self._module_configuration.runtime.startswith('java') or
+         self._module_configuration.effective_runtime.startswith('java'))):
       runtime_config.java_config.CopyFrom(self._java_config)
 
     if self._vm_config:
       runtime_config.vm_config.CopyFrom(self._vm_config)
-      # If the effective runtime is "custom" and --custom_entrypoint is not set,
-      # bail out early; otherwise, load custom into runtime_config.
-      # TODO: Remove the GAE_LOCAL_VM_RUNTIME check here once
-      # sandboxing is disabled.
-      if (self._module_configuration.effective_runtime == 'custom' and
-          os.environ.get('GAE_LOCAL_VM_RUNTIME') != '0'):
-        if not self._custom_config.custom_entrypoint:
-          raise ValueError('The --custom_entrypoint flag must be set for '
-                           'custom runtimes')
-        else:
-          runtime_config.custom_config.CopyFrom(self._custom_config)
+      if self._module_configuration.effective_runtime == 'custom':
+        runtime_config.custom_config.CopyFrom(self._custom_config)
 
     runtime_config.vm = self._module_configuration.runtime == 'vm'
 
@@ -400,7 +380,7 @@ class Module(object):
   def _maybe_restart_instances(self, config_changed, file_changed):
     """Restarts instances. May avoid some restarts depending on policy.
 
-    One of config_changed or file_changed must be True.
+    If neither config_changed or file_changed is True, returns immediately.
 
     Args:
       config_changed: True if the configuration for the application has changed.
@@ -427,6 +407,14 @@ class Module(object):
 
   def _handle_changes(self, timeout=0):
     """Handle file or configuration changes."""
+    # Check for file changes first, because they can trigger config changes.
+    file_changes = self._watcher.changes(timeout)
+    if file_changes:
+      logging.info(
+          '[%s] Detected file changes:\n  %s', self.name,
+          '\n  '.join(sorted(file_changes)))
+      self._instance_factory.files_changed()
+
     # Always check for config and file changes because checking also clears
     # pending changes.
     config_changes = self._module_configuration.check_for_updates()
@@ -434,13 +422,6 @@ class Module(object):
       handlers = self._create_url_handlers()
       with self._handler_lock:
         self._handlers = handlers
-
-    file_changes = self._watcher.changes(timeout)
-    if file_changes:
-      logging.info(
-          '[%s] Detected file changes:\n  %s', self.name,
-          '\n  '.join(sorted(file_changes)))
-      self._instance_factory.files_changed()
 
     if config_changes & _RESTART_INSTANCES_CONFIG_CHANGES:
       self._instance_factory.configuration_changed(config_changes)
@@ -471,7 +452,8 @@ class Module(object):
                use_mtime_file_watcher,
                automatic_restarts,
                allow_skipped_files,
-               threadsafe_override):
+               threadsafe_override,
+               grpc_apis=None):
     """Initializer for Module.
     Args:
       module_configuration: An application_configuration.ModuleConfiguration
@@ -493,9 +475,10 @@ class Module(object):
           Python runtime-specific configuration. If None then defaults are used.
       java_config: A runtime_config_pb2.JavaConfig instance containing
           Java runtime-specific configuration. If None then defaults are used.
-      custom_config: A runtime_config_pb2.CustomConfig instance. If None, or
-          'custom_entrypoint' is not set, then attempting to instantiate a
-          custom runtime module will result in an error.
+      custom_config: A runtime_config_pb2.CustomConfig instance. If 'runtime'
+          is set then we switch to another runtime.  Otherwise, we use the
+          custom_entrypoint to start the app.  If neither or both are set,
+          then we will throw an error.
       cloud_sql_config: A runtime_config_pb2.CloudSQL instance containing the
           required configuration for local Google Cloud SQL development. If None
           then Cloud SQL will not be available.
@@ -520,6 +503,11 @@ class Module(object):
           directive.
       threadsafe_override: If not None, ignore the YAML file value of threadsafe
           and use this value instead.
+      grpc_apis: a list of apis that use grpc.
+
+    Raises:
+      errors.InvalidAppConfigError: For runtime: custom, either mistakenly set
+        both --custom_entrypoint and --runtime or neither.
     """
     self._module_configuration = module_configuration
     self._name = module_configuration.module_name
@@ -528,6 +516,7 @@ class Module(object):
     self._host = host
     self._api_host = api_host
     self._api_port = api_port
+    self._grpc_apis = grpc_apis or []
     self._auth_domain = auth_domain
     self._runtime_stderr_loglevel = runtime_stderr_loglevel
     self._balanced_port = balanced_port
@@ -547,9 +536,19 @@ class Module(object):
     self._default_version_port = default_version_port
     self._port_registry = port_registry
 
-    if self.vm_enabled():
-      self._RUNTIME_INSTANCE_FACTORIES['vm'] = (
-          vm_runtime_factory.VMRuntimeInstanceFactory)
+    if self.effective_runtime == 'custom':
+      if self._custom_config.runtime and self._custom_config.custom_entrypoint:
+        raise errors.InvalidAppConfigError(
+            'Cannot set both --runtime and --custom_entrypoint.')
+      elif self._custom_config.runtime:
+        actual_runtime = self._custom_config.runtime
+        self._module_configuration.effective_runtime = actual_runtime
+      elif not self._custom_config.custom_entrypoint:
+        raise errors.InvalidAppConfigError(
+            'Must set either --runtime or --custom_entrypoint.  For a '
+            'standard runtime, set the --runtime flag with one of %s.  '
+            'For a custom runtime, set the --custom_entrypoint with a '
+            'command to start your app.' % runtime_factories.valid_runtimes())
 
     self._instance_factory = self._create_instance_factory(
         self._module_configuration)
@@ -558,6 +557,8 @@ class Module(object):
           [self._module_configuration.application_root] +
           self._instance_factory.get_restart_directories(),
           self._use_mtime_file_watcher)
+      if hasattr(self._watcher, 'set_skip_files_re'):
+        self._watcher.set_skip_files_re(self._module_configuration.skip_files)
     else:
       self._watcher = None
     self._handler_lock = threading.Lock()
@@ -575,10 +576,6 @@ class Module(object):
       self._filesapi_warning_message = _FILESAPI_DEPRECATION_WARNING_GO
     else:
       self._filesapi_warning_message = None
-
-  def vm_enabled(self):
-    # TODO: change when GA
-    return self._vm_config
 
   @property
   def name(self):
@@ -727,7 +724,7 @@ class Module(object):
     else:
       environ['SERVER_PORT'] = str(self.balanced_port)
     if 'HTTP_HOST' in environ:
-      environ['SERVER_NAME'] = environ['HTTP_HOST'].split(':', 1)[0]
+      environ['SERVER_NAME'] = environ['HTTP_HOST'].rsplit(':', 1)[0]
     environ['DEFAULT_VERSION_HOSTNAME'] = '%s:%s' % (
         environ['SERVER_NAME'], self._default_version_port)
 
@@ -883,7 +880,9 @@ class Module(object):
               return request_rewriter.frontend_rewriter_middleware(app)(
                   environ, wrapped_start_response)
             else:
-              return handler.handle(match, environ, wrapped_start_response)
+              ret = handler.handle(match, environ, wrapped_start_response)
+              if ret is not None:
+                return ret
         return self._no_handler_for_request(environ, wrapped_start_response,
                                             request_id)
       except StandardError, e:
@@ -1090,7 +1089,10 @@ class Module(object):
 
     url = urlparse.urlsplit(relative_url)
     if port != 80:
-      host = '%s:%s' % (self.host, port)
+      if ':' in self.host:
+        host = '[%s]:%s' % (self.host, port)
+      else:
+        host = '%s:%s' % (self.host, port)
     else:
       host = self.host
     environ = {constants.FAKE_IS_ADMIN_HEADER: '1',
@@ -1730,25 +1732,7 @@ class ManualScalingModule(Module):
       self._instances.append(inst)
       suspended = self._suspended
     if not suspended:
-      future = self._async_start_instance(wsgi_servr, inst)
-      health_check_config = self.module_configuration.health_check
-      if (self.module_configuration.runtime == 'vm' and
-          health_check_config.enable_health_check and
-          os.environ.get('GAE_LOCAL_VM_RUNTIME') == '0'):
-        # Health checks should only get added after the build is done and the
-        # container starts.
-        def _add_health_checks_callback(unused_future):
-          return self._add_health_checks(inst, wsgi_servr, health_check_config)
-        future.add_done_callback(_add_health_checks_callback)
-
-  def _add_health_checks(self, inst, wsgi_servr, config):
-    do_health_check = functools.partial(
-        self._do_health_check, wsgi_servr, inst)
-    restart_instance = functools.partial(
-        self._restart_instance, inst)
-    health_checker = health_check_service.HealthChecker(
-        inst, config, do_health_check, restart_instance)
-    health_checker.start()
+      self._async_start_instance(wsgi_servr, inst)
 
   def _async_start_instance(self, wsgi_servr, inst):
     return _THREAD_POOL.submit(self._start_instance, wsgi_servr, inst)
@@ -1778,20 +1762,6 @@ class ManualScalingModule(Module):
         self._condition.notify(self.max_instance_concurrent_requests)
     except Exception, e:  # pylint: disable=broad-except
       logging.exception('Internal error while handling start request: %s', e)
-
-  def _do_health_check(self, wsgi_servr, inst, start_response,
-                       is_last_successful):
-    is_last_successful = 'yes' if is_last_successful else 'no'
-    url = '/_ah/health?%s' % urllib.urlencode(
-        [('IsLastSuccessful', is_last_successful)])
-    environ = self.build_request_environ(
-        'GET', url, [], '', '', wsgi_servr.port,
-        fake_login=True)
-    return self._handle_request(
-        environ,
-        start_response,
-        inst=inst,
-        request_type=instance.NORMAL_REQUEST)
 
   def _choose_instance(self, timeout_time):
     """Returns an Instance to handle a request or None if all are busy."""
@@ -1944,12 +1914,6 @@ class ManualScalingModule(Module):
         for wsgi_servr, inst in zip(wsgi_servers, instances_to_start)]
     logging.info('Waiting for instances to restart')
 
-    health_check_config = self.module_configuration.health_check
-    for (inst, wsgi_servr) in zip(instances_to_start, wsgi_servers):
-      if (self.module_configuration.runtime == 'vm'
-          and health_check_config.enable_health_check):
-        self._add_health_checks(inst, wsgi_servr, health_check_config)
-
     _, not_done = futures.wait(start_futures, timeout=_SHUTDOWN_TIMEOUT)
     if not_done:
       logging.warning('All instances may not have restarted')
@@ -1969,12 +1933,7 @@ class ManualScalingModule(Module):
       self._port_registry.add(wsgi_servr.port, self, new_instance)
       # Start the new instance.
       self._start_instance(wsgi_servr, new_instance)
-    health_check_config = self.module_configuration.health_check
-    if (self.module_configuration.runtime == 'vm'
-        and health_check_config.enable_health_check):
-      self._add_health_checks(new_instance, wsgi_servr, health_check_config)
       # Replace it in the module registry.
-    with self._instances_change_lock:
       with self._condition:
         self._instances[new_instance.instance_id] = new_instance
 

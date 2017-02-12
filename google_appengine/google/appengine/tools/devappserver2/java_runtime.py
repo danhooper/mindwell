@@ -31,6 +31,7 @@ from google.appengine.api import appinfo
 from google.appengine.tools.devappserver2 import http_runtime
 from google.appengine.tools.devappserver2 import instance
 from google.appengine.tools.devappserver2 import java_application
+from google.appengine.tools.devappserver2 import util
 
 # TODO: figure out what's needed to react to file changes
 
@@ -67,8 +68,8 @@ class JavaRuntimeInstanceFactory(instance.InstanceFactory):
     self._application_lock = threading.Lock()
     self._java_application = java_application.JavaApplication(
         self._module_configuration)
-    self._for_jetty9 = (os.environ.get('GAE_LOCAL_VM_RUNTIME') != '0' and
-                        module_configuration.runtime == 'vm')
+    self._for_jetty9 = (module_configuration.runtime == 'vm' or
+                        util.is_env_flex(module_configuration.env))
     self._java_command = self._make_java_command()
 
   def _make_java_command(self):
@@ -100,12 +101,11 @@ class JavaRuntimeInstanceFactory(instance.InstanceFactory):
     if self._for_jetty9:
       jetty_home = os.environ.get('APP_ENGINE_JETTY_HOME', None)
       jetty_base = os.environ.get('APP_ENGINE_JETTY_BASE', None)
-      appengine_dir = os.path.dirname(tools_dir)
       if not jetty_home:
-        jetty_home = os.path.join(appengine_dir,
-                                  'javamanagedvm', 'appengine-java-vmruntime')
+        jetty_home = os.path.join(java_lib_dir, 'java-managed-vm',
+                                  'appengine-java-vmruntime')
       if not jetty_base:
-        jetty_base = os.path.join(appengine_dir, 'jettybasesdk')
+        jetty_base = os.path.join(java_lib_dir, 'jetty-base-sdk')
 
       args = [
           java_bin,
@@ -117,14 +117,16 @@ class JavaRuntimeInstanceFactory(instance.InstanceFactory):
       args.extend(self._runtime_config_getter().java_config.jvm_args)
       args.append('-jar')
       args.append('%s/start.jar' % jetty_home)
-      args.append('-module=http')
     else:
       args = [
           java_bin,
           '-cp', class_path,
           '-Dappengine.sdk.root=' + java_dir,
+          '-Dappengine.runtime=' + self._module_configuration.runtime,
           '-Xbootclasspath/p:' + jdk_overrides_jar,
       ]
+      if self._module_configuration.runtime.startswith('java8'):
+        args.append('-Duse_jetty9_runtime=true')
       if sys.platform == 'darwin':
         args.append('-XstartOnFirstThread')
       args.extend(self._runtime_config_getter().java_config.jvm_args)

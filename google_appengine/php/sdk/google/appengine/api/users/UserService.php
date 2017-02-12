@@ -96,14 +96,18 @@ final class UserService {
   }
 
   /**
+   * Get the current logged in user.
+   *
    * @return User The object representing the current signed in user, or null
    * if no user is signed in.
    */
   public static function getCurrentUser() {
-    $email = getenv('USER_EMAIL');
-    $userId = getenv('USER_ID');
-    $federatedIdentity = getenv('FEDERATED_IDENTITY');
-    $federatedProvider = getenv('FEDERATED_PROVIDER');
+    $email = UserServiceUtil::getUserEnvironmentVariable('USER_EMAIL');
+    $userId = UserServiceUtil::getUserEnvironmentVariable('USER_ID');
+    $federatedIdentity =
+        UserServiceUtil::getUserEnvironmentVariable('FEDERATED_IDENTITY');
+    $federatedProvider =
+        UserServiceUtil::getUserEnvironmentVariable('FEDERATED_PROVIDER');
 
     if (!$email && !$federatedIdentity) {
       return null;
@@ -146,9 +150,19 @@ final class UserService {
    * application.
    */
   public static function isCurrentUserAdmin() {
-    return getenv('USER_IS_ADMIN') == '1';
+    return UserServiceUtil::getUserEnvironmentVariable('USER_IS_ADMIN') == '1';
   }
 
+  /**
+   * Convert a UserService RPC error to an exception.
+   *
+   * @param mixed $error The application error object.
+   * @param string $destination_url A URL that was used for the RPC call.
+   *
+   * @return mixed The correct exception object for the supplied error.
+   *
+   * @access private.
+   */
   private static function applicationErrorToException($error,
                                                       $destination_url) {
     switch ($error->getApplicationError()) {

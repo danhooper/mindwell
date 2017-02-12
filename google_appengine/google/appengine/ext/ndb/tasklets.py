@@ -1,3 +1,18 @@
+#
+# Copyright 2008 The ndb Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """A tasklet decorator.
 
 Tasklets are a way to write concurrently running functions without
@@ -10,7 +25,7 @@ that RPC to complete.
 The @tasklet decorator wraps generator function so that when it is
 called, a Future is returned while the generator is executed by the
 event loop.  Within the tasklet, any yield of a Future waits for and
-returns the Future's result.  For example:
+returns the Future's result.  For example::
 
   @tasklet
   def foo():
@@ -26,7 +41,7 @@ returns the Future's result.  For example:
 Note that blocking until the Future's result is available using
 get_result() is somewhat inefficient (though not vastly -- it is not
 busy-waiting).  In most cases such code should be rewritten as a tasklet
-instead:
+instead::
 
   @tasklet
   def main_tasklet():
@@ -34,7 +49,7 @@ instead:
     x = yield f
     print x
 
-Calling a tasklet automatically schedules it with the event loop:
+Calling a tasklet automatically schedules it with the event loop::
 
   def main():
     f = main_tasklet()
@@ -43,7 +58,7 @@ Calling a tasklet automatically schedules it with the event loop:
 
 As a special feature, if the wrapped function is not a generator
 function, its return value is returned via the Future.  This makes the
-following two equivalent:
+following two equivalent::
 
   @tasklet
   def foo():
@@ -65,6 +80,7 @@ import logging
 import os
 import sys
 import types
+import weakref
 
 from .google_imports import apiproxy_stub_map
 from .google_imports import apiproxy_rpc
@@ -73,6 +89,7 @@ from .google_imports import datastore_errors
 from .google_imports import datastore_pbs
 from .google_imports import datastore_rpc
 from .google_imports import namespace_manager
+from .google_imports import callback as _request_callback
 
 from . import eventloop
 from . import utils
@@ -83,9 +100,17 @@ __all__ = ['Return', 'tasklet', 'synctasklet', 'toplevel', 'sleep',
            'make_default_context', 'make_context',
            'Future', 'MultiFuture', 'QueueFuture', 'SerialQueueFuture',
            'ReducingFuture',
-           ]
+          ]
 
 _logging_debug = utils.logging_debug
+
+_CALLBACK_KEY = '__CALLBACK__'
+
+# Python 2.5 compatability.
+if hasattr(weakref, 'WeakSet'):
+  _set = weakref.WeakSet
+else:
+  _set = set
 
 
 def _is_generator(obj):
@@ -100,13 +125,28 @@ def _is_generator(obj):
 class _State(utils.threading_local):
   """Hold thread-local state."""
 
-  current_context = None
-
   def __init__(self):
     super(_State, self).__init__()
+    self.current_context = None
+    self.all_generators = _set()
     self.all_pending = set()
 
+  def set_context(self, ctx):
+    self.current_context = ctx
+
+  def add_generator(self, gen):
+    if _request_callback and _CALLBACK_KEY not in os.environ:
+      _request_callback.SetRequestEndCallback(self.reset)
+      os.environ[_CALLBACK_KEY] = '1'
+
+    _logging_debug('all_generators: add %s', gen)
+    self.all_generators.add(gen)
+
   def add_pending(self, fut):
+    if _request_callback and _CALLBACK_KEY not in os.environ:
+      _request_callback.SetRequestEndCallback(self.reset)
+      os.environ[_CALLBACK_KEY] = '1'
+
     _logging_debug('all_pending: add %s', fut)
     self.all_pending.add(fut)
 
@@ -117,9 +157,18 @@ class _State(utils.threading_local):
     else:
       _logging_debug('all_pending: %s: not found %s', status, fut)
 
+  def clear_all_generators(self):
+    if self.all_generators:
+      _logging_debug('all_generators: clear %s', self.all_generators)
+      for gen in self.all_generators:
+        gen.close()
+      self.all_generators.clear()
+    else:
+      _logging_debug('all_generators: clear no-op')
+
   def clear_all_pending(self):
     if self.all_pending:
-      logging.info('all_pending: clear %s', self.all_pending)
+      _logging_debug('all_pending: clear %s', self.all_pending)
       self.all_pending.clear()
     else:
       _logging_debug('all_pending: clear no-op')
@@ -128,11 +177,18 @@ class _State(utils.threading_local):
     pending = []
     for fut in self.all_pending:
       if verbose:
-        line = fut.dump() + ('\n' + '-'*40)
+        line = fut.dump() + ('\n' + '-' * 40)
       else:
         line = fut.dump_stack()
       pending.append(line)
     return '\n'.join(pending)
+
+  def reset(self, unused_req_id):
+    self.current_context = None
+    ev = eventloop.get_event_loop()
+    ev.clear()
+    self.clear_all_pending()
+    self.clear_all_generators()
 
 
 _state = _State()
@@ -197,6 +253,7 @@ class Future(object):
 
   def __init__(self, info=None):
     # TODO: Make done a method, to match PEP 3148?
+    # pylint: disable=invalid-name
     __ndb_debug__ = 'SKIP'  # Hide this frame from self._where
     self._info = info  # Info from the caller about this Future's purpose.
     self._where = utils.get_stack()
@@ -234,7 +291,7 @@ class Future(object):
     if self._geninfo:
       line += ' %s' % self._geninfo
     return '<%s %x created by %s; %s>' % (
-      self.__class__.__name__, id(self), line, state)
+        self.__class__.__name__, id(self), line, state)
 
   def dump(self):
     return '%s\nCreated by %s' % (self.dump_stack(),
@@ -306,7 +363,7 @@ class Future(object):
         logging.info('Deadlock in %s', self)
         logging.info('All pending Futures:\n%s', _state.dump_all_pending())
         _logging_debug('All pending Futures (verbose):\n%s',
-                      _state.dump_all_pending(verbose=True))
+                       _state.dump_all_pending(verbose=True))
         self.set_exception(RuntimeError('Deadlock waiting for %s' % self))
 
   def get_exception(self):
@@ -352,6 +409,7 @@ class Future(object):
   def _help_tasklet_along(self, ns, ds_conn, gen, val=None, exc=None, tb=None):
     # XXX Docstring
     info = utils.gen_info(gen)
+    # pylint: disable=invalid-name
     __ndb_debug__ = info
     try:
       save_context = get_context()
@@ -365,7 +423,7 @@ class Future(object):
           datastore._SetConnection(ds_conn)
         if exc is not None:
           _logging_debug('Throwing %s(%s) into %s',
-                        exc.__class__.__name__, exc, info)
+                         exc.__class__.__name__, exc, info)
           value = gen.throw(exc.__class__, exc, tb)
         else:
           _logging_debug('Sending %r to %s', val, info)
@@ -399,7 +457,7 @@ class Future(object):
         # Flow exceptions aren't logged except in "heavy debug" mode,
         # and then only at DEBUG level, without a traceback.
         _logging_debug('%s raised %s(%s)',
-                      info, err.__class__.__name__, err)
+                       info, err.__class__.__name__, err)
       elif utils.DEBUG and logging.getLogger().level < logging.DEBUG:
         # In "heavy debug" mode, log a warning with traceback.
         # (This is the same condition as used in utils.logging_debug().)
@@ -474,6 +532,7 @@ class Future(object):
       val = future.get_result()  # This won't raise an exception.
       self._help_tasklet_along(ns, ds_conn, gen, val)
 
+
 def sleep(dt):
   """Public function to sleep some time.
 
@@ -491,7 +550,7 @@ class MultiFuture(Future):
   This is used internally by 'v1, v2, ... = yield f1, f2, ...'; the
   semantics (e.g. error handling) are constrained by that use case.
 
-  The protocol from the caller's POV is:
+  The protocol from the caller's POV is::
 
     mf = MultiFuture()
     mf.add_dependent(<some other Future>)  -OR- mf.putq(<some value>)
@@ -523,6 +582,7 @@ class MultiFuture(Future):
   """
 
   def __init__(self, info=None):
+    # pylint: disable=invalid-name
     __ndb_debug__ = 'SKIP'  # Hide this frame from self._where
     self._full = False
     self._dependents = set()
@@ -710,10 +770,10 @@ class QueueFuture(Future):
     self._pass_result(fut, exc, tb, None)
 
   def _pass_result(self, fut, exc, tb, val):
-      if exc is not None:
-        fut.set_exception(exc, tb)
-      else:
-        fut.set_result(val)
+    if exc is not None:
+      fut.set_exception(exc, tb)
+    else:
+      fut.set_result(val)
 
 
 class SerialQueueFuture(Future):
@@ -989,7 +1049,8 @@ def tasklet(func):
     # TODO: make most of this a public function so you can take a bare
     # generator and turn it into a tasklet dynamically.  (Monocle has
     # this I believe.)
-    # __ndb_debug__ = utils.func_info(func)
+    # pylint: disable=invalid-name
+    __ndb_debug__ = utils.func_info(func)
     fut = Future('tasklet %s' % utils.func_info(func))
     fut._context = get_context()
     try:
@@ -1001,6 +1062,7 @@ def tasklet(func):
     if _is_generator(result):
       ns = namespace_manager.get_namespace()
       ds_conn = datastore._GetConnection()
+      _state.add_generator(result)
       eventloop.queue_call(None, fut._help_tasklet_along, ns, ds_conn, result)
     else:
       fut.set_result(result)
@@ -1017,8 +1079,10 @@ def synctasklet(func):
   webapp.RequestHandler.get method).
   """
   taskletfunc = tasklet(func)  # wrap at declaration time.
+
   @utils.wrapping(func)
   def synctasklet_wrapper(*args, **kwds):
+    # pylint: disable=invalid-name
     __ndb_debug__ = utils.func_info(func)
     return taskletfunc(*args, **kwds).get_result()
   return synctasklet_wrapper
@@ -1031,8 +1095,10 @@ def toplevel(func):
   webapp.RequestHandler.get() or Django view functions.
   """
   synctaskletfunc = synctasklet(func)  # wrap at declaration time.
+
   @utils.wrapping(func)
   def add_context_wrapper(*args, **kwds):
+    # pylint: disable=invalid-name
     __ndb_debug__ = utils.func_info(func)
     _state.clear_all_pending()
     # Create and install a new context.
@@ -1049,11 +1115,11 @@ def toplevel(func):
 
 _CONTEXT_KEY = '__CONTEXT__'
 
-_DATASTORE_HOST_ENV = 'DATASTORE_HOST'
 _DATASTORE_APP_ID_ENV = 'DATASTORE_APP_ID'
 _DATASTORE_PROJECT_ID_ENV = 'DATASTORE_PROJECT_ID'
 _DATASTORE_ADDITIONAL_APP_IDS_ENV = 'DATASTORE_ADDITIONAL_APP_IDS'
 _DATASTORE_USE_PROJECT_ID_AS_APP_ID_ENV = 'DATASTORE_USE_PROJECT_ID_AS_APP_ID'
+
 
 def get_context():
   # XXX Docstring
@@ -1103,9 +1169,7 @@ def make_default_context():
     datastore_app_id = datastore_project_id or datastore_app_id
     additional_app_str = os.environ.get(_DATASTORE_ADDITIONAL_APP_IDS_ENV, '')
     additional_apps = (app.strip() for app in additional_app_str.split(','))
-    host = os.environ.get(_DATASTORE_HOST_ENV, None)
-    return _make_cloud_datastore_context(datastore_app_id,
-                                         additional_apps, host)
+    return _make_cloud_datastore_context(datastore_app_id, additional_apps)
   return make_context()
 
 
@@ -1116,7 +1180,7 @@ def make_context(conn=None, config=None):
   return context.Context(conn=conn, config=config)
 
 
-def _make_cloud_datastore_context(app_id, external_app_ids=(), host=None):
+def _make_cloud_datastore_context(app_id, external_app_ids=()):
   """Creates a new context to connect to a remote Cloud Datastore instance.
 
   This should only be used outside of Google App Engine.
@@ -1128,8 +1192,6 @@ def _make_cloud_datastore_context(app_id, external_app_ids=(), host=None):
       application. For example, if you are connected to s~my-app and store keys
       for s~my-other-app, you should include s~my-other-app in the external_apps
       list.
-    host: The hostname to provide to the datastore connection. If None, the
-      default is used.
   Returns:
     An ndb.Context that can connect to a Remote Cloud Datastore. You can use
     this context by passing it to ndb.set_context.
@@ -1156,7 +1218,10 @@ def _make_cloud_datastore_context(app_id, external_app_ids=(), host=None):
 
   id_resolver = datastore_pbs.IdResolver((app_id,) + tuple(external_app_ids))
   project_id = id_resolver.resolve_project_id(app_id)
-  datastore = googledatastore.Datastore(project_id, host=host)
+  endpoint = googledatastore.helper.get_project_endpoint_from_env(project_id)
+  datastore = googledatastore.Datastore(
+      project_endpoint=endpoint,
+      credentials=googledatastore.helper.get_credentials_from_env())
 
   conn = model.make_connection(_api_version=datastore_rpc._CLOUD_DATASTORE_V1,
                                _id_resolver=id_resolver)
@@ -1169,14 +1234,37 @@ def _make_cloud_datastore_context(app_id, external_app_ids=(), host=None):
   except:
     pass  # The stub is already installed.
   # TODO(pcostello): Ensure the current stub is connected to the right project.
+
+  # Install a memcache and taskqueue stub which throws on everything.
+  try:
+    apiproxy_stub_map.apiproxy.RegisterStub('memcache', _ThrowingStub())
+  except:
+    pass  # The stub is already installed.
+  try:
+    apiproxy_stub_map.apiproxy.RegisterStub('taskqueue', _ThrowingStub())
+  except:
+    pass  # The stub is already installed.
+
+
   return make_context(conn=conn)
 
 
 def set_context(new_context):
   # XXX Docstring
   os.environ[_CONTEXT_KEY] = '1'
-  _state.current_context = new_context
+  _state.set_context(new_context)
 
+class _ThrowingStub(object):
+  """A Stub implementation which always throws a NotImplementedError."""
+
+  # pylint: disable=invalid-name
+  def MakeSyncCall(self, service, call, request, response):
+    raise NotImplementedError('In order to use %s.%s you must '
+                              'install the Remote API.' % (service, call))
+
+  # pylint: disable=invalid-name
+  def CreateRPC(self):
+    return apiproxy_rpc.RPC(stub=self)
 
 # TODO: Rework the following into documentation.
 
@@ -1218,7 +1306,7 @@ def set_context(new_context):
 #   it schedules the call to be run by the event loop.)
 
 # - Code not running in a tasklet can call f.get_result() or f.wait() on
-#   a future.  This is implemented by a simple loop like the following:
+#   a future.  This is implemented by a simple loop like the following::
 
 #     while not self._done:
 #       eventloop.run1()

@@ -59,7 +59,8 @@ def setup_stubs(config):
   remote_api_stub.ConfigureRemoteApi(
       config.app_id, '/', lambda: ('', ''),
       '%s:%d' % (str(config.api_host), config.api_port),
-      use_remote_datastore=False)
+      use_remote_datastore=False,
+      grpc_apis=config.grpc_apis)
 
   if config.HasField('cloud_sql_config'):
     # Connect the RDBMS API to MySQL.
@@ -89,7 +90,11 @@ def setup_stubs(config):
       #
       # A warning is not logged if FindUnixSocket returns None because it would
       # appear for all users, not just those who call connect.
-      connect_kwargs['unix_socket'] = rdbms_mysqldb.FindUnixSocket()
+      socket = rdbms_mysqldb.FindUnixSocket()
+      # Don't set socket to None or the mysql driver will blow up with a
+      # TypeError. This way it will raise a nicer connection error message.
+      if socket is not None:
+        connect_kwargs['unix_socket'] = socket
 
     rdbms_mysqldb.SetConnectKwargs(**connect_kwargs)
 
@@ -123,6 +128,11 @@ class AutoFlush(object):
     return getattr(self.stream, attr)
 
 
+def expand_user(path):
+  """Fake implementation of os.path.expanduser(path)."""
+  return path
+
+
 def main():
   # Required so PDB prompts work properly. Originally tried to disable buffering
   # (both by adding the -u flag when starting this process and by adding
@@ -153,10 +163,10 @@ def main():
   else:
     setup_stubs(config)
     sandbox.enable_sandbox(config)
+    os.path.expanduser = expand_user
     # This import needs to be after enabling the sandbox so the runtime
     # implementation imports the sandboxed version of the logging module.
     from google.appengine.tools.devappserver2.python import request_handler
-
     server = wsgi_server.WsgiServer(
         ('localhost', port),
         request_rewriter.runtime_rewriter_middleware(

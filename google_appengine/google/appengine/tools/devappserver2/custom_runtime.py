@@ -22,6 +22,7 @@ import os
 import shlex
 
 import google
+from google.appengine.api import appinfo
 from google.appengine.tools.devappserver2 import http_runtime
 from google.appengine.tools.devappserver2 import instance
 
@@ -31,6 +32,15 @@ class CustomRuntimeInstanceFactory(instance.InstanceFactory):
 
   SUPPORTS_INTERACTIVE_REQUESTS = True
   FILE_CHANGE_INSTANCE_RESTART_POLICY = instance.NEVER
+
+  START_URL_MAP = appinfo.URLMap(
+      url='/_ah/start',
+      script='/dev/null',
+      login='admin')
+  WARMUP_URL_MAP = appinfo.URLMap(
+      url='/_ah/warmup',
+      script='/dev/null',
+      login='admin')
 
   def __init__(self, request_data, runtime_config_getter, module_configuration):
     """Initializer for CustomRuntimeInstanceFactory.
@@ -79,10 +89,7 @@ class CustomRuntimeInstanceFactory(instance.InstanceFactory):
         instance_config_getter,
         self._module_configuration,
         env=dict(os.environ),
-        start_process_flavor=http_runtime.START_PROCESS_REVERSE)
-    return instance.Instance(self.request_data,
-                             instance_id,
-                             proxy,
+        start_process_flavor=http_runtime.START_PROCESS_REVERSE_NO_FILE)
+    return instance.Instance(self.request_data, instance_id, proxy,
                              self.max_concurrent_requests,
-                             self.max_background_threads,
-                             expect_ready_request)
+                             self.max_background_threads, expect_ready_request)

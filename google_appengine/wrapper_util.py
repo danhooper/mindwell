@@ -107,6 +107,7 @@ class Paths(object):
       dir_path: the directory path where the calling script is to be found.
         This directory should have a lib subdirectory.
     """
+    self.dir_path = dir_path
 
 
     self.v1_extra_paths = [
@@ -218,12 +219,6 @@ class Paths(object):
         dir_path,
         os.path.join(dir_path, 'lib', 'concurrent'),
         os.path.join(dir_path, 'lib', 'cherrypy'),
-
-        os.path.join(dir_path, 'lib', 'distutils'),
-        os.path.join(dir_path, 'lib', 'requests'),
-        os.path.join(dir_path, 'lib', 'six'),
-        os.path.join(dir_path, 'lib', 'websocket'),
-        os.path.join(dir_path, 'lib', 'docker'),
         os.path.join(dir_path, 'lib', 'portpicker'),
         os.path.join(dir_path, 'lib', 'jinja2-2.6'),
         os.path.join(dir_path, 'lib', 'webob-1.2.3'),
@@ -256,7 +251,6 @@ class Paths(object):
         'download_appstats.py': self.v1_extra_paths,
         'endpointscfg.py': self.v1_extra_paths + self.endpointscfg_extra_paths,
         'gen_protorpc.py': self.v1_extra_paths,
-        'google_sql.py': self.v1_extra_paths + self.google_sql_extra_paths,
         'php_cli.py': devappserver2_paths,
         'remote_api_shell.py': self.v1_extra_paths,
         'vmboot.py': self.v1_extra_paths,
@@ -277,7 +271,6 @@ class Paths(object):
         dir_path, 'google', 'storage', 'speckle', 'python', 'tool')
 
     self._script_to_dir = {
-        'google_sql.py': self.google_sql_dir,
         'dev_appserver.py': devappserver2_dir,
         '_php_runtime.py': php_runtime_dir,
         '_python_runtime.py': python_runtime_dir,
@@ -337,3 +330,13 @@ class Paths(object):
 
     return [path for path in paths
             if os.path.normcase(path) not in sys_paths_to_scrub]
+
+  def add_grpc_path(self, script_name):
+    """Adds grpcio-1.0.0 to sys.path and avoid hard-coding.
+
+    Args:
+      script_name: the basename of the script, for example 'appcfg.py'.
+    """
+
+    grpc_lib_path = os.path.join(self.dir_path, 'lib', 'grpcio-1.0.0')
+    self._script_to_paths[script_name].append(grpc_lib_path)

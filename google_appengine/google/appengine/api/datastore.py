@@ -234,6 +234,7 @@ class _BaseIndex(object):
 
 
 
+
   ASCENDING = datastore_query.PropertyOrder.ASCENDING
   DESCENDING = datastore_query.PropertyOrder.DESCENDING
 
@@ -337,6 +338,9 @@ class DatastoreAdapter(datastore_rpc.AbstractAdapter):
           entity_pb.Index_Property.DESCENDING: Index.DESCENDING
       }
 
+  def __init__(self, _id_resolver=None):
+    super(DatastoreAdapter, self).__init__(_id_resolver)
+
   def key_to_pb(self, key):
     return key._Key__reference
 
@@ -383,7 +387,20 @@ def __InitConnection():
 
   if os.getenv(_ENV_KEY) and hasattr(_thread_local, 'connection_stack'):
     return
-  _thread_local.connection_stack = [datastore_rpc.Connection(adapter=_adapter)]
+
+
+  def CreateConnection(adapter=None,
+                       _id_resolver=None,
+                       _api_version=datastore_rpc._DATASTORE_V3):
+    if _id_resolver:
+      adapter = DatastoreAdapter(_id_resolver=_id_resolver)
+    return datastore_rpc.Connection(adapter=adapter, _api_version=_api_version)
+
+  _thread_local.connection_stack = [
+      datastore_rpc._CreateDefaultConnection(CreateConnection,
+                                             adapter=_adapter)
+  ]
+
 
   os.environ[_ENV_KEY] = '1'
 
@@ -774,8 +791,8 @@ class Entity(dict):
     if namespace is None:
       namespace = _namespace
     elif _namespace is not None:
-        raise datastore_errors.BadArgumentError(
-            "Must not set both _namespace and namespace parameters.")
+      raise datastore_errors.BadArgumentError(
+          "Must not set both _namespace and namespace parameters.")
 
     datastore_types.ValidateString(kind, 'kind',
                                    datastore_errors.BadArgumentError)
@@ -1215,8 +1232,8 @@ class Query(dict):
   > query['name ='] = 'Ryan'
   > query['age >='] = 21
 
-  This query returns all Person entities where the name property is 'Ryan',
-  'Ken', or 'Bret', and the age property is at least 21.
+  This query returns all Person entities where the name property is 'Ryan'
+  and the age property is at least 21.
 
   Another way to build this query is:
 
@@ -1336,8 +1353,8 @@ class Query(dict):
     if namespace is None:
       namespace = _namespace
     elif _namespace is not None:
-        raise datastore_errors.BadArgumentError(
-            "Must not set both _namespace and namespace parameters.")
+      raise datastore_errors.BadArgumentError(
+          "Must not set both _namespace and namespace parameters.")
 
     if kind is not None:
       datastore_types.ValidateString(kind, 'kind',
@@ -2865,7 +2882,7 @@ class Iterator(datastore_query.ResultsIterator):
     result = []
     for r in self:
       if len(result) >= count:
-        break;
+        break
       result.append(r)
     return result
 

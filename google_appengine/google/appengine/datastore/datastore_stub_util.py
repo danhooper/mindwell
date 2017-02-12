@@ -140,6 +140,10 @@ _MAX_RETRY_DELAY_MS = 120000
 
 
 
+MINIMUM_VERSION = 1
+
+
+
 
 SEQUENTIAL = 'sequential'
 SCATTERED = 'scattered'
@@ -246,6 +250,63 @@ def _PrepareSpecialProperties(entity_proto, is_load):
         entity_proto.property_list().append(special_property)
 
 
+
+
+_METADATA_PROPERTY_NAME = '__metadata__'
+
+
+def _FromStorageEntity(entity):
+  """Converts a stored entity protobuf to an EntityRecord (with metadata).
+
+  This function is only provided as convenience for storage implementations that
+  wish to store metadata directly on EntityProto.
+
+  Args:
+    entity: An Entity protobuf.
+
+  Returns:
+    The EntityRecord including the EntityMetadata protobuf that was stored as a
+    property on the Entity protobuf or an empty EntityMetadata if that Entity
+    has no metadata property.
+  """
+  clone = entity_pb.EntityProto()
+  clone.CopyFrom(entity)
+  metadata = entity_pb.EntityMetadata()
+  for i in xrange(clone.property_size() - 1, -1, -1):
+    property = clone.property(i)
+    if _METADATA_PROPERTY_NAME == property.name():
+      del clone.property_list()[i]
+      metadata = entity_pb.EntityMetadata(property.value().stringvalue())
+  return EntityRecord(clone, metadata)
+
+
+def _ToStorageEntity(record):
+  """Store a metadata object as a pickled string property on an entity protobuf.
+
+  This function is only provided as convenience for storage implementations that
+  wish to store metadata directly on EntityProto.
+
+  Args:
+    record: An EntityRecord.
+
+  Returns:
+    A copy of the entity with an additional string property that contains the
+    pickled metadata object. Returns None If the record is None.
+  """
+  if record:
+    clone = entity_pb.EntityProto()
+    clone.CopyFrom(record.entity)
+
+    serialized_metadata = record.metadata.SerializeToString()
+    metadata_property = clone.add_property()
+    metadata_property.set_name(_METADATA_PROPERTY_NAME)
+    metadata_property.set_meaning(entity_pb.Property.BLOB)
+    metadata_property.set_multiple(False)
+    metadata_property.mutable_value().set_stringvalue(serialized_metadata)
+
+    return clone
+
+
 def _GetGroupByKey(entity, property_names):
   """Computes a key value that uniquely identifies the 'group' of an entity.
 
@@ -274,7 +335,7 @@ def LoadEntity(entity, keys_only=False, property_names=None):
     entity: a entity_pb.EntityProto or None
     keys_only: if a keys only result should be produced
     property_names: if not None or empty, cause a projected entity
-  to be produced with the given properties.
+        to be produced with the given properties.
 
   Returns:
     A user friendly copy of entity or None.
@@ -309,22 +370,43 @@ def LoadEntity(entity, keys_only=False, property_names=None):
     return clone
 
 
-def StoreEntity(entity):
-  """Prepares an entity for storing.
+def LoadRecord(record, keys_only=False, property_names=None):
+  """Prepares a record to be returned to the user.
 
   Args:
-    entity: a entity_pb.EntityProto to prepare
+    record: an EntityRecord or None
+    keys_only: if a keys only result should be produced
+    property_names: if not None or empty, cause a projected entity
+        to be produced with the given properties.
 
   Returns:
-    A copy of entity that should be stored in its place.
+    A user friendly copy of record or None.
+  """
+  if record:
+    metadata = record.metadata
+    if keys_only or property_names:
+      metadata = entity_pb.EntityMetadata()
+    return EntityRecord(LoadEntity(record.entity, keys_only, property_names),
+                        metadata)
+
+
+def StoreRecord(record):
+  """Prepares a record for storing.
+
+  Args:
+    record: an EntityRecord to prepare
+
+  Returns:
+    A copy of the record that can be stored.
   """
   clone = entity_pb.EntityProto()
-  clone.CopyFrom(entity)
+  clone.CopyFrom(record.entity)
 
 
 
   PrepareSpecialPropertiesForStore(clone)
-  return clone
+
+  return EntityRecord(clone, record.metadata)
 
 
 def PrepareSpecialPropertiesForLoad(entity_proto):
@@ -408,8 +490,8 @@ def CheckReference(request_trusted,
 
   Check(key.path().element_size() > 0, 'key\'s path cannot be empty')
 
-  if require_id_or_name and not datastore_pbs.is_complete_v3_key(key):
-    raise datastore_errors.BadRequestError('missing key id/name')
+  if require_id_or_name:
+    Check(datastore_pbs.is_complete_v3_key(key), 'missing key id/name')
 
   for elem in key.path().element_list():
     Check(not elem.has_id() or not elem.has_name(),
@@ -508,7 +590,7 @@ def CheckPropertyValue(name, value, max_length, meaning):
           'Property %s is too long. Maximum length is %d.' % (name, max_length))
     if (meaning not in _BLOB_MEANINGS and
         meaning != entity_pb.Property.BYTESTRING):
-      CheckValidUTF8(value.stringvalue(), 'String property value')
+      CheckValidUTF8(value.stringvalue(), 'String property "%s" value' % name)
 
 
 def CheckTransaction(request_trusted, request_app_id, transaction):
@@ -1053,19 +1135,19 @@ class BaseCursor(object):
       cls._next_cursor_lock.release()
     return cursor_id
 
-  def _IsBeforeCursor(self, entity, cursor):
+  def _IsBeforeCursor(self, record, cursor):
     """True if entity is before cursor according to the current order.
 
     Args:
-      entity: a entity_pb.EntityProto entity.
+      record: an EntityRecord.
       cursor: a compiled cursor as returned by _DecodeCompiledCursor.
     """
     comparison_entity = entity_pb.EntityProto()
-    for prop in entity.property_list():
+    for prop in record.entity.property_list():
       if prop.name() in self.__cursor_properties:
         comparison_entity.add_property().MergeFrom(prop)
     if cursor[0].has_key():
-      comparison_entity.mutable_key().MergeFrom(entity.key())
+      comparison_entity.mutable_key().MergeFrom(record.entity.key())
     x = self.__order_compare_entities(comparison_entity, cursor[0])
     if cursor[1]:
       return x < 0
@@ -1184,7 +1266,7 @@ class ListCursor(BaseCursor):
       dsquery: a datastore_query.Query over query.
       orders: the orders of query as returned by _GuessOrders.
       index_list: the list of indexes used by the query.
-      results: list of entity_pb.EntityProto
+      results: list of EntityRecord.
     """
     super(ListCursor, self).__init__(query, dsquery, orders, index_list)
 
@@ -1193,9 +1275,20 @@ class ListCursor(BaseCursor):
       distincts = set()
       new_results = []
       for result in results:
-        key_value = _GetGroupByKey(result, self.group_by)
+        key_value = _GetGroupByKey(result.entity, self.group_by)
         if key_value not in distincts:
           distincts.add(key_value)
+          new_results.append(result)
+      results = new_results
+
+    if query.shallow():
+      key_path_length = 1
+      if query.has_ancestor():
+        key_path_length += query.ancestor().path().element_size()
+
+      new_results = []
+      for result in results:
+        if result.entity.key().path().element_size() == key_path_length:
           new_results.append(result)
       results = new_results
 
@@ -1263,7 +1356,7 @@ class ListCursor(BaseCursor):
 
     if compile and result.skipped_results() > 0:
       self._EncodeCompiledCursor(
-          self.__results[self.__offset - 1],
+          self.__results[self.__offset - 1].entity,
           result.mutable_skipped_results_compiled_cursor())
     if offset == limited_offset and count:
 
@@ -1277,17 +1370,24 @@ class ListCursor(BaseCursor):
 
 
 
-      result.result_list().extend(
-          LoadEntity(entity, self.keys_only, self.property_names)
-          for entity in results)
+      records = [LoadRecord(record, self.keys_only, self.property_names)
+                 for record in results]
+      entities = [record.entity for record in records]
+      versions = [record.metadata.updated_version() for record in records
+                  if record.metadata.has_updated_version()]
+
+      result.result_list().extend(entities)
+      if len(versions) == len(entities):
+        result.version_list().extend(versions)
+
       if compile:
-        for entity in results:
-          self._EncodeCompiledCursor(entity,
+        for record in results:
+          self._EncodeCompiledCursor(record.entity,
                                      result.add_result_compiled_cursor())
 
     if self.__offset:
 
-      self.__last_result = self.__results[self.__offset - 1]
+      self.__last_result = self.__results[self.__offset - 1].entity
 
     result.set_more_results(self.__offset < self.__count)
     self._PopulateResultMetadata(result, compile,
@@ -1353,7 +1453,7 @@ class LiveTxn(object):
 
 
   ACTIVE = 1
-  COMMITED = 2
+  COMMITTED = 2
   ROLLEDBACK = 3
   FAILED = 4
 
@@ -1376,6 +1476,10 @@ class LiveTxn(object):
 
     self._actions = []
     self._cost = datastore_pb.Cost()
+
+    self._mutation_versions = {}
+
+    self._mutated_references = []
 
 
 
@@ -1473,12 +1577,11 @@ class LiveTxn(object):
       The associated entity_pb.EntityProto or None if no such entity exists.
     """
     snapshot = self._GrabSnapshot(reference)
-    entity = snapshot.get(datastore_types.ReferenceToKeyValue(reference))
-    return LoadEntity(entity)
+    record = snapshot.get(datastore_types.ReferenceToKeyValue(reference))
+    return LoadRecord(record)
 
   @_SynchronizeTxn
-  def GetQueryCursor(self, query, filters, orders, index_list,
-                     filter_predicate=None):
+  def GetQueryCursor(self, query, filters, orders, index_list):
     """Runs the given datastore_pb.Query and returns a QueryCursor for it.
 
     Does not see any modifications in the current txn.
@@ -1488,9 +1591,6 @@ class LiveTxn(object):
       filters: A list of filters that override the ones found on query.
       orders: A list of orders that override the ones found on query.
       index_list: A list of indexes used by the query.
-      filter_predicate: an additional filter of type
-          datastore_query.FilterPredicate. This is passed along to implement V4
-          specific filters without changing the entire stub.
 
     Returns:
       A BaseCursor that can be used to fetch query results.
@@ -1498,8 +1598,7 @@ class LiveTxn(object):
     Check(query.has_ancestor(),
           'Query must have an ancestor when performed in a transaction.')
     snapshot = self._GrabSnapshot(query.ancestor())
-    return _ExecuteQuery(snapshot.values(), query, filters, orders, index_list,
-                         filter_predicate)
+    return _ExecuteQuery(snapshot.values(), query, filters, orders, index_list)
 
   @_SynchronizeTxn
   def Put(self, entity, insert, indexes):
@@ -1582,20 +1681,29 @@ class LiveTxn(object):
                 'in use, please try again')
 
           old_entity = None
+          old_version = None
           key = datastore_types.ReferenceToKeyValue(entity.key())
+          self._mutated_references.append(entity.key())
           if key in snapshot:
-            old_entity = snapshot[key]
+            old_entity = snapshot[key].entity
+            old_version = snapshot[key].metadata.updated_version()
           self._AddWriteOps(old_entity, entity)
+
+          if _IsNoOpWrite(old_entity, entity):
+            self._mutation_versions[key] = long(old_version)
 
         for reference in tracker._delete.itervalues():
 
 
           old_entity = None
           key = datastore_types.ReferenceToKeyValue(reference)
+          self._mutated_references.append(reference)
           if key in snapshot:
-            old_entity = snapshot[key]
-            if old_entity is not None:
-              self._AddWriteOps(None, old_entity)
+            old_entity = snapshot[key].entity
+            self._AddWriteOps(None, old_entity)
+
+          if _IsNoOpWrite(old_entity, None):
+            self._mutation_versions[key] = long(tracker._read_timestamp)
 
 
       if empty and not self._actions:
@@ -1620,8 +1728,14 @@ class LiveTxn(object):
 
       for tracker in trackers:
         tracker._meta_data.Log(self)
-      self._state = self.COMMITED
+      self._state = self.COMMITTED
       self._commit_time_s = time.time()
+      write_timestamp = self._txn_manager._IncrementAndGetCommitTimestamp()
+
+      for reference in self._mutated_references:
+        key = datastore_types.ReferenceToKeyValue(reference)
+        if key not in self._mutation_versions:
+          self._mutation_versions[key] = long(write_timestamp)
     except:
 
       self.Rollback()
@@ -1644,6 +1758,12 @@ class LiveTxn(object):
 
     self._txn_manager._consistency_policy._OnCommit(self)
     return self._cost
+
+  def GetMutationVersion(self, reference):
+    """Returns the version of an entity after this transaction has committed."""
+    assert self._state == self.COMMITTED
+    key = datastore_types.ReferenceToKeyValue(reference)
+    return self._mutation_versions[key]
 
   def _AddWriteOps(self, old_entity, new_entity):
     """Adds the cost of writing the new_entity to the _cost member.
@@ -1670,7 +1790,7 @@ class LiveTxn(object):
     self._apply_lock.acquire()
     try:
 
-      assert self._state == self.COMMITED
+      assert self._state == self.COMMITTED
       for tracker in self._entity_groups.values():
         if tracker._meta_data is meta_data:
           break
@@ -1680,7 +1800,14 @@ class LiveTxn(object):
 
 
       for entity, insert in tracker._put.itervalues():
-        self._txn_manager._Put(entity, insert)
+        key = datastore_types.ReferenceToKeyValue(entity.key())
+        if key in tracker._snapshot:
+          metadata = tracker._snapshot[key].metadata
+        else:
+          metadata = entity_pb.EntityMetadata()
+        metadata.set_updated_version(self.GetMutationVersion(entity.key()))
+        record = EntityRecord(entity, metadata)
+        self._txn_manager._Put(record, insert)
 
 
       for key in tracker._delete.itervalues():
@@ -1695,6 +1822,14 @@ class LiveTxn(object):
       self._apply_lock.release()
 
 
+class EntityRecord(object):
+  """An EntityProto and its associated EntityMetadata protobuf."""
+
+  def __init__(self, entity, metadata=None):
+    self.entity = entity
+    self.metadata = metadata or entity_pb.EntityMetadata()
+
+
 class EntityGroupTracker(object):
   """An entity group involved a transaction."""
 
@@ -1705,6 +1840,9 @@ class EntityGroupTracker(object):
 
 
   _read_pos = None
+
+
+  _read_timestamp = None
 
 
   _snapshot = None
@@ -1720,7 +1858,7 @@ class EntityGroupTracker(object):
   def _GrabSnapshot(self, txn_manager):
     """Snapshot this entity group, remembering the read position."""
     if self._snapshot is None:
-      self._meta_data, self._read_pos, self._snapshot = (
+      self._meta_data, self._read_pos, self._read_timestamp, self._snapshot = (
           txn_manager._GrabSnapshot(self._entity_group))
     return self._snapshot
 
@@ -1730,6 +1868,7 @@ class EntityGroupMetaData(object):
 
 
   _log_pos = -1
+  _read_timestamp = None
 
   _snapshot = None
 
@@ -1780,12 +1919,12 @@ class BaseConsistencyPolicy(object):
 
 
   def _OnCommit(self, txn):
-    """Called after a LiveTxn has been commited.
+    """Called after a LiveTxn has been committed.
 
     This function can decide whether to apply the txn right away.
 
     Args:
-      txn: A LiveTxn that has been commited
+      txn: A LiveTxn that has been committed
     """
     raise NotImplementedError
 
@@ -1856,15 +1995,15 @@ class BaseHighReplicationConsistencyPolicy(BaseConsistencyPolicy):
         meta_data._write_lock.release()
 
   def _ShouldApply(self, txn, meta_data):
-    """Determins if the given transaction should be applied."""
+    """Determines if the given transaction should be applied."""
     raise NotImplementedError
 
 
 class TimeBasedHRConsistencyPolicy(BaseHighReplicationConsistencyPolicy):
-  """A High Replication Datastore consiseny policy based on elapsed time.
+  """A High Replication Datastore consistency policy based on elapsed time.
 
   This class tries to simulate performance seen in the high replication
-  datastore using estimated probabilities of a transaction commiting after a
+  datastore using estimated probabilities of a transaction committing after a
   given amount of time.
   """
 
@@ -1879,7 +2018,7 @@ class TimeBasedHRConsistencyPolicy(BaseHighReplicationConsistencyPolicy):
 
     Args:
       classification_map: A list of tuples containing (float between 0 and 1,
-        number of miliseconds) that define the probability of a transaction
+        number of milliseconds) that define the probability of a transaction
         applying after a given amount of time.
     """
     for prob, delay in classification_map:
@@ -1945,6 +2084,7 @@ class BaseTransactionManager(object):
 
   This includes creating consistent snap shots for transactions.
   """
+  _commit_timestamp = MINIMUM_VERSION
 
   def __init__(self, consistency_policy=None):
     super(BaseTransactionManager, self).__init__()
@@ -1954,6 +2094,7 @@ class BaseTransactionManager(object):
 
 
     self._meta_data_lock = threading.Lock()
+    self._commit_timestamp_lock = threading.Lock()
     BaseTransactionManager.Clear(self)
 
   def SetConsistencyPolicy(self, policy):
@@ -2045,6 +2186,15 @@ class BaseTransactionManager(object):
     finally:
       self._meta_data_lock.release()
 
+  def _IncrementAndGetCommitTimestamp(self):
+    with self._commit_timestamp_lock:
+      now_ms = int(time.time() * 1000)
+      self._commit_timestamp = max(self._commit_timestamp + 1, now_ms)
+      return self._commit_timestamp
+
+  def _GetReadTimestamp(self):
+    return self._commit_timestamp
+
   def _GetMetaData(self, entity_group):
     """Safely gets the EntityGroupMetaData object for the given entity_group.
     """
@@ -2084,7 +2234,9 @@ class BaseTransactionManager(object):
 
         meta_data.CatchUp()
         meta_data._snapshot = self._GetEntitiesInEntityGroup(entity_group)
-      return meta_data, meta_data._log_pos, meta_data._snapshot
+        meta_data._read_timestamp = self._GetReadTimestamp()
+      return (meta_data, meta_data._log_pos, meta_data._read_timestamp,
+              meta_data._snapshot)
     finally:
 
       meta_data._write_lock.release()
@@ -2114,14 +2266,14 @@ class BaseTransactionManager(object):
     """Removes a LiveTxn from the txn_map (if present)."""
     self._txn_map.pop(id(txn), None)
 
-  def _Put(self, entity, insert):
-    """Put the given entity.
+  def _Put(self, record, insert):
+    """Put the given entity record.
 
     This must be implemented by a sub-class. The sub-class can assume that any
     need consistency is enforced at a higher level (and can just put blindly).
 
     Args:
-      entity: The entity_pb.EntityProto to put.
+      record: The EntityRecord to put.
       insert: A boolean that indicates if we should fail if the entity already
         exists.
     """
@@ -2151,7 +2303,7 @@ class BaseTransactionManager(object):
       entity_group: A entity_pb.Reference of the entity group to get.
 
     Returns:
-      A dict mapping datastore_types.ReferenceToKeyValue(key) to EntityProto
+      A dict mapping datastore_types.ReferenceToKeyValue(key) to EntityRecord.
     """
     raise NotImplementedError
 
@@ -2286,7 +2438,7 @@ class BaseIndexManager(object):
 
 
 class BaseDatastore(BaseTransactionManager, BaseIndexManager):
-  """A base implemenation of a Datastore.
+  """A base implementation of a Datastore.
 
   This class implements common functions associated with a datastore and
   enforces security restrictions passed on by a stub or client. It is designed
@@ -2338,8 +2490,7 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
 
 
 
-  def GetQueryCursor(self, raw_query, trusted=False, calling_app=None,
-                     filter_predicate=None):
+  def GetQueryCursor(self, raw_query, trusted=False, calling_app=None):
     """Execute a query.
 
     Args:
@@ -2347,9 +2498,6 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       trusted: If the calling app is trusted.
       calling_app: The app requesting the results or None to pull the app from
         the environment.
-      filter_predicate: an additional filter of type
-          datastore_query.FilterPredicate. This is passed along to implement V4
-          specific filters without changing the entire stub.
 
     Returns:
       A BaseCursor that can be used to retrieve results.
@@ -2357,6 +2505,8 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
 
     calling_app = datastore_types.ResolveAppId(calling_app)
     CheckAppId(trusted, calling_app, raw_query.app())
+
+
 
 
     filters, orders = datastore_index.Normalize(raw_query.filter_list(),
@@ -2367,15 +2517,11 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
     CheckQuery(raw_query, filters, orders, self._MAX_QUERY_COMPONENTS)
     FillUsersInQuery(filters)
 
-    index_list = []
-
-
-
-    if filter_predicate is None:
+    if self._require_indexes:
       self._CheckHasIndex(raw_query, trusted, calling_app)
 
 
-      index_list = self.__IndexListForQuery(raw_query)
+    index_list = self.__IndexListForQuery(raw_query)
 
 
     if raw_query.has_transaction():
@@ -2388,13 +2534,11 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
     if raw_query.has_ancestor() and raw_query.kind() not in self._pseudo_kinds:
 
       txn = self._BeginTransaction(raw_query.app(), False)
-      return txn.GetQueryCursor(raw_query, filters, orders, index_list,
-                                filter_predicate)
+      return txn.GetQueryCursor(raw_query, filters, orders, index_list)
 
 
     self.Groom()
-    return self._GetQueryCursor(raw_query, filters, orders, index_list,
-                                filter_predicate)
+    return self._GetQueryCursor(raw_query, filters, orders, index_list)
 
   def __IndexListForQuery(self, query):
     """Get the single composite index pb used by the query, if any, as a list.
@@ -2417,16 +2561,15 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
     index_pb = composite_index_pb.mutable_definition()
     index_pb.set_entity_type(kind)
     index_pb.set_ancestor(bool(ancestor))
-    for name, direction in datastore_index.GetRecommendedIndexProperties(props):
+    for prop in datastore_index.GetRecommendedIndexProperties(props):
       prop_pb = entity_pb.Index_Property()
-      prop_pb.set_name(name)
-      prop_pb.set_direction(direction)
+      prop.CopyToIndexPb(prop_pb)
       index_pb.property_list().append(prop_pb)
     return [composite_index_pb]
 
   def Get(self, raw_keys, transaction=None, eventual_consistency=False,
           trusted=False, calling_app=None):
-    """Get the entities for the given keys.
+    """Get the entity records for the given keys.
 
     Args:
       raw_keys: A list of unverified entity_pb.Reference objects.
@@ -2438,58 +2581,67 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
         the environment.
 
     Returns:
-      A list containing the entity or None if no entity exists.
+      A list containing the records in the same order as the list of keys.
     """
-
     if not raw_keys:
       return []
 
     calling_app = datastore_types.ResolveAppId(calling_app)
+    records = []
 
     if not transaction and eventual_consistency:
       self.Groom()
 
-      result = []
       for key in raw_keys:
         CheckReference(calling_app, trusted, key)
-        result.append(self._GetWithPseudoKinds(None, key))
-      return result
-
-
-
-
-    grouped_keys = collections.defaultdict(list)
-    for i, key in enumerate(raw_keys):
-      CheckReference(trusted, calling_app, key)
-      entity_group = _GetEntityGroup(key)
-      entity_group_key = datastore_types.ReferenceToKeyValue(entity_group)
-      grouped_keys[entity_group_key].append((key, i))
-
-    if transaction:
-
-      txn = self.GetTxn(transaction, trusted, calling_app)
-      return [self._GetWithPseudoKinds(txn, key) for key in raw_keys]
+        records.append(self._GetWithPseudoKinds(None, key,
+                                                eventual_consistency))
     else:
 
+      grouped_keys = collections.defaultdict(list)
+      for i, key in enumerate(raw_keys):
+        CheckReference(trusted, calling_app, key)
+        entity_group = _GetEntityGroup(key)
+        entity_group_key = datastore_types.ReferenceToKeyValue(entity_group)
+        grouped_keys[entity_group_key].append((key, i))
 
-      result = [None] * len(raw_keys)
+      if transaction:
 
-      def op(txn, v):
-        key, i = v
-        result[i] = self._GetWithPseudoKinds(txn, key)
-      for keys in grouped_keys.itervalues():
-        self._RunInTxn(keys, keys[0][0].app(), op)
-      return result
+        txn = self.GetTxn(transaction, trusted, calling_app)
+        records = [self._GetWithPseudoKinds(txn, key, eventual_consistency)
+                   for key in raw_keys]
+      else:
 
-  def _GetWithPseudoKinds(self, txn, key):
+
+
+        records = [None] * len(raw_keys)
+
+        def op(txn, v):
+          key, i = v
+          records[i] = self._GetWithPseudoKinds(txn, key, eventual_consistency)
+        for keys in grouped_keys.itervalues():
+          self._RunInTxn(keys, keys[0][0].app(), op)
+
+    return records
+
+  def _GetWithPseudoKinds(self, txn, key, eventual_consistency=False):
     """Fetch entity key in txn, taking account of pseudo-kinds."""
     pseudo_kind = self._pseudo_kinds.get(_GetKeyKind(key), None)
     if pseudo_kind:
-      return pseudo_kind.Get(txn, key)
-    elif txn:
-      return txn.Get(key)
+      return EntityRecord(pseudo_kind.Get(txn, key))
     else:
-      return self._Get(key)
+      if txn:
+        record = txn.Get(key)
+      else:
+        record = self._Get(key)
+
+      if not record:
+        metadata = entity_pb.EntityMetadata()
+        if not eventual_consistency:
+          metadata.set_updated_version(self._GetReadTimestamp())
+        record = EntityRecord(None, metadata)
+
+      return record
 
   def Put(self, raw_entities, cost, transaction=None,
           trusted=False, calling_app=None):
@@ -2505,8 +2657,9 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       calling_app: The app requesting the results or None to pull the app from
         the environment.
     Returns:
-      A list of entity_pb.Reference objects that indicates where each entity
-      was stored.
+      A list of tuple (entity_pb.Reference, version number) that indicates where
+      each entity was stored and at which version. When a transaction is
+      provided, all version numbers are None.
     """
     if not raw_entities:
       return []
@@ -2545,7 +2698,7 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       entity_group = _GetEntityGroup(entity.key())
       entity.mutable_entity_group().CopyFrom(entity_group.path())
       entity_group_key = datastore_types.ReferenceToKeyValue(entity_group)
-      grouped_entities[entity_group_key].append((entity, insert))
+      grouped_entities[entity_group_key].append((entity, insert, i))
 
 
 
@@ -2553,11 +2706,12 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       key.CopyFrom(entity.key())
       result[i] = key
 
+    mutation_versions = [None] * len(raw_entities)
     if transaction:
 
       txn = self.GetTxn(transaction, trusted, calling_app)
       for group in grouped_entities.values():
-        for entity, insert in group:
+        for entity, insert, _ in group:
 
           indexes = _FilterIndexesByKind(entity.key(), self.GetIndexes(
               entity.key().app(), trusted, calling_app))
@@ -2565,14 +2719,18 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
     else:
 
       for entities in grouped_entities.itervalues():
-        txn_cost = self._RunInTxn(
+        txn = self._RunInTxn(
             entities, entities[0][0].key().app(),
 
             lambda txn, v: txn.Put(v[0], v[1], _FilterIndexesByKind(
                 v[0].key(),
                 self.GetIndexes(v[0].key().app(), trusted, calling_app))))
-        _UpdateCost(cost, txn_cost.entity_writes(), txn_cost.index_writes())
-    return result
+
+        for entity, _, index in entities:
+          mutation_versions[index] = txn.GetMutationVersion(entity.key())
+        _UpdateCost(cost, txn._cost.entity_writes(), txn._cost.index_writes())
+
+    return zip(result, mutation_versions)
 
   def Delete(self, raw_keys, cost, transaction=None,
              trusted=False, calling_app=None):
@@ -2585,20 +2743,25 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       trusted: If the calling app is trusted.
       calling_app: The app requesting the results or None to pull the app from
         the environment.
+
+    Returns:
+      A list of versions numbers at which the entities were deleted, one for
+      each given keys. Every version numbers are None if a transaction is given.
     """
     if not raw_keys:
-      return
+      return []
 
     calling_app = datastore_types.ResolveAppId(calling_app)
 
 
     grouped_keys = collections.defaultdict(list)
-    for key in raw_keys:
+    for i, key in enumerate(raw_keys):
       CheckReference(trusted, calling_app, key)
       entity_group = _GetEntityGroup(key)
       entity_group_key = datastore_types.ReferenceToKeyValue(entity_group)
-      grouped_keys[entity_group_key].append(key)
+      grouped_keys[entity_group_key].append((key, i))
 
+    mutation_versions = [None] * len(raw_keys)
     if transaction:
 
       txn = self.GetTxn(transaction, trusted, calling_app)
@@ -2611,11 +2774,16 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
 
       for keys in grouped_keys.itervalues():
 
-        txn_cost = self._RunInTxn(
-            keys, keys[0].app(),
-            lambda txn, key: txn.Delete(key, _FilterIndexesByKind(
-                key, self.GetIndexes(key.app(), trusted, calling_app))))
-        _UpdateCost(cost, txn_cost.entity_writes(), txn_cost.index_writes())
+        txn = self._RunInTxn(
+            keys, keys[0][0].app(),
+            lambda txn, key: txn.Delete(key[0], _FilterIndexesByKind(
+                key[0], self.GetIndexes(key[0].app(), trusted, calling_app))))
+
+        for key, index in keys:
+          mutation_versions[index] = txn.GetMutationVersion(key)
+        _UpdateCost(cost, txn._cost.entity_writes(), txn._cost.index_writes())
+
+    return mutation_versions
 
   def Touch(self, raw_keys, trusted=False, calling_app=None):
     """Applies all outstanding writes."""
@@ -2642,7 +2810,7 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       op: A function to run on each value in the Txn.
 
     Returns:
-      The cost of the txn.
+      The transaction that was committed.
     """
     retries = 0
     backoff = _INITIAL_RETRY_DELAY_MS / 1000.0
@@ -2651,7 +2819,8 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
         txn = self._BeginTransaction(app, False)
         for value in values:
           op(txn, value)
-        return txn.Commit()
+        txn.Commit()
+        return txn
       except apiproxy_errors.ApplicationError, e:
         if e.application_error == datastore_pb.Error.CONCURRENT_TRANSACTION:
 
@@ -2671,8 +2840,11 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       query: the datastore_pb.Query to check
       trusted: True if the calling app is trusted (like dev_admin_console)
       calling_app: app_id of the current running application
+    Raises:
+      apiproxy_errors.ApplicationError: if the query can be satisfied
+      given the existing indexes.
     """
-    if query.kind() in self._pseudo_kinds or not self._require_indexes:
+    if query.kind() in self._pseudo_kinds:
       return
 
     minimal_index = datastore_index.MinimalCompositeIndexForQuery(query,
@@ -2718,8 +2890,7 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
     """Closes the Datstore, writing any buffered data."""
     self.Write()
 
-  def _GetQueryCursor(self, query, filters, orders, index_list,
-                      filter_predicate):
+  def _GetQueryCursor(self, query, filters, orders, index_list):
     """Runs the given datastore_pb.Query and returns a QueryCursor for it.
 
     This must be implemented by a sub-class. The sub-class does not need to
@@ -2730,9 +2901,6 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       filters: A list of filters that override the ones found on query.
       orders: A list of orders that override the ones found on query.
       index_list: A list of indexes used by the query.
-      filter_predicate: an additional filter of type
-          datastore_query.FilterPredicate. This is passed along to implement V4
-          specific filters without changing the entire stub.
 
     Returns:
       A BaseCursor that can be used to fetch query results.
@@ -2740,7 +2908,7 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
     raise NotImplementedError
 
   def _Get(self, reference):
-    """Get the entity for the given reference or None.
+    """Get the entity record for the given reference or None.
 
     This must be implemented by a sub-class. The sub-class does not need to
     enforced any consistency guarantees (and can just blindly read).
@@ -2749,7 +2917,7 @@ class BaseDatastore(BaseTransactionManager, BaseIndexManager):
       reference: A entity_pb.Reference to loop up.
 
     Returns:
-      The entity_pb.EntityProto associated with the given reference or None.
+      The EntityRecord associated with the given reference or None.
     """
     raise NotImplementedError
 
@@ -3032,11 +3200,12 @@ class DatastoreStub(object):
     res.set_in_order(not req.allow_deferred())
 
     total_response_bytes = 0
-    for index, entity in enumerate(self._datastore.Get(keys_to_get,
+    for index, record in enumerate(self._datastore.Get(keys_to_get,
                                                        transaction,
                                                        req.has_failover_ms(),
                                                        self._trusted,
                                                        self._app_id)):
+      entity = record.entity
       entity_size = entity and entity.ByteSize() or 0
 
 
@@ -3046,34 +3215,39 @@ class DatastoreStub(object):
 
         res.deferred_list().extend(keys_to_get[index:])
         break
-      elif entity:
-        entity_result = res.add_entity()
-        entity_result.mutable_entity().CopyFrom(entity)
-        total_response_bytes += entity_size
       else:
-
         entity_result = res.add_entity()
-        entity_result.mutable_key().CopyFrom(keys_to_get[index])
+        if record.metadata.has_updated_version():
+          entity_result.set_version(record.metadata.updated_version())
+
+        if entity:
+          entity_result.mutable_entity().CopyFrom(entity)
+          total_response_bytes += entity_size
+        else:
+
+          entity_result.mutable_key().CopyFrom(keys_to_get[index])
 
   def _Dynamic_Put(self, req, res):
     transaction = req.has_transaction() and req.transaction() or None
-    res.key_list().extend(self._datastore.Put(req.entity_list(),
-                                              res.mutable_cost(),
-                                              transaction,
-                                              self._trusted, self._app_id))
+    results = self._datastore.Put(req.entity_list(), res.mutable_cost(),
+                                  transaction, self._trusted, self._app_id)
+    res.key_list().extend(result[0] for result in results)
+    if not transaction:
+      res.version_list().extend(result[1] for result in results)
 
   def _Dynamic_Delete(self, req, res):
     transaction = req.has_transaction() and req.transaction() or None
-    self._datastore.Delete(req.key_list(), res.mutable_cost(), transaction,
-                           self._trusted, self._app_id)
+    versions = self._datastore.Delete(req.key_list(), res.mutable_cost(),
+                                      transaction, self._trusted, self._app_id)
+    if not transaction:
+      res.version_list().extend(versions)
 
   def _Dynamic_Touch(self, req, _):
     self._datastore.Touch(req.key_list(), self._trusted, self._app_id)
 
   @_NeedsIndexes
-  def _Dynamic_RunQuery(self, query, query_result, filter_predicate=None):
-    cursor = self._datastore.GetQueryCursor(query, self._trusted, self._app_id,
-                                            filter_predicate)
+  def _Dynamic_RunQuery(self, query, query_result):
+    cursor = self._datastore.GetQueryCursor(query, self._trusted, self._app_id)
 
     count = query.count() if query.has_count() else None
     cursor.PopulateQueryResult(query_result, count, query.offset(),
@@ -3139,18 +3313,28 @@ class DatastoreStub(object):
     if not request.add_request_list():
       return
 
-    transaction = request.add_request_list()[0].transaction()
+    first_add_request = request.add_request_list()[0]
+    datastore_transaction = None
+    if first_add_request.has_datastore_transaction():
+      datastore_transaction = first_add_request.datastore_transaction()
+      transaction = datastore_pb.Transaction()
+      get_service_converter().v1_to_v3_txn(datastore_transaction, transaction)
+    else:
+      transaction = first_add_request.transaction()
     txn = self._datastore.GetTxn(transaction, self._trusted, self._app_id)
     new_actions = []
     for add_request in request.add_request_list():
 
 
 
-      Check(add_request.transaction() == transaction,
+      Check(datastore_transaction is not None
+            and add_request.datastore_transaction() == datastore_transaction
+            or add_request.transaction() == transaction,
             'Cannot add requests to different transactions')
       clone = taskqueue_service_pb.TaskQueueAddRequest()
       clone.CopyFrom(add_request)
       clone.clear_transaction()
+      clone.clear_datastore_transaction()
       new_actions.append(clone)
 
     txn.AddActions(new_actions, self._MAX_ACTIONS_PER_TXN)
@@ -3164,6 +3348,10 @@ class DatastoreStub(object):
     CheckAppId(self._trusted, self._app_id, transaction.app())
     txn = self._datastore.GetTxn(transaction, self._trusted, self._app_id)
     res.mutable_cost().CopyFrom(txn.Commit())
+    for reference in txn._mutated_references:
+      commit_version = res.add_version()
+      commit_version.mutable_root_entity_key().CopyFrom(reference)
+      commit_version.set_version(txn.GetMutationVersion(reference))
 
   def _Dynamic_Rollback(self, transaction, _):
     CheckAppId(self._trusted, self._app_id, transaction.app())
@@ -3176,9 +3364,9 @@ class DatastoreStub(object):
                                                       self._app_id))
 
   @_NeedsIndexes
-  def _Dynamic_GetIndices(self, app_str, composite_indices):
+  def _Dynamic_GetIndices(self, get_indicies_request, composite_indices):
     composite_indices.index_list().extend(self._datastore.GetIndexes(
-        app_str.value(), self._trusted, self._app_id))
+        get_indicies_request.app_id(), self._trusted, self._app_id))
 
   def _Dynamic_UpdateIndex(self, index, _):
     self._datastore.UpdateIndex(index, self._trusted, self._app_id)
@@ -3209,7 +3397,7 @@ class DatastoreStub(object):
       allocate_ids_response.set_end(end)
     else:
       for reference in allocate_ids_request.reserve_list():
-        CheckAppId(reference.app(), self._trusted, self._app_id)
+        CheckReference(self._trusted, self._app_id, reference)
       self._datastore._AllocateIds(allocate_ids_request.reserve_list())
       allocate_ids_response.set_start(0)
       allocate_ids_response.set_end(0)
@@ -3643,7 +3831,7 @@ class StubQueryConverter(datastore_pbs._QueryConverter):
 
 
     num_v1_filters = len(v3_query.filter_list())
-    if v3_query.has_ancestor():
+    if v3_query.has_ancestor() or v3_query.shallow():
       num_v1_filters += 1
 
     if num_v1_filters == 1:
@@ -3653,7 +3841,7 @@ class StubQueryConverter(datastore_pbs._QueryConverter):
           googledatastore.CompositeFilter.AND)
       get_property_filter = self.__add_property_filter_from_V1
 
-    if v3_query.has_ancestor():
+    if v3_query.has_ancestor() or v3_query.shallow():
       self._v3_query_to_v1_ancestor_filter(v3_query,
                                            get_property_filter(v1_query))
     for v3_filter in v3_query.filter_list():
@@ -3684,19 +3872,30 @@ class StubQueryConverter(datastore_pbs._QueryConverter):
     if filter_type == 'property_filter':
       v1_property_filter = v1_filter.property_filter
       v1_property_name = v1_property_filter.property.name
-      if (v1_property_filter.op
-          == googledatastore.PropertyFilter.HAS_ANCESTOR):
-        datastore_pbs.check_conversion(
-            v1_property_filter.value.HasField('key_value'),
-            'HAS_ANCESTOR requires a reference value')
+      if (v1_property_filter.op == googledatastore.PropertyFilter.HAS_PARENT or
+          v1_property_filter.op == googledatastore.PropertyFilter.HAS_ANCESTOR):
+        if v1_property_filter.op == googledatastore.PropertyFilter.HAS_PARENT:
+          datastore_pbs.check_conversion(
+              v1_property_filter.value.HasField('key_value') or
+              v1_property_filter.value.HasField('null_value'),
+              'HAS_PARENT requires a key value or null')
+        else:
+          datastore_pbs.check_conversion(
+              v1_property_filter.value.HasField('key_value'),
+              'HAS_ANCESTOR requires a key value')
         datastore_pbs.check_conversion((v1_property_name
                                         == datastore_pbs.PROPERTY_NAME_KEY),
                                        'unsupported property')
-        datastore_pbs.check_conversion(not v3_query.has_ancestor(),
-                                       'duplicate ancestor constraint')
-        self._entity_converter.v1_to_v3_reference(
-            v1_property_filter.value.key_value,
-            v3_query.mutable_ancestor())
+        datastore_pbs.check_conversion(not v3_query.has_ancestor() and
+                                       not v3_query.shallow(),
+                                       'duplicate ancestor or parent '
+                                       'constraint')
+        if v1_property_filter.value.HasField('key_value'):
+          self._entity_converter.v1_to_v3_reference(
+              v1_property_filter.value.key_value,
+              v3_query.mutable_ancestor())
+        if v1_property_filter.op == googledatastore.PropertyFilter.HAS_PARENT:
+          v3_query.set_shallow(True)
       else:
         v3_filter = v3_query.add_filter()
         property_name = v1_property_name
@@ -3851,34 +4050,51 @@ class StubServiceConverter(object):
 
 
 
-  def v1_run_query_req_to_v3_query(self, v1_req):
+  def v1_run_query_req_to_v3_query(self, v1_req, new_txn=None):
     """Converts a v1 RunQueryRequest to a v3 Query.
 
     GQL is not supported.
 
     Args:
       v1_req: a googledatastore.RunQueryRequest
+      new_txn: a v1 transaction created ad-hoc for this query, or None.
 
     Returns:
       a datastore_pb.Query
     """
+    consistency_type = v1_req.read_options.WhichOneof('consistency_type')
 
     datastore_pbs.check_conversion(not v1_req.HasField('gql_query'),
                                    'GQL not supported')
+    if (new_txn is None) == (consistency_type == 'new_transaction'):
+      raise datastore_errors.InternalError('new_txn should be set only if the '
+                                           'consistency type is '
+                                           'new_transaction')
+
     v3_query = datastore_pb.Query()
     self._query_converter.v1_to_v3_query(v1_req.partition_id, v1_req.query,
                                          v3_query)
 
 
-    read_options = v1_req.read_options
-    if read_options.transaction:
-      self.v1_to_v3_txn(read_options.transaction,
+    if consistency_type == 'transaction':
+      self.v1_to_v3_txn(v1_req.read_options.transaction,
                         v3_query.mutable_transaction())
-    elif read_options.read_consistency == googledatastore.ReadOptions.EVENTUAL:
-      v3_query.set_strong(False)
-      v3_query.set_failover_ms(-1)
-    elif read_options.read_consistency == googledatastore.ReadOptions.STRONG:
-      v3_query.set_strong(True)
+    elif consistency_type == 'new_transaction':
+      self.v1_to_v3_txn(new_txn, v3_query.mutable_transaction())
+    elif consistency_type == 'read_consistency':
+      read_consistency = v1_req.read_options.read_consistency
+      if read_consistency == googledatastore.ReadOptions.EVENTUAL:
+        v3_query.set_strong(False)
+        v3_query.set_failover_ms(-1)
+      elif read_consistency == googledatastore.ReadOptions.STRONG:
+        v3_query.set_strong(True)
+      elif (read_consistency !=
+            googledatastore.ReadOptions.READ_CONSISTENCY_UNSPECIFIED):
+        raise datastore_errors.InternalError('Unknown read_consistency %d'
+                                             % read_consistency)
+    elif consistency_type is not None:
+      raise datastore_errors.InternalError('Unknown consistency_type: %s'
+                                           % consistency_type)
 
     return v3_query
 
@@ -3926,74 +4142,99 @@ class StubServiceConverter(object):
 
     return v3_resp
 
-  def v3_to_v1_run_query_resp(self, v3_resp):
+  def v3_to_v1_run_query_resp(self, v3_resp, new_txn=None):
     """Converts a v3 QueryResult to a V4 RunQueryResponse.
 
     Args:
       v3_resp: a datastore_pb.QueryResult
+      new_txn: optional, a transaction that was created when processing the
+        RunQueryRequest.
 
     Returns:
       a googledatastore.RunQueryResponse
     """
     v1_resp = googledatastore.RunQueryResponse()
     self.v3_to_v1_query_result_batch(v3_resp, v1_resp.batch)
+    if new_txn:
+      v1_resp.transaction = new_txn
 
     return v1_resp
 
 
 
 
-  def v1_to_v3_get_req(self, v1_req):
+  def v1_to_v3_get_req(self, v1_req, new_txn=None):
     """Converts a v1 LookupRequest to a v3 GetRequest.
 
     Args:
       v1_req: a googledatastore.LookupRequest
+      new_txn: a v1 transaction created ad-hoc for this lookup, or None.
 
     Returns:
       a datastore_pb.GetRequest
     """
+    consistency_type = v1_req.read_options.WhichOneof('consistency_type')
+    if (new_txn is None) == (consistency_type == 'new_transaction'):
+      raise datastore_errors.InternalError('new_txn should be set only if the '
+                                           'consistency type is '
+                                           'new_transaction')
+
     v3_req = datastore_pb.GetRequest()
     v3_req.set_allow_deferred(True)
 
 
-    if v1_req.read_options.transaction:
+    if consistency_type == 'transaction':
       self.v1_to_v3_txn(v1_req.read_options.transaction,
                         v3_req.mutable_transaction())
-    elif (v1_req.read_options.read_consistency
-          == googledatastore.ReadOptions.EVENTUAL):
-      v3_req.set_strong(False)
-      v3_req.set_failover_ms(-1)
-    elif (v1_req.read_options.read_consistency
-          == googledatastore.ReadOptions.STRONG):
-      v3_req.set_strong(True)
+    elif consistency_type == 'new_transaction':
+      self.v1_to_v3_txn(new_txn, v3_req.mutable_transaction())
+    elif consistency_type == 'read_consistency':
+      read_consistency = v1_req.read_options.read_consistency
+      if read_consistency == googledatastore.ReadOptions.EVENTUAL:
+        v3_req.set_strong(False)
+        v3_req.set_failover_ms(-1)
+      elif read_consistency == googledatastore.ReadOptions.STRONG:
+        v3_req.set_strong(True)
+      elif (read_consistency !=
+            googledatastore.ReadOptions.READ_CONSISTENCY_UNSPECIFIED):
+        raise datastore_errors.InternalError('Unknown read_consistency %d'
+                                             % read_consistency)
+    elif consistency_type is not None:
+      raise datastore_errors.InternalError('Unknown consistency_type: %s'
+                                           % consistency_type)
 
     for v1_key in v1_req.keys:
       self._entity_converter.v1_to_v3_reference(v1_key, v3_req.add_key())
 
     return v3_req
 
-  def v3_to_v1_lookup_resp(self, v3_resp):
+  def v3_to_v1_lookup_resp(self, v3_resp, new_txn=None):
     """Converts a v3 GetResponse to a v1 LookupResponse.
 
     Args:
       v3_resp: a datastore_pb.GetResponse
+      new_txn: a v1 transaction created ad-hoc for this lookup, or None.
 
     Returns:
       a googledatastore.LookupResponse
     """
     v1_resp = googledatastore.LookupResponse()
+    if new_txn:
+      v1_resp.transaction = new_txn
 
     for v3_ref in v3_resp.deferred_list():
       self._entity_converter.v3_to_v1_key(v3_ref, v1_resp.deferred.add())
     for v3_entity in v3_resp.entity_list():
       if v3_entity.has_entity():
+        v1_entity_result = v1_resp.found.add()
         self._entity_converter.v3_to_v1_entity(
-            v3_entity.entity(),
-            v1_resp.found.add().entity)
+            v3_entity.entity(), v1_entity_result.entity)
       if v3_entity.has_key():
+        v1_entity_result = v1_resp.missing.add()
         self._entity_converter.v3_to_v1_key(
-            v3_entity.key(),
-            v1_resp.missing.add().entity.key)
+            v3_entity.key(), v1_entity_result.entity.key)
+      if v3_entity.has_version():
+        v1_entity_result.version = v3_entity.version()
 
     return v1_resp
 
@@ -4078,12 +4319,15 @@ class StubServiceConverter(object):
 
     if v3_result.has_skipped_results():
       v1_batch.skipped_results = v3_result.skipped_results()
-    for v3_entity, v3_cursor in itertools.izip_longest(
+    for v3_entity, v3_version, v3_cursor in itertools.izip_longest(
         v3_result.result_list(),
+        v3_result.version_list(),
         v3_result.result_compiled_cursor_list()):
       v1_entity_result = v1_batch.entity_results.add()
       self._entity_converter.v3_to_v1_entity(v3_entity,
                                              v1_entity_result.entity)
+      if v3_version is not None:
+        v1_entity_result.version = v3_version
       if v3_cursor is not None:
         v1_entity_result.cursor = (
             self._query_converter.v3_to_v1_compiled_cursor(v3_cursor))
@@ -4640,7 +4884,7 @@ def _GuessOrders(filters, orders):
   return orders
 
 
-def _MakeQuery(query_pb, filters, orders, filter_predicate):
+def _MakeQuery(query_pb, filters, orders):
   """Make a datastore_query.Query for the given datastore_pb.Query.
 
   Overrides filters and orders in query with the specified arguments.
@@ -4649,16 +4893,9 @@ def _MakeQuery(query_pb, filters, orders, filter_predicate):
     query_pb: a datastore_pb.Query.
     filters: the filters from query.
     orders: the orders from query.
-    filter_predicate: an additional filter of type
-          datastore_query.FilterPredicate. This is passed along to implement V4
-          specific filters without changing the entire stub.
 
   Returns:
     A datastore_query.Query for the datastore_pb.Query."""
-
-
-
-
 
   clone_pb = datastore_pb.Query()
   clone_pb.CopyFrom(query_pb)
@@ -4667,27 +4904,7 @@ def _MakeQuery(query_pb, filters, orders, filter_predicate):
   clone_pb.filter_list().extend(filters)
   clone_pb.order_list().extend(orders)
 
-  query = datastore_query.Query._from_pb(clone_pb)
-
-
-
-
-  if filter_predicate is not None:
-    if query.filter_predicate is not None:
-
-
-      filter_predicate = datastore_query.CompositeFilter(
-          datastore_query.CompositeFilter.AND,
-          [filter_predicate, query.filter_predicate])
-
-    return datastore_query.Query(app=query.app,
-                                 namespace=query.namespace,
-                                 ancestor=query.ancestor,
-                                 filter_predicate=filter_predicate,
-                                 group_by=query.group_by,
-                                 order=query.order)
-  else:
-    return query
+  return datastore_query.Query._from_pb(clone_pb)
 
 
 def _CreateIndexEntities(entity, postfix_props):
@@ -4764,27 +4981,25 @@ def _CreateIndexEntities(entity, postfix_props):
   return results
 
 
-def _CreateIndexOnlyQueryResults(results, postfix_props):
+def _CreateIndexOnlyQueryResults(records, postfix_props):
   """Creates a result set similar to that returned by an index only query."""
-  new_results = []
-  for result in results:
-    new_results.extend(_CreateIndexEntities(result, postfix_props))
-  return new_results
+  new_records = []
+  for record in records:
+    index_entities = _CreateIndexEntities(record.entity, postfix_props)
+    new_records.extend([EntityRecord(e, record.metadata)
+                        for e in index_entities])
+  return new_records
 
 
-def _ExecuteQuery(results, query, filters, orders, index_list,
-                  filter_predicate=None):
+def _ExecuteQuery(results, query, filters, orders, index_list):
   """Executes the query on a superset of its results.
 
   Args:
-    results: superset of results for query.
+    results: superset of results for query, list of EntityRecord.
     query: a datastore_pb.Query.
     filters: the filters from query.
     orders: the orders from query.
     index_list: the list of indexes used by the query.
-    filter_predicate: an additional filter of type
-          datastore_query.FilterPredicate. This is passed along to implement V4
-          specific filters without changing the entire stub.
 
   Returns:
     A ListCursor over the results of applying query to results.
@@ -4793,14 +5008,15 @@ def _ExecuteQuery(results, query, filters, orders, index_list,
 
 
   NormalizeCursors(query, orders[0].direction())
-  dsquery = _MakeQuery(query, filters, orders, filter_predicate)
+  dsquery = _MakeQuery(query, filters, orders)
 
   if query.property_name_size():
-    results = _CreateIndexOnlyQueryResults(
-        results, set(order.property() for order in orders))
+    order_properties = set(order.property() for order in orders)
+    results = _CreateIndexOnlyQueryResults(results, order_properties)
 
-  return ListCursor(query, dsquery, orders, index_list,
-                    datastore_query.apply_query(dsquery, results))
+  filtered_results = datastore_query.apply_query(dsquery, results,
+                                                 lambda r: r.entity)
+  return ListCursor(query, dsquery, orders, index_list, filtered_results)
 
 
 def _UpdateCost(cost, entity_writes, index_writes):
@@ -4813,6 +5029,49 @@ def _UpdateCost(cost, entity_writes, index_writes):
   """
   cost.set_entity_writes(cost.entity_writes() + entity_writes)
   cost.set_index_writes(cost.index_writes() + index_writes)
+
+
+def _PropertyListToMultimap(property_list):
+  """Transforms a list of property protobufs into a multimap keyed by name.
+
+  The order of repeated properties is respected in the result. The returned
+  multimap can be compared directly for entity equality testing.
+
+  Args:
+    property_list: a list of datastore_pbs.Property protobufs.
+
+  Returns:
+    a map of property names to list of datastore_pbs.Property with that name.
+  """
+  result = collections.defaultdict(list)
+  for prop in property_list:
+    result[prop.name()].append(prop)
+  return result
+
+
+def _IsNoOpWrite(old_entity, new_entity):
+  """Returns whether putting an entity is a no-op given its current value.
+
+  Args:
+    old_entity: the current entity in the datastore, or None if the entity does
+        not exist.
+    new_entity: the new entity to store, or None if we are deleting the entity.
+        Note that the two entities must share the same key.
+
+  Returns:
+    True iff both the previous and new entities are None or are equivalent (have
+    the same properties and property values).
+  """
+  if old_entity is not None and new_entity is not None:
+    old_raw_properties = _PropertyListToMultimap(old_entity.raw_property_list())
+    new_raw_properties = _PropertyListToMultimap(new_entity.raw_property_list())
+    old_properties = _PropertyListToMultimap(old_entity.property_list())
+    new_properties = _PropertyListToMultimap(new_entity.property_list())
+
+    return (old_properties == new_properties
+            and old_raw_properties == new_raw_properties)
+  else:
+    return old_entity == new_entity
 
 
 def _CalculateWriteOps(composite_indexes, old_entity, new_entity):
@@ -4829,9 +5088,7 @@ def _CalculateWriteOps(composite_indexes, old_entity, new_entity):
     A tuple of size 2, where the first value is the number of entity writes and
     the second value is the number of index writes.
   """
-  if (old_entity is not None and
-      old_entity.property_list() == new_entity.property_list()
-      and old_entity.raw_property_list() == new_entity.raw_property_list()):
+  if _IsNoOpWrite(old_entity, new_entity):
     return 0, 0
 
   index_writes = _ChangedIndexRows(composite_indexes, old_entity, new_entity)

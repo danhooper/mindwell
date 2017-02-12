@@ -94,8 +94,8 @@ else:
 
 from google.appengine.tools import appengine_rpc
 
-
 _REQUEST_ID_HEADER = 'HTTP_X_APPENGINE_REQUEST_ID'
+_TIMEOUT_SECONDS = 10
 
 
 class Error(Exception):
@@ -170,19 +170,22 @@ class RemoteStub(object):
 
   _local = threading.local()
 
-  def __init__(self, server, path, _test_stub_map=None):
+  def __init__(self, server, path, _test_stub_map=None, grpc_apis=None):
     """Constructs a new RemoteStub that communicates with the specified server.
 
     Args:
       server: An instance of a subclass of
         google.appengine.tools.appengine_rpc.AbstractRpcServer.
       path: The path to the handler this stub should send requests to.
+      _test_stub_map: If supplied, send RPC calls to stubs in this map instead
+        of over the wire.
+       grpc_apis: a list of apis that use grpc.
     """
-
-
+    self._grpc_port = int(os.environ['GRPC_PORT']) if grpc_apis else None
     self._server = server
     self._path = path
     self._test_stub_map = _test_stub_map
+    self._grpc_apis = grpc_apis or []
 
   def _PreHookHandler(self, service, call, request, response):
     pass
@@ -213,13 +216,42 @@ class RemoteStub(object):
     cls._local.request_id = request_id
 
   def _MakeRealSyncCall(self, service, call, request, response):
+    if service in self._grpc_apis or 'all' in self._grpc_apis:
+      grpc_impl_module = __import__('grpc.beta.implementations', globals(),
+                                    locals(), ['implementations'])
+      grpc_service_pb2 = __import__('google.appengine.tools.devappserver2'
+                                    '.grpc_service_pb2', globals(), locals(),
+                                    ['grpc_service_pb2'])
+      channel = grpc_impl_module.insecure_channel('localhost',
+                                                  self._grpc_port)
+      stub = grpc_service_pb2.beta_create_CallHandler_stub(channel)
+      request_pb = grpc_service_pb2.Request(service_name=service, method=call,
+                                            request=request.Encode())
+      if hasattr(self._local, 'request_id'):
+        request_pb.request_id = self._local.request_id
+      response_pb = stub.HandleCall(request_pb, _TIMEOUT_SECONDS)
+
+
+
+      if response_pb.HasField('application_error'):
+        error_pb = response_pb.application_error
+        raise apiproxy_errors.ApplicationError(error_pb.code,
+                                               error_pb.detail)
+
+      elif response_pb.exception:
+        raise pickle.loads(response_pb.exception)
+      elif response_pb.java_exception:
+        raise UnknownJavaServerError('An unknown error has occured in the '
+                                     'Java remote_api handler for this call.')
+      else:
+        response.ParseFromString(response_pb.response)
+      return
+
     request_pb = remote_api_pb.Request()
     request_pb.set_service_name(service)
     request_pb.set_method(call)
     request_pb.set_request(request.Encode())
     if hasattr(self._local, 'request_id'):
-
-
       request_pb.set_request_id(self._local.request_id)
 
     response_pb = remote_api_pb.Response()
@@ -497,11 +529,11 @@ class RemoteDatastoreStub(RemoteStub):
 
     tx = remote_api_pb.TransactionRequest()
     tx.set_allow_multiple_eg(txdata.is_xg)
-    for key, hash in txdata.preconditions.values():
+    for key, txhash in txdata.preconditions.values():
       precond = tx.add_precondition()
       precond.mutable_key().CopyFrom(key)
-      if hash:
-        precond.set_hash(hash)
+      if txhash:
+        precond.set_hash(txhash)
 
     puts = tx.mutable_puts()
     deletes = tx.mutable_deletes()
@@ -582,7 +614,7 @@ def GetRemoteAppIdFromServer(server, path, remote_token=None):
 
 def ConfigureRemoteApiFromServer(server, path, app_id, services=None,
                                  default_auth_domain=None,
-                                 use_remote_datastore=True):
+                                 use_remote_datastore=True, grpc_apis=None):
   """Does necessary setup to allow easy remote access to App Engine APIs.
 
   Args:
@@ -597,7 +629,7 @@ def ConfigureRemoteApiFromServer(server, path, app_id, services=None,
       through datastore requests. RemoteDatastoreStub batches transactional
       datastore requests since, in production, datastore requires are scoped to
       a single request.
-
+    grpc_apis: a list of apis that use grpc.
   Raises:
     urllib2.HTTPError: if app_id is not provided and there is an error while
       retrieving it.
@@ -619,7 +651,7 @@ def ConfigureRemoteApiFromServer(server, path, app_id, services=None,
     services.remove('datastore_v3')
     datastore_stub = RemoteDatastoreStub(server, path)
     apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', datastore_stub)
-  stub = RemoteStub(server, path)
+  stub = RemoteStub(server, path, grpc_apis=grpc_apis)
   for service in services:
     apiproxy_stub_map.apiproxy.RegisterStub(service, stub)
 
@@ -668,146 +700,106 @@ _OAUTH_SCOPES = [
     ]
 
 
-
-def _ConfigureRemoteApiWithKeyFile(servername,
-                                   path,
-                                   service_account,
-                                   key_file_path):
+def ConfigureRemoteApiForOAuth(
+    servername, path, secure=True, service_account=None, key_file_path=None,
+    oauth2_parameters=None, save_cookies=False, auth_tries=3,
+    rpc_server_factory=None, app_id=None):
   """Does necessary setup to allow easy remote access to App Engine APIs.
 
-  This function uses OAuth2 with a credential derived from service_account and
-  key_file_path to communicate with App Engine APIs.
+  This function uses OAuth2 with Application Default Credentials
+  to communicate with App Engine APIs.
 
-  Use of this method requires an encryption library to be installed.
+  For more information on Application Default Credentials, see:
+  https://developers.google.com/accounts/docs/application-default-credentials
 
   Args:
-    servername: The hostname your app is deployed on (typically,
-        <app_id>.appspot.com).
+    servername: The hostname your app is deployed on.
     path: The path to the remote_api handler for your app
       (for example, '/_ah/remote_api').
+    secure: If true, will use SSL to communicate with server. Unlike
+      ConfigureRemoteApi, this is true by default.
     service_account: The email address of the service account to use for
-      making OAuth requests.
+      making OAuth requests. If none, the application default will be used
+      instead.
     key_file_path: The path to a .p12 file containing the private key for
-      service_account.
+      service_account. Must be set if service_account is provided.
+    oauth2_parameters: None, or an
+      appengine_rpc_httplib2.HttpRpcServerOAuth2.OAuth2Parameters object
+      representing the OAuth2 parameters for this connection.
+    save_cookies: If true, save OAuth2 information in a file.
+    auth_tries: Number of attempts to make to authenticate.
+    rpc_server_factory: Factory to make RPC server instances.
+    app_id: The app_id of your app, as declared in app.yaml, or None.
 
   Returns:
     server, a server which may be useful for calling the application directly.
 
   Raises:
-    urllib2.HTTPError: if app_id is not provided and there is an error while
-      retrieving it.
+    urllib2.HTTPError: if there is an error while retrieving the app id.
     ConfigurationError: if there is a error configuring the DatstoreFileStub.
-    ImportError: if the oauth2client module is not available or an appropriate
-      encryption library cannot not be found.
-    IOError: if key_file_path does not exist or cannot be read.
+    ImportError: if the oauth2client or appengine_rpc_httplib2
+      module is not available.
+    ValueError: if only one of service_account and key_file_path is provided.
   """
+
+  if bool(service_account) != bool(key_file_path):
+    raise ValueError('Must provide both service_account and key_file_path.')
+
   try:
 
-    import oauth2client.client
+    from oauth2client import client
   except ImportError, e:
-    raise ImportError('Use of a key file to access the Remote API '
-                      'requires the oauth2client module: %s' % e)
+    raise ImportError('Use of OAuth credentials requires the '
+                      'oauth2client module: %s' % e)
 
-  if not oauth2client.client.HAS_CRYPTO:
-    raise ImportError('Use of a key file to access the Remote API '
-                      'requires an encryption library. Please install '
-                      'either PyOpenSSL or PyCrypto 2.6 or later.')
-
-  with open(key_file_path, 'rb') as key_file:
-    key = key_file.read()
-    credentials = oauth2client.client.SignedJwtAssertionCredentials(
-        service_account,
-        key,
-        _OAUTH_SCOPES)
-    return _ConfigureRemoteApiWithOAuthCredentials(servername,
-                                                   path,
-                                                   credentials)
-
-
-
-def _ConfigureRemoteApiWithComputeEngineCredential(servername,
-                                                   path):
-  """Does necessary setup to allow easy remote access to App Engine APIs.
-
-  This function uses OAuth2 with a credential from the Compute Engine metadata
-  server to communicate with App Engine APIs.
-
-  Args:
-    servername: The hostname your app is deployed on (typically,
-        <app_id>.appspot.com).
-    path: The path to the remote_api handler for your app
-      (for example, '/_ah/remote_api').
-
-  Returns:
-    server, a server which may be useful for calling the application directly.
-
-  Raises:
-    urllib2.HTTPError: if app_id is not provided and there is an error while
-      retrieving it.
-    ConfigurationError: if there is a error configuring the DatstoreFileStub.
-    ImportError: if the oauth2client or httplib2 module is not available.
-  """
-  try:
-
-    import httplib2
-    import oauth2client
-  except ImportError, e:
-    raise ImportError('Use of Compute Engine credentials requires the '
-                      'oauth2client and httplib2 modules: %s' % e)
-  credentials = oauth2client.gce.AppAssertionCredentials(_OAUTH_SCOPES)
-  http = httplib2.Http()
-  credentials.authorize(http)
-  credentials.refresh(http)
-  return _ConfigureRemoteApiWithOAuthCredentials(servername,
-                                                 path,
-                                                 credentials)
-
-
-def _ConfigureRemoteApiWithOAuthCredentials(servername,
-                                            path,
-                                            credentials):
-  """Does necessary setup to allow easy remote access to App Engine APIs.
-
-  Args:
-    servername: The hostname your app is deployed on (typically,
-        <app_id>.appspot.com).
-    path: The path to the remote_api handler for your app
-      (for example, '/_ah/remote_api').
-    credentials: An oauth2client.OAuth2Credentials object.
-
-  Returns:
-    server, a server which may be useful for calling the application directly.
-
-  Raises:
-    urllib2.HTTPError: if app_id is not provided and there is an error while
-      retrieving it.
-    ConfigurationError: if there is a error configuring the DatstoreFileStub.
-    ImportError: if the appengine_rpc_httplib2 module is not available.
-  """
   try:
 
     from google.appengine.tools import appengine_rpc_httplib2
   except ImportError, e:
     raise ImportError('Use of OAuth credentials requires the '
                       'appengine_rpc_httplib2 module. %s' % e)
-  if not servername:
-    raise ConfigurationError('servername required')
 
-  oauth2_parameters = (
-      appengine_rpc_httplib2.HttpRpcServerOAuth2.OAuth2Parameters(
-          access_token=None,
-          client_id=None,
-          client_secret=None,
-          scope=None,
-          refresh_token=None,
-          credential_file=None,
-          credentials=credentials))
+  rpc_server_factory = (rpc_server_factory
+                        or appengine_rpc_httplib2.HttpRpcServerOAuth2)
+
+  if not oauth2_parameters:
+    if key_file_path:
+      if not client.HAS_CRYPTO:
+        raise ImportError('Use of a key file to access the Remote API '
+                          'requires an encryption library. Please install '
+                          'either PyOpenSSL or PyCrypto 2.6 or later.')
+
+      with open(key_file_path, 'rb') as key_file:
+        key = key_file.read()
+        credentials = client.SignedJwtAssertionCredentials(
+            service_account,
+            key,
+            _OAUTH_SCOPES)
+    else:
+      credentials = client.GoogleCredentials.get_application_default()
+      if credentials and credentials.create_scoped_required():
+        credentials = credentials.create_scoped(_OAUTH_SCOPES)
+
+
+    oauth2_parameters = (
+        appengine_rpc_httplib2.HttpRpcServerOAuth2.OAuth2Parameters(
+            access_token=None,
+            client_id=None,
+            client_secret=None,
+            scope=_OAUTH_SCOPES,
+            refresh_token=None,
+            credential_file=None,
+            credentials=credentials))
+
   return ConfigureRemoteApi(
-      app_id=None,
+      app_id=app_id,
       path=path,
       auth_func=oauth2_parameters,
       servername=servername,
-      rpc_server_factory=appengine_rpc_httplib2.HttpRpcServerOAuth2)
+      secure=secure,
+      save_cookies=save_cookies,
+      auth_tries=auth_tries,
+      rpc_server_factory=rpc_server_factory)
 
 
 def ConfigureRemoteApi(app_id,
@@ -820,7 +812,9 @@ def ConfigureRemoteApi(app_id,
                        services=None,
                        default_auth_domain=None,
                        save_cookies=False,
-                       use_remote_datastore=True):
+                       auth_tries=3,
+                       use_remote_datastore=True,
+                       grpc_apis=None):
   """Does necessary setup to allow easy remote access to App Engine APIs.
 
   Either servername must be provided or app_id must not be None.  If app_id
@@ -835,10 +829,13 @@ def ConfigureRemoteApi(app_id,
     app_id: The app_id of your app, as declared in app.yaml, or None.
     path: The path to the remote_api handler for your app
       (for example, '/_ah/remote_api').
-    auth_func: A function that takes no arguments and returns a
+    auth_func: If rpc_server_factory=appengine_rpc.HttpRpcServer, auth_func is
+      a function that takes no arguments and returns a
       (username, password) tuple. This will be called if your application
       requires authentication to access the remote_api handler (it should!)
       and you do not already have a valid auth cookie.
+      If rpc_server_factory=appengine_rpc_httplib2.HttpRpcServerOAuth2,
+      auth_func is appengine_rpc_httplib2.HttpRpcServerOAuth2.OAuth2Parameters.
     servername: The hostname your app is deployed on. Defaults to
       <app_id>.appspot.com.
     rpc_server_factory: A factory to construct the rpc server for the datastore.
@@ -849,11 +846,12 @@ def ConfigureRemoteApi(app_id,
       services are configured; by default all supported services are configured.
     default_auth_domain: The authentication domain to use by default.
     save_cookies: Forwarded to rpc_server_factory function.
+    auth_tries: Number of attempts to make to authenticate.
     use_remote_datastore: Whether to use RemoteDatastoreStub instead of passing
       through datastore requests. RemoteDatastoreStub batches transactional
       datastore requests since, in production, datastore requires are scoped to
       a single request.
-
+    grpc_apis: a list of apis that use grpc.
   Returns:
     server, the server created by rpc_server_factory, which may be useful for
       calling the application directly.
@@ -867,14 +865,16 @@ def ConfigureRemoteApi(app_id,
     raise ConfigurationError('app_id or servername required')
   if not servername:
     servername = '%s.appspot.com' % (app_id,)
-  server = rpc_server_factory(servername, auth_func, GetUserAgent(),
-                              GetSourceName(), save_cookies=save_cookies,
-                              debug_data=False, secure=secure)
+  server = rpc_server_factory(
+      servername, auth_func, GetUserAgent(), GetSourceName(),
+      save_cookies=save_cookies, auth_tries=auth_tries, debug_data=False,
+      secure=secure)
   if not app_id:
     app_id = GetRemoteAppIdFromServer(server, path, rtok)
 
   ConfigureRemoteApiFromServer(server, path, app_id, services,
-                               default_auth_domain, use_remote_datastore)
+                               default_auth_domain, use_remote_datastore,
+                               grpc_apis)
   return server
 
 

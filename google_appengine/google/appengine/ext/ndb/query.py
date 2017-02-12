@@ -1,3 +1,18 @@
+#
+# Copyright 2008 The ndb Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Higher-level Query wrapper.
 
 There are perhaps too many query APIs in the world.
@@ -7,7 +22,7 @@ represent filters on property values, and supports AND and OR
 operations (implemented as functions -- Python's 'and' and 'or'
 operators cannot be overloaded, and the '&' and '|' operators have a
 priority that conflicts with the priority of comparison operators).
-For example:
+For example::
 
   class Employee(Model):
     name = StringProperty()
@@ -26,31 +41,31 @@ For example:
     print emp.name, emp.age, emp.rank
 
 The 'in' operator cannot be overloaded, but is supported through the
-IN() method.  For example:
+IN() method.  For example::
 
   Employee.query().filter(Employee.rank.IN([4, 5, 6]))
 
 Sort orders are supported through the order() method; unary minus is
-overloaded on the Property class to represent a descending order:
+overloaded on the Property class to represent a descending order::
 
   Employee.query().order(Employee.name, -Employee.age)
 
 Besides using AND() and OR(), filters can also be combined by
-repeatedly calling .filter():
+repeatedly calling .filter()::
 
   q1 = Employee.query()  # A query that returns all employees
   q2 = q1.filter(Employee.age >= 30)  # Only those over 30
   q3 = q2.filter(Employee.age < 40)  # Only those in their 30s
 
 A further shortcut is calling .filter() with multiple arguments; this
-implies AND():
+implies AND()::
 
   q1 = Employee.query()  # A query that returns all employees
   q3 = q1.filter(Employee.age >= 30,
                  Employee.age < 40)  # Only those in their 30s
 
 And finally you can also pass one or more filter expressions directly
-to the .query() method:
+to the .query() method::
 
   q3 = Employee.query(Employee.age >= 30,
                       Employee.age < 40)  # Only those in their 30s
@@ -61,22 +76,22 @@ other hand, operations that are effectively no-ops may return the
 original Query object.)
 
 Sort orders can also be combined this way, and .filter() and .order()
-calls may be intermixed:
+calls may be intermixed::
 
   q4 = q3.order(-Employee.age)
   q5 = q4.order(Employee.name)
   q6 = q5.filter(Employee.rank == 5)
 
-Again, multiple .order() calls can be combined:
+Again, multiple .order() calls can be combined::
 
   q5 = q3.order(-Employee.age, Employee.name)
 
-The simplest way to retrieve Query results is a for-loop:
+The simplest way to retrieve Query results is a for-loop::
 
   for emp in q3:
     print emp.name, emp.age
 
-Some other methods to run a query and access its results:
+Some other methods to run a query and access its results::
 
   q.iter() # Return an iterator; same as iter(q) but more flexible
   q.map(callback) # Call the callback function for each query result
@@ -90,14 +105,14 @@ options, either in the form of keyword arguments such as
 keys_only=True, or as QueryOptions object passed with
 options=QueryOptions(...).  The most important query options are:
 
-  keys_only: bool, if set the results are keys instead of entities
-  limit: int, limits the number of results returned
-  offset: int, skips this many results first
-  start_cursor: Cursor, start returning results after this position
-  end_cursor: Cursor, stop returning results after this position
-  batch_size: int, hint for the number of results returned per RPC
-  prefetch_size: int, hint for the number of results in the first RPC
-  produce_cursors: bool, return Cursor objects with the results
+- keys_only: bool, if set the results are keys instead of entities
+- limit: int, limits the number of results returned
+- offset: int, skips this many results first
+- start_cursor: Cursor, start returning results after this position
+- end_cursor: Cursor, stop returning results after this position
+- batch_size: int, hint for the number of results returned per RPC
+- prefetch_size: int, hint for the number of results in the first RPC
+- produce_cursors: bool, return Cursor objects with the results
 
 For additional (obscure) query options and more details on them,
 including an explanation of Cursors, see datastore_query.py.
@@ -105,7 +120,7 @@ including an explanation of Cursors, see datastore_query.py.
 All of the above methods except for iter() have asynchronous variants
 as well, which return a Future; to get the operation's ultimate
 result, yield the Future (when inside a tasklet) or call the Future's
-get_result() method (outside a tasklet):
+get_result() method (outside a tasklet)::
 
   q.map_async(callback)  # Callback may be a task or a plain function
   q.fetch_async(N)
@@ -114,12 +129,13 @@ get_result() method (outside a tasklet):
   q.fetch_page_async(N, start_cursor=cursor)
 
 Finally, there's an idiom to efficiently loop over the Query results
-in a tasklet, properly yielding when appropriate:
+in a tasklet, properly yielding when appropriate::
 
   it = q.iter()
   while (yield it.has_next_async()):
     emp = it.next()
     print emp.name, emp.age
+
 """
 
 from __future__ import with_statement
@@ -149,7 +165,7 @@ __all__ = ['Query', 'QueryOptions', 'Cursor', 'QueryIterator',
            'FilterNode', 'PostFilterNode', 'FalseNode', 'Node',
            'ParameterNode', 'ParameterizedThing', 'Parameter',
            'ParameterizedFunction', 'gql',
-           ]
+          ]
 
 # Re-export some useful classes from the lower-level module.
 Cursor = datastore_query.Cursor
@@ -163,7 +179,7 @@ _KEY = datastore_types._KEY_SPECIAL_PROPERTY
 # Table of supported comparison operators.
 _OPS = frozenset(['=', '!=', '<', '<=', '>', '>=', 'in'])
 
-# Default limit value.  (Yes, the datastore uses int32!)
+# Default limit value.
 _MAX_LIMIT = 2 ** 31 - 1
 
 
@@ -259,6 +275,7 @@ class ParameterizedThing(object):
       eq = not eq
     return eq
 
+
 class Parameter(ParameterizedThing):
   """Represents a bound variable in a GQL query.
 
@@ -296,7 +313,7 @@ class Parameter(ParameterizedThing):
     key = self.__key
     if key not in bindings:
       raise datastore_errors.BadArgumentError(
-        'Parameter :%s is not bound.' % key)
+          'Parameter :%s is not bound.' % key)
     value = bindings[key]
     used[key] = True
     return value
@@ -422,7 +439,7 @@ class FalseNode(Node):
     # Because there's no point submitting a query that will never
     # return anything.
     raise datastore_errors.BadQueryError(
-      'Cannot convert FalseNode to predicate')
+        'Cannot convert FalseNode to predicate')
 
 
 class ParameterNode(Node):
@@ -441,6 +458,9 @@ class ParameterNode(Node):
     obj.__param = param
     return obj
 
+  def __getnewargs__(self):
+    return self.__prop, self.__op, self.__param
+
   def __repr__(self):
     return 'ParameterNode(%r, %r, %r)' % (self.__prop, self.__op, self.__param)
 
@@ -453,7 +473,7 @@ class ParameterNode(Node):
 
   def _to_filter(self, post=False):
     raise datastore_errors.BadArgumentError(
-      'Parameter :%s is not bound.' % (self.__param.key,))
+        'Parameter :%s is not bound.' % (self.__param.key,))
 
   def resolve(self, bindings, used):
     value = self.__param.resolve(bindings, used)
@@ -489,6 +509,9 @@ class FilterNode(Node):
     self.__value = value
     return self
 
+  def __getnewargs__(self):
+    return self.__name, self.__opsymbol, self.__value
+
   def __repr__(self):
     return '%s(%r, %r, %r)' % (self.__class__.__name__,
                                self.__name, self.__opsymbol, self.__value)
@@ -497,8 +520,7 @@ class FilterNode(Node):
     if not isinstance(other, FilterNode):
       return NotImplemented
     # TODO: Should nodes with values that compare equal but have
-    # different types really be considered equal?  IIUC the datastore
-    # doesn't consider 1 equal to 1.0 when it compares property values.
+    # different types really be considered equal?
     return (self.__name == other.__name and
             self.__opsymbol == other.__opsymbol and
             self.__value == other.__value)
@@ -527,13 +549,16 @@ class PostFilterNode(Node):
     self.predicate = predicate
     return self
 
+  def __getnewargs__(self):
+    return self.predicate,
+
   def __repr__(self):
     return '%s(%s)' % (self.__class__.__name__, self.predicate)
 
   def __eq__(self, other):
     if not isinstance(other, PostFilterNode):
       return NotImplemented
-    return self is other
+    return self is other or self.__dict__ == other.__dict__
 
   def _to_filter(self, post=False):
     if post:
@@ -581,6 +606,9 @@ class ConjunctionNode(Node):
     self = super(ConjunctionNode, cls).__new__(cls)
     self.__nodes = clauses[0]
     return self
+
+  def __getnewargs__(self):
+    return tuple(self.__nodes)
 
   def __iter__(self):
     return iter(self.__nodes)
@@ -642,6 +670,9 @@ class DisjunctionNode(Node):
       else:
         self.__nodes.append(node)
     return self
+
+  def __getnewargs__(self):
+    return tuple(self.__nodes)
 
   def __iter__(self):
     return iter(self.__nodes)
@@ -837,8 +868,8 @@ class Query(object):
         raise TypeError('projection argument cannot be empty')
       if not isinstance(projection, (tuple, list)):
         raise TypeError(
-          'projection must be a tuple, list or None; received %r' %
-          (projection,))
+            'projection must be a tuple, list or None; received %r' %
+            (projection,))
       self._check_properties(self._to_property_names(projection))
       self.__projection = tuple(projection)
 
@@ -848,7 +879,7 @@ class Query(object):
         raise TypeError('group_by argument cannot be empty')
       if not isinstance(group_by, (tuple, list)):
         raise TypeError(
-          'group_by must be a tuple, list or None; received %r' % (group_by,))
+            'group_by must be a tuple, list or None; received %r' % (group_by,))
       self._check_properties(self._to_property_names(group_by))
       self.__group_by = tuple(group_by)
 
@@ -896,7 +927,7 @@ class Query(object):
                           projection=self.projection, group_by=self.group_by)
 
   def _get_query(self, connection):
-    self.bind()  #  Raises an exception if there are unbound parameters.
+    self.bind()  # Raises an exception if there are unbound parameters.
     kind = self.kind
     ancestor = self.ancestor
     if ancestor is not None:
@@ -918,8 +949,8 @@ class Query(object):
                                     group_by=group_by)
     if post_filters is not None:
       dsquery = datastore_query._AugmentedQuery(
-        dsquery,
-        in_memory_filter=post_filters._to_filter(post=True))
+          dsquery,
+          in_memory_filter=post_filters._to_filter(post=True))
     return dsquery
 
   @tasklets.tasklet
@@ -1114,7 +1145,7 @@ class Query(object):
     Returns:
       A QueryIterator object.
     """
-    self.bind()  #  Raises an exception if there are unbound parameters.
+    self.bind()  # Raises an exception if there are unbound parameters.
     return QueryIterator(self, **q_options)
 
   __iter__ = iter
@@ -1167,11 +1198,11 @@ class Query(object):
     """
     qry = self._fix_namespace()
     return tasklets.get_context().map_query(
-      qry,
-      callback,
-      pass_batch_into_callback=pass_batch_into_callback,
-      options=self._make_options(q_options),
-      merge_future=merge_future)
+        qry,
+        callback,
+        pass_batch_into_callback=pass_batch_into_callback,
+        options=self._make_options(q_options),
+        merge_future=merge_future)
 
   @utils.positional(2)
   def fetch(self, limit=None, **q_options):
@@ -1382,7 +1413,7 @@ class Query(object):
     if q_options.get('projection'):
       try:
         q_options['projection'] = self._to_property_names(
-          q_options['projection'])
+            q_options['projection'])
       except TypeError, e:
         raise datastore_errors.BadArgumentError(e)
       self._check_properties(q_options['projection'])
@@ -1393,7 +1424,7 @@ class Query(object):
         options.projection is None and
         self.__projection):
       options = QueryOptions(
-        projection=self._to_property_names(self.__projection), config=options)
+          projection=self._to_property_names(self.__projection), config=options)
     # Populate default options
     if self.default_options is not None:
       options = self.default_options.merge(options)
@@ -1422,6 +1453,7 @@ class Query(object):
   def analyze(self):
     """Return a list giving the parameters required by a query."""
     class MockBindings(dict):
+
       def __contains__(self, key):
         self[key] = None
         return True
@@ -1457,8 +1489,8 @@ class Query(object):
         unused.append(i)
     if unused:
       raise datastore_errors.BadArgumentError(
-        'Positional arguments %s were given but not used.' %
-        ', '.join(str(i) for i in unused))
+          'Positional arguments %s were given but not used.' %
+          ', '.join(str(i) for i in unused))
     return self.__class__(kind=self.kind, ancestor=ancestor,
                           filters=filters, orders=self.orders,
                           app=self.app, namespace=self.namespace,
@@ -1502,7 +1534,8 @@ def _gql(query_string, query_class=Query):
     # construct the results).
     modelclass = model.Expando
   else:
-    modelclass = model.Model._lookup_model(kind,
+    modelclass = model.Model._lookup_model(
+        kind,
         tasklets.get_context()._conn.adapter.default_model)
     # Adjust kind to the kind of the model class.
     kind = modelclass._get_kind()
@@ -1590,7 +1623,7 @@ class QueryIterator(object):
   exception.  Once the loop is exhausted, both return the cursor after
   the last item returned.  Calling it.has_next() does not affect the
   cursors; you must call it.next() before the cursors move.  Note that
-  sometimes requesting a cursor requires a datastore roundtrip (but
+  sometimes requesting a cursor requires a Cloud Datastore roundtrip (but
   not if you happen to request a cursor corresponding to a batch
   boundary).  If produce_cursors is not set, both methods always raise
   an exception.
@@ -1768,6 +1801,9 @@ class QueryIterator(object):
       self._fut = self._iter.getq()
     try:
       try:
+        # The future result is set by this class's _extended_callback
+        # method.
+        # pylint: disable=unpacking-non-sequence
         (ent,
          self._cursor_before,
          self._cursor_after,
@@ -1833,7 +1869,7 @@ class _MultiQuery(object):
 
   # TODO: Need a way to specify the unification of two queries that
   # are identical except one has an ancestor and the other doesn't.
-  # The HR datastore makes that a useful special case.
+  # Cloud Datastore makes that a useful special case.
 
   def __init__(self, subqueries):
     if not isinstance(subqueries, list):
@@ -1892,10 +1928,10 @@ class _MultiQuery(object):
           names = self.__orders._get_prop_names()
         if '__key__' not in names:
           raise datastore_errors.BadArgumentError(
-            '_MultiQuery with cursors requires __key__ order')
+              '_MultiQuery with cursors requires __key__ order')
 
     # Decide if we need to modify the options passed to subqueries.
-    # NOTE: It would seem we can sometimes let the datastore handle
+    # NOTE: It would seem we can sometimes let Cloud Datastore handle
     # the offset natively, but this would thwart the duplicate key
     # detection, so we always have to emulate the offset here.
     # We can set the limit we pass along to offset + limit though,

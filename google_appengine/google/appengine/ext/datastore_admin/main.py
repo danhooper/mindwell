@@ -46,6 +46,7 @@ from google.appengine.ext.db import metadata
 from google.appengine.ext.db import stats
 from google.appengine.ext.webapp import util
 from google.appengine.runtime import apiproxy_errors
+from google.appengine.runtime import features
 
 
 
@@ -56,6 +57,12 @@ ENTITY_ACTIONS = {
     'Delete Entities': delete_handler.ConfirmDeleteHandler.Render,
     'Backup Entities': backup_handler.ConfirmBackupHandler.Render,
 }
+
+
+
+if features.IsEnabled('DisableDatastoreAdminCopyToAnotherApp'):
+  del ENTITY_ACTIONS['Copy to Another App']
+
 
 BACKUP_ACTIONS = {
     'Delete': backup_handler.ConfirmDeleteBackupHandler.Render,
@@ -327,14 +334,25 @@ class RouteByActionHandler(webapp.RequestHandler):
                         reverse=True)
     return operations[:limit]
 
-  def GetBackups(self, limit=100):
-    """Obtain a list of backups."""
+  def GetBackups(self, limit=100, deadline=10):
+    """Obtain a list of backups.
+
+    Args:
+      limit: maximum number of backup records to retrieve.
+      deadline: maximum number of seconds to spend getting backups.
+
+    Returns:
+      List of backups, sorted in reverse order by completion time.
+    """
+    backups = []
     query = backup_handler.BackupInformation.all()
     query.filter('complete_time > ', 0)
-    backups = query.fetch(max(10000, limit) if limit else 1000)
-    backups = sorted(backups, key=operator.attrgetter('complete_time'),
-                     reverse=True)
-    return backups[:limit]
+    query.order('-complete_time')
+    try:
+      backups.extend(query.run(deadline=deadline, limit=limit))
+    except (datastore_errors.Timeout, apiproxy_errors.DeadlineExceededError):
+      logging.warning('Failed to retrieve all backups within deadline.')
+    return backups
 
   def GetPendingBackups(self, limit=100):
     """Obtain a list of pending backups."""

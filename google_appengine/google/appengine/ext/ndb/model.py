@@ -1,3 +1,18 @@
+#
+# Copyright 2008 The ndb Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Model and Property classes and associated stuff.
 
 A model class represents the structure of entities stored in the
@@ -7,35 +22,35 @@ to create entities.
 
 All model classes must inherit (directly or indirectly) from Model.
 Through the magic of metaclasses, straightforward assignments in the
-model class definition can be used to declare the model's structure:
+model class definition can be used to declare the model's structure::
 
   class Person(Model):
     name = StringProperty()
     age = IntegerProperty()
 
-We can now create a Person entity and write it to the datastore:
+We can now create a Person entity and write it to Cloud Datastore::
 
   p = Person(name='Arthur Dent', age=42)
   k = p.put()
 
 The return value from put() is a Key (see the documentation for
-ndb/key.py), which can be used to retrieve the same entity later:
+ndb/key.py), which can be used to retrieve the same entity later::
 
   p2 = k.get()
   p2 == p  # Returns True
 
 To update an entity, simple change its attributes and write it back
-(note that this doesn't change the key):
+(note that this doesn't change the key)::
 
   p2.name = 'Arthur Philip Dent'
   p2.put()
 
-We can also delete an entity (by using the key):
+We can also delete an entity (by using the key)::
 
   k.delete()
 
 The property definitions in the class body tell the system the names
-and the types of the fields to be stored in the datastore, whether
+and the types of the fields to be stored in Cloud Datastore, whether
 they must be indexed, their default value, and more.
 
 Many different Property types exist.  Most are indexed by default, the
@@ -62,7 +77,7 @@ exceptions indicated in the list below:
 
 - GeoPtProperty: a geographical location, i.e. (latitude, longitude)
 
-- KeyProperty: a datastore Key value, optionally constrained to
+- KeyProperty: a Cloud Datastore Key value, optionally constrained to
   referring to a specific kind
 
 - UserProperty: a User object (for backwards compatibility only)
@@ -75,19 +90,19 @@ exceptions indicated in the list below:
 
 - ComputedProperty: a property whose value is computed from other
   properties by a user-defined function.  The property value is
-  written to the datastore so that it can be used in queries, but the
-  value from the datastore is not used when the entity is read back
+  written to Cloud Datastore so that it can be used in queries, but the
+  value from Cloud Datastore is not used when the entity is read back
 
 - GenericProperty: a property whose type is not constrained; mostly
   used by the Expando class (see below) but also usable explicitly
 
 - JsonProperty: a property whose value is any object that can be
-  serialized using JSON; the value written to the datastore is a JSON
+  serialized using JSON; the value written to Cloud Datastore is a JSON
   representation of that object
 
 - PickleProperty: a property whose value is any object that can be
   serialized using Python's pickle protocol; the value written to the
-  datastore is the pickled representation of that object, using the
+  Cloud Datastore is the pickled representation of that object, using the
   highest available pickle protocol
 
 Most Property classes have similar constructor signatures.  They
@@ -140,13 +155,13 @@ validated.  Since it is also possible to mutate lists in place,
 repeated properties are re-validated before they are written to the
 datastore.
 
-No validation happens when an entity is read from the datastore;
+No validation happens when an entity is read from Cloud Datastore;
 however property values read that have the wrong type (e.g. a string
 value for an IntegerProperty) are ignored.
 
 For non-repeated properties, None is always a possible value, and no
 validation is called when the value is set to None.  However for
-required properties, writing the entity to the datastore requires
+required properties, writing the entity to Cloud Datastore requires
 the value to be something other than None (and valid).
 
 The StructuredProperty is different from most other properties; it
@@ -156,7 +171,7 @@ instance of that model class.  However it is not stored in the
 datastore as a separate entity; instead, its attribute values are
 included in the parent entity using a naming convention (the name of
 the structured attribute followed by a dot followed by the name of the
-subattribute).  For example:
+subattribute).  For example::
 
   class Address(Model):
     street = StringProperty()
@@ -172,7 +187,7 @@ subattribute).  For example:
   k.put()
 
 This would write a single 'Person' entity with three attributes (as
-you could verify using the Datastore Viewer in the Admin Console):
+you could verify using the Datastore Viewer in the Admin Console)::
 
   name = 'Harry Potter'
   address.street = '4 Privet Drive'
@@ -188,7 +203,7 @@ class and as for a structured property; however queries for the model
 class will only return the top-level entities.
 
 The LocalStructuredProperty works similar to StructuredProperty on the
-Python side.  For example:
+Python side.  For example::
 
   class Address(Model):
     street = StringProperty()
@@ -203,7 +218,7 @@ Python side.  For example:
                              city='Little Whinging'))
   k.put()
 
-However the data written to the datastore is different; it writes a
+However the data written to Cloud Datastore is different; it writes a
 'Person' entity with a 'name' attribute as before and a single
 'address' attribute whose value is a blob which encodes the Address
 value (using the standard"protocol buffer" encoding).
@@ -211,7 +226,7 @@ value (using the standard"protocol buffer" encoding).
 Sometimes the set of properties is not known ahead of time.  In such
 cases you can use the Expando class.  This is a Model subclass that
 creates properties on the fly, both upon assignment and when loading
-an entity from the datastore.  For example:
+an entity from Cloud Datastore.  For example::
 
   class SuperPerson(Expando):
     name = StringProperty()
@@ -245,19 +260,19 @@ object returns the entities matching the query one at a time.
 Query objects are fully described in the docstring for query.py, but
 there is one handy shortcut that is only available through
 Model.query(): positional arguments are interpreted as filter
-expressions which are combined through an AND operator.  For example:
+expressions which are combined through an AND operator.  For example::
 
   Person.query(Person.name == 'Harry Potter', Person.age >= 11)
 
-is equivalent to:
+is equivalent to::
 
   Person.query().filter(Person.name == 'Harry Potter', Person.age >= 11)
 
 Keyword arguments passed to .query() are passed along to the Query()
 constructor.
 
-It is possible to query for field values of stuctured properties.  For
-example:
+It is possible to query for field values of structured properties.  For
+example::
 
   qry = Person.query(Person.address.city == 'London')
 
@@ -268,8 +283,8 @@ A number of top-level functions also live in this module:
 - put_multi() writes multiple entities at once
 - delete_multi() deletes multiple entities at once
 
-All these have a corresponding *_async() variant as well.
-The *_multi_async() functions return a list of Futures.
+All these have a corresponding ``*_async()`` variant as well.
+The ``*_multi_async()`` functions return a list of Futures.
 
 And finally these (without async variants):
 
@@ -318,7 +333,7 @@ __all__ = ['Key', 'BlobKey', 'GeoPt', 'Rollback',
            'delete_multi', 'delete_multi_async',
            'get_indexes', 'get_indexes_async',
            'make_connection',
-           ]
+          ]
 
 
 BlobKey = datastore_types.BlobKey
@@ -363,17 +378,17 @@ _MAX_STRING_LENGTH = datastore_types._MAX_STRING_LENGTH
 
 # Map index directions to human-readable strings.
 _DIR_MAP = {
-  entity_pb.Index_Property.ASCENDING: 'asc',
-  entity_pb.Index_Property.DESCENDING: 'desc',
-  }
+    entity_pb.Index_Property.ASCENDING: 'asc',
+    entity_pb.Index_Property.DESCENDING: 'desc',
+}
 
 # Map index states to human-readable strings.
 _STATE_MAP = {
-  entity_pb.CompositeIndex.ERROR: 'error',
-  entity_pb.CompositeIndex.DELETED: 'deleting',
-  entity_pb.CompositeIndex.READ_WRITE: 'serving',
-  entity_pb.CompositeIndex.WRITE_ONLY: 'building',
-  }
+    entity_pb.CompositeIndex.ERROR: 'error',
+    entity_pb.CompositeIndex.DELETED: 'deleting',
+    entity_pb.CompositeIndex.READ_WRITE: 'serving',
+    entity_pb.CompositeIndex.WRITE_ONLY: 'building',
+}
 
 
 class _NotEqualMixin(object):
@@ -690,11 +705,11 @@ class ModelAdapter(datastore_rpc.AbstractAdapter):
     index = Index(kind=index_def.entity_type(),
                   properties=properties,
                   ancestor=bool(index_def.ancestor()),
-                  )
+                 )
     index_state = IndexState(definition=index,
                              state=_STATE_MAP[pb.state()],
                              id=pb.id(),
-                             )
+                            )
     return index_state
 
 
@@ -709,6 +724,7 @@ def make_connection(config=None, default_model=None,
       adapter=ModelAdapter(default_model, id_resolver=_id_resolver),
       config=config,
       _api_version=_api_version)
+
 
 class ModelAttribute(object):
   """A Base class signifying the presence of a _fix_up() method."""
@@ -748,7 +764,7 @@ class _BaseValue(_NotEqualMixin):
 
 
 class Property(ModelAttribute):
-  """A class describing a typed, persisted attribute of a datastore entity.
+  """A class describing a typed, persisted attribute of a Cloud Datastore entity.
 
   Not to be confused with Python's 'property' built-in.
 
@@ -770,7 +786,7 @@ class Property(ModelAttribute):
     application code using standard attributes on the entity.
 
   - A 'base value' is a value such as would be serialized to
-    and deserialized from the datastore.
+    and deserialized from Cloud Datastore.
 
   The values stored in ent._values[name] and accessed by
   _store_value() and _retrieve_value() can be either user values or
@@ -965,7 +981,7 @@ class Property(ModelAttribute):
     # NOTE: This is also used by query.gql().
     if not self._indexed:
       raise datastore_errors.BadFilterError(
-        'Cannot query for unindexed property %s' % self._name)
+          'Cannot query for unindexed property %s' % self._name)
     from .query import FilterNode  # Import late to avoid circular imports.
     if value is not None:
       value = self._do_validate(value)
@@ -1002,11 +1018,12 @@ class Property(ModelAttribute):
     """Return a FilterNode instance representing the '>=' comparison."""
     return self._comparison('>=', value)
 
+  # pylint: disable=invalid-name
   def _IN(self, value):
     """Comparison operator for the 'in' comparison operator.
 
     The Python 'in' operator cannot be overloaded in the way we want
-    to, so we define a method.  For example:
+    to, so we define a method.  For example::
 
       Employee.query(Employee.rank.IN([4, 5, 6]))
 
@@ -1016,11 +1033,11 @@ class Property(ModelAttribute):
     """
     if not self._indexed:
       raise datastore_errors.BadFilterError(
-        'Cannot query for unindexed property %s' % self._name)
+          'Cannot query for unindexed property %s' % self._name)
     from .query import FilterNode  # Import late to avoid circular imports.
     if not isinstance(value, (list, tuple, set, frozenset)):
       raise datastore_errors.BadArgumentError(
-        'Expected list, tuple or set, got %r' % (value,))
+          'Expected list, tuple or set, got %r' % (value,))
     values = []
     for val in value:
       if val is not None:
@@ -1034,18 +1051,18 @@ class Property(ModelAttribute):
   def __neg__(self):
     """Return a descending sort order on this Property.
 
-    For example:
+    For example::
 
       Employee.query().order(-Employee.rank)
     """
     return datastore_query.PropertyOrder(
-      self._name, datastore_query.PropertyOrder.DESCENDING)
+        self._name, datastore_query.PropertyOrder.DESCENDING)
 
   def __pos__(self):
     """Return an ascending sort order on this Property.
 
     Note that this is redundant but provided for consistency with
-    __neg__.  For example, the following two are equivalent:
+    __neg__.  For example, the following two are equivalent::
 
       Employee.query().order(+Employee.rank)
       Employee.query().order(Employee.rank)
@@ -1080,8 +1097,8 @@ class Property(ModelAttribute):
     if self._choices is not None:
       if value not in self._choices:
         raise datastore_errors.BadValueError(
-          'Value %r for property %s is not an allowed choice' %
-          (value, self._name))
+            'Value %r for property %s is not an allowed choice' %
+            (value, self._name))
     return value
 
   def _fix_up(self, cls, code_name):
@@ -1117,7 +1134,7 @@ class Property(ModelAttribute):
     """
     if entity._projection:
       raise ReadonlyPropertyError(
-        'You cannot set property values of a projection entity')
+          'You cannot set property values of a projection entity')
     if self._repeated:
       if not isinstance(value, (list, tuple, set, frozenset)):
         raise datastore_errors.BadValueError('Expected list or tuple, got %r' %
@@ -1247,7 +1264,7 @@ class Property(ModelAttribute):
     An example: suppose the class hierarchy is A -> B -> C ->
     Property, and suppose A defines _validate() only, but B and C
     define _validate() and _to_base_type().  The full list of
-    methods called by _call_to_base_type() is:
+    methods called by _call_to_base_type() is::
 
       A._validate()
       B._validate()
@@ -1350,7 +1367,7 @@ class Property(ModelAttribute):
     if entity._projection:
       if self._name not in entity._projection:
         raise UnprojectedPropertyError(
-          'Property %s is not in the projection' % (self._name,))
+            'Property %s is not in the projection' % (self._name,))
     return self._get_user_value(entity)
 
   def _delete_value(self, entity):
@@ -1409,12 +1426,12 @@ class Property(ModelAttribute):
 
     if self._indexed:
       create_prop = lambda: pb.add_property()
-    else :
+    else:
       create_prop = lambda: pb.add_raw_property()
 
     if self._repeated and not values and self._write_empty_list:
       # We want to write the empty list
-      p = create_prop();
+      p = create_prop()
       p.set_name(name)
       p.set_multiple(False)
       p.set_meaning(entity_pb.Property.EMPTY_LIST)
@@ -1422,7 +1439,7 @@ class Property(ModelAttribute):
     else:
       # We write a list, or a single property
       for val in values:
-        p = create_prop();
+        p = create_prop()
         p.set_name(name)
         p.set_multiple(self._repeated or parent_repeated)
         v = p.mutable_value()
@@ -1508,7 +1525,7 @@ class Property(ModelAttribute):
     returned by entity._to_dict() to contain a different value.  The
     main use case is StructuredProperty and LocalStructuredProperty.
 
-    NOTES:
+    NOTES::
 
     - If you override _get_for_dict() to return a different type, you
       must override _validate() to accept values of that type and
@@ -1699,8 +1716,8 @@ class BlobProperty(Property):
         not isinstance(self, TextProperty) and
         len(value) > _MAX_STRING_LENGTH):
       raise datastore_errors.BadValueError(
-        'Indexed value %s must be at most %d bytes' %
-        (self._name, _MAX_STRING_LENGTH))
+          'Indexed value %s must be at most %d bytes' %
+          (self._name, _MAX_STRING_LENGTH))
 
   def _to_base_type(self, value):
     if self._compressed:
@@ -1764,8 +1781,8 @@ class TextProperty(BlobProperty):
                                            (value,))
     if self._indexed and length > _MAX_STRING_LENGTH:
       raise datastore_errors.BadValueError(
-        'Indexed value %s must be at most %d bytes' %
-        (self._name, _MAX_STRING_LENGTH))
+          'Indexed value %s must be at most %d bytes' %
+          (self._name, _MAX_STRING_LENGTH))
 
   def _to_base_type(self, value):
     if isinstance(value, unicode):
@@ -1883,8 +1900,8 @@ class UserProperty(Property):
   """A Property whose value is a User object.
 
   Note: this exists for backwards compatibility with existing
-  datastore schemas only; we do not recommend storing User objects
-  directly in the datastore, but instead recommend storing the
+  Cloud Datastore schemas only; we do not recommend storing User objects
+  directly in Cloud Datastore, but instead recommend storing the
   user.user_id() value.
   """
 
@@ -2001,7 +2018,7 @@ class KeyProperty(Property):
     if self._kind is not None:
       if value.kind() != self._kind:
         raise datastore_errors.BadValueError(
-          'Expected Key with kind=%r, got %r' % (self._kind, value))
+            'Expected Key with kind=%r, got %r' % (self._kind, value))
 
   def _db_set_value(self, v, unused_p, value):
     if not isinstance(value, Key):
@@ -2054,6 +2071,7 @@ class BlobKeyProperty(Property):
 
 # The Epoch (a zero POSIX timestamp).
 _EPOCH = datetime.datetime.utcfromtimestamp(0)
+
 
 class DateTimeProperty(Property):
   """A Property whose value is a datetime object.
@@ -2122,7 +2140,7 @@ class DateTimeProperty(Property):
 
 
 def _date_to_datetime(value):
-  """Convert a date to a datetime for datastore storage.
+  """Convert a date to a datetime for Cloud Datastore storage.
 
   Args:
     value: A datetime.date object.
@@ -2137,7 +2155,7 @@ def _date_to_datetime(value):
 
 
 def _time_to_datetime(value):
-  """Convert a time to a datetime for datastore storage.
+  """Convert a time to a datetime for Cloud Datastore storage.
 
   Args:
     value: A datetime.time object.
@@ -2276,10 +2294,10 @@ class StructuredProperty(_StructuredGetForDictMixin):
   def _comparison(self, op, value):
     if op != '=':
       raise datastore_errors.BadFilterError(
-        'StructuredProperty filter can only use ==')
+          'StructuredProperty filter can only use ==')
     if not self._indexed:
       raise datastore_errors.BadFilterError(
-        'Cannot query for unindexed StructuredProperty %s' % self._name)
+          'Cannot query for unindexed StructuredProperty %s' % self._name)
     # Import late to avoid circular imports.
     from .query import ConjunctionNode, PostFilterNode
     from .query import RepeatedStructuredPropertyPredicate
@@ -2296,7 +2314,7 @@ class StructuredProperty(_StructuredGetForDictMixin):
       if prop._repeated:
         if vals:
           raise datastore_errors.BadFilterError(
-            'Cannot query for non-empty repeated property %s' % prop._name)
+              'Cannot query for non-empty repeated property %s' % prop._name)
         continue
       assert isinstance(vals, list) and len(vals) == 1, repr(vals)
       val = vals[0]
@@ -2307,7 +2325,7 @@ class StructuredProperty(_StructuredGetForDictMixin):
         match_keys.append(altprop._name)
     if not filters:
       raise datastore_errors.BadFilterError(
-        'StructuredProperty filter without any values')
+          'StructuredProperty filter without any values')
     if len(filters) == 1:
       return filters[0]
     if self._repeated:
@@ -2320,7 +2338,7 @@ class StructuredProperty(_StructuredGetForDictMixin):
   def _IN(self, value):
     if not isinstance(value, (list, tuple, set, frozenset)):
       raise datastore_errors.BadArgumentError(
-        'Expected list, tuple or set, got %r' % (value,))
+          'Expected list, tuple or set, got %r' % (value,))
     from .query import DisjunctionNode, FalseNode
     # Expand to a series of == filters.
     filters = [self._comparison('=', val) for val in value]
@@ -2380,8 +2398,8 @@ class StructuredProperty(_StructuredGetForDictMixin):
       else:
         # Serialize a single None
         super(StructuredProperty, self)._serialize(
-          entity, pb, prefix=prefix, parent_repeated=parent_repeated,
-          projection=projection)
+            entity, pb, prefix=prefix, parent_repeated=parent_repeated,
+            projection=projection)
 
   def _deserialize(self, entity, p, depth=1):
     if not self._repeated:
@@ -2452,7 +2470,7 @@ class StructuredProperty(_StructuredGetForDictMixin):
     if self._has_value(entity):
       # If an entire subentity has been set to None, we have to loop
       # to advance until we find the next partial entity.
-      while (next_index < self._get_value_size(entity)):
+      while next_index < self._get_value_size(entity):
         subentity = self._get_base_value_at_index(entity, next_index)
         if not isinstance(subentity, self._modelclass):
           raise TypeError('sub-entities must be instances '
@@ -2496,7 +2514,7 @@ class StructuredProperty(_StructuredGetForDictMixin):
     """
     if not rest:
       raise InvalidPropertyError(
-        'Structured property %s requires a subproperty' % self._name)
+          'Structured property %s requires a subproperty' % self._name)
     self._modelclass._check_properties([rest], require_indexed=require_indexed)
 
   def _get_base_value_at_index(self, entity, index):
@@ -2511,11 +2529,12 @@ class StructuredProperty(_StructuredGetForDictMixin):
       return 0
     return len(values)
 
+
 class LocalStructuredProperty(_StructuredGetForDictMixin, BlobProperty):
   """Substructure that is serialized to an opaque blob.
 
   This looks like StructuredProperty on the Python side, but is
-  written like a BlobProperty in the datastore.  It is not indexed
+  written like a BlobProperty in Cloud Datastore.  It is not indexed
   and you cannot query for subproperties.  On the other hand, the
   on-disk representation is more efficient and can be made even more
   efficient by passing compressed=True, which compresses the blob
@@ -2585,7 +2604,7 @@ class GenericProperty(Property):
   """A Property whose value can be (almost) any basic type.
 
   This is mainly used for Expando and for orphans (values present in
-  the datastore but not represented in the Model subclass) but can
+  Cloud Datastore but not represented in the Model subclass) but can
   also be used explicitly for properties with dynamically-typed
   values.
 
@@ -2622,8 +2641,8 @@ class GenericProperty(Property):
         value = value.encode('utf-8')
       if isinstance(value, basestring) and len(value) > _MAX_STRING_LENGTH:
         raise datastore_errors.BadValueError(
-          'Indexed value %s must be at most %d bytes' %
-          (self._name, _MAX_STRING_LENGTH))
+            'Indexed value %s must be at most %d bytes' %
+            (self._name, _MAX_STRING_LENGTH))
 
   def _db_get_value(self, v, p):
     # This is awkward but there seems to be no faster way to inspect
@@ -2697,6 +2716,7 @@ class GenericProperty(Property):
     elif isinstance(value, bool):  # Must test before int!
       v.set_booleanvalue(value)
     elif isinstance(value, (int, long)):
+      # pylint: disable=superfluous-parens
       if not (-_MAX_LONG <= value < _MAX_LONG):
         raise TypeError('Property %s can only accept 64-bit integers; '
                         'received %s' % (self._name, value))
@@ -2751,7 +2771,7 @@ class ComputedProperty(GenericProperty):
   """A Property whose value is determined by a user-supplied function.
 
   Computed properties cannot be set directly, but are instead generated by a
-  function when required. They are useful to provide fields in the datastore
+  function when required. They are useful to provide fields in Cloud Datastore
   that can be used for filtering or sorting without having to manually set the
   value in code - for example, sorting on the length of a BlobProperty, or
   using an equality filter to check if another field is not empty.
@@ -2836,7 +2856,7 @@ class MetaModel(type):
 
 
 class Model(_NotEqualMixin):
-  """A class describing datastore entities.
+  """A class describing Cloud Datastore entities.
 
   Model instances are usually called entities.  All model classes
   inheriting from Model automatically have MetaModel as their
@@ -2845,7 +2865,7 @@ class Model(_NotEqualMixin):
 
   Because of this, you cannot use the same Property object to describe
   multiple properties -- you must create separate Property objects for
-  each property.  E.g. this does not work:
+  each property.  E.g. this does not work::
 
     wrong_prop = StringProperty()
     class Wrong(Model):
@@ -2854,7 +2874,7 @@ class Model(_NotEqualMixin):
 
   The kind is normally equal to the class name (exclusive of the
   module name or any other parent scope).  To override the kind,
-  define a class method named _get_kind(), as follows:
+  define a class method named _get_kind(), as follows::
 
     class MyModel(Model):
       @classmethod
@@ -2881,7 +2901,7 @@ class Model(_NotEqualMixin):
   def __init__(*args, **kwds):
     """Creates a new instance of this model (a.k.a. an entity).
 
-    The new entity must be written to the datastore using an explicit
+    The new entity must be written to Cloud Datastore using an explicit
     call to .put().
 
     Keyword Args:
@@ -2991,7 +3011,7 @@ class Model(_NotEqualMixin):
     baddies = self._find_uninitialized()
     if baddies:
       raise datastore_errors.BadValueError(
-        'Entity has uninitialized properties: %s' % ', '.join(baddies))
+          'Entity has uninitialized properties: %s' % ', '.join(baddies))
 
   def __repr__(self):
     """Return an unambiguous string representation of an entity."""
@@ -3180,14 +3200,20 @@ class Model(_NotEqualMixin):
     if key is not None and (set_key or key.id() or key.parent()):
       ent._key = key
 
+    # NOTE(darke): Keep a map from (indexed, property name) to the property.
+    # This allows us to skip the (relatively) expensive call to
+    # _get_property_for for repeated fields.
+    _property_map = {}
     projection = []
     for indexed, plist in ((True, pb.property_list()),
                            (False, pb.raw_property_list())):
       for p in plist:
         if p.meaning() == entity_pb.Property.INDEX_VALUE:
           projection.append(p.name())
-        ent._get_property_for(p, indexed)._deserialize(ent, p)
-
+        property_map_key = (p.name(), indexed)
+        if property_map_key not in _property_map:
+          _property_map[property_map_key] = ent._get_property_for(p, indexed)
+        _property_map[property_map_key]._deserialize(ent, p)
 
     ent._set_projection(projection)
     return ent
@@ -3421,7 +3447,7 @@ class Model(_NotEqualMixin):
   gql = _gql
 
   def _put(self, **ctx_options):
-    """Write this entity to the datastore.
+    """Write this entity to Cloud Datastore.
 
     If the operation creates or completes a key, the entity's key
     attribute is set to the new, complete key.
@@ -3433,7 +3459,7 @@ class Model(_NotEqualMixin):
   put = _put
 
   def _put_async(self, **ctx_options):
-    """Write this entity to the datastore.
+    """Write this entity to Cloud Datastore.
 
     This is the asynchronous version of Model._put().
     """
@@ -3675,7 +3701,7 @@ class Expando(Model):
   # properties default to unindexed.
   _default_indexed = True
 
-  # Set this to True to write [] to datastore instead of no property
+  # Set this to True to write [] to Cloud Datastore instead of no property
   _write_empty_list_for_dynamic_properties = None
 
   def _set_attributes(self, kwds):
@@ -3859,13 +3885,13 @@ def non_transactional(func, args, kwds, allow_existing=True):
     return func(*args, **kwds)
   if not allow_existing:
     raise datastore_errors.BadRequestError(
-      '%s cannot be called within a transaction.' % func.__name__)
+        '%s cannot be called within a transaction.' % func.__name__)
   save_ctx = ctx
   while ctx.in_transaction():
     ctx = ctx._parent_context
     if ctx is None:
       raise datastore_errors.BadRequestError(
-        'Context without non-transactional ancestor')
+          'Context without non-transactional ancestor')
   save_ds_conn = datastore._GetConnection()
   try:
     if hasattr(save_ctx, '_old_ds_conn'):

@@ -80,7 +80,12 @@ class AppYamlTranslator(object):
     self.api_version = api_version
 
   def GetRuntime(self):
-    return 'java7'
+    """Returns the runtime to use for this deployment.
+
+    Returns:
+      the runtimeid to use in the runtime: section.
+    """
+    return self.app_engine_web_xml.runtime or 'java7'
 
   def GetYaml(self):
     """Returns full yaml text."""
@@ -93,7 +98,6 @@ class AppYamlTranslator(object):
     stmnt_list += self.TranslateInboundServices()
     stmnt_list += self.TranslateAdminConsolePages()
     stmnt_list += self.TranslateApiConfig()
-    stmnt_list += self.TranslatePagespeed()
     stmnt_list += self.TranslateEnvVariables()
     stmnt_list += self.TranslateBetaSettings()
     stmnt_list += self.TranslateVmSettings()
@@ -114,9 +118,10 @@ class AppYamlTranslator(object):
 
     for entry_name, field in [
         ('application', self.app_engine_web_xml.app_id),
-        ('source_language', self.app_engine_web_xml.source_language),
         ('module', self.app_engine_web_xml.module),
-        ('version', self.app_engine_web_xml.version_id)]:
+        ('service', self.app_engine_web_xml.service),
+        ('version', self.app_engine_web_xml.version_id)
+    ]:
       if field:
         basic_statements.append(
             '%s: %s' % (entry_name, self.SanitizeForYaml(field)))
@@ -129,6 +134,8 @@ class AppYamlTranslator(object):
         ('code_lock', self.app_engine_web_xml.codelock)]:
       if field:
         basic_statements.append('%s: %s' % (entry_name, field))
+    if self.app_engine_web_xml.env != '1':
+      basic_statements.append('env: %s' % self.app_engine_web_xml.env)
     return basic_statements
 
   def TranslateAutomaticScaling(self):
@@ -190,21 +197,6 @@ class AppYamlTranslator(object):
     return ['api_version: %s' % self.SanitizeForYaml(
         self.api_version or NO_API_VERSION)]
 
-  def TranslatePagespeed(self):
-    """Translates pagespeed settings in appengine-web.xml to yaml."""
-    pagespeed = self.app_engine_web_xml.pagespeed
-    if not pagespeed:
-      return []
-    statements = ['pagespeed:']
-    for title, urls in [('domains_to_rewrite', pagespeed.domains_to_rewrite),
-                        ('url_blacklist', pagespeed.url_blacklist),
-                        ('enabled_rewriters', pagespeed.enabled_rewriters),
-                        ('disabled_rewriters', pagespeed.disabled_rewriters)]:
-      if urls:
-        statements.append('  %s:' % title)
-        statements += ['  - %s' % url for url in urls]
-    return statements
-
   def TranslateEnvVariables(self):
     if not self.app_engine_web_xml.env_variables:
       return []
@@ -219,7 +211,8 @@ class AppYamlTranslator(object):
 
   def TranslateBetaSettings(self):
     """Translates Beta settings in appengine-web.xml to yaml."""
-    if not self.app_engine_web_xml.vm:
+    if ((not self.app_engine_web_xml.vm) and
+        (self.app_engine_web_xml.env not in ['flex', 'flexible'])):
       return []
 
     settings = self.app_engine_web_xml.beta_settings or {}
@@ -238,7 +231,8 @@ class AppYamlTranslator(object):
 
   def TranslateVmSettings(self):
     """Translates VM settings in appengine-web.xml to yaml."""
-    if not self.app_engine_web_xml.vm:
+    if ((not self.app_engine_web_xml.vm) and
+        (self.app_engine_web_xml.env not in ['flex', 'flexible'])):
       return []
 
     settings = self.app_engine_web_xml.vm_settings or {}

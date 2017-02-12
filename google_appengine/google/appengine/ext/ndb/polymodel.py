@@ -1,3 +1,18 @@
+#
+# Copyright 2008 The ndb Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Polymorphic models and queries.
 
 The standard NDB Model class only supports 'functional polymorphism'.
@@ -27,7 +42,7 @@ class _ClassKeyProperty(model.StringProperty):
 
   The class key is a list of strings describing a polymorphic entity's
   place within its class hierarchy.  This property is automatically
-  calculated.  For example:
+  calculated.  For example::
 
     class Foo(PolyModel): ...
     class Bar(Foo): ...
@@ -36,16 +51,18 @@ class _ClassKeyProperty(model.StringProperty):
     Foo().class_ == ['Foo']
     Bar().class_ == ['Foo', 'Bar']
     Baz().class_ == ['Foo', 'Bar', 'Baz']
+
   """
 
   def __init__(self, name=_CLASS_KEY_PROPERTY, indexed=True):
     """Constructor.
 
     If you really want to you can give this a different datastore name
-    or make it unindexed.  For example:
+    or make it unindexed.  For example::
 
       class Foo(PolyModel):
         class_ = _ClassKeyProperty(indexed=False)
+
     """
     super(_ClassKeyProperty, self).__init__(name=name, indexed=indexed,
                                             repeated=True)
@@ -75,7 +92,7 @@ class PolyModel(model.Model):
 
   Example:
 
-    Consider the following model hierarchy:
+    Consider the following model hierarchy::
 
       +------+
       |Animal|
@@ -97,28 +114,28 @@ class PolyModel(model.Model):
     class'.  All models in a single class hierarchy must inherit from
     this root.  All models in the hierarchy are stored as the same
     kind as the root class.  For example, Panther entities when stored
-    to the datastore are of the kind 'Animal'.  Querying against the
+    to Cloud Datastore are of the kind 'Animal'.  Querying against the
     Animal kind will retrieve Cats, Dogs and Canines, for example,
     that match your query.  Different classes stored in the root
     class' kind are identified by their class key.  When loaded from
-    the datastore, it is mapped to the appropriate implementation
+    Cloud Datastore, it is mapped to the appropriate implementation
     class.
 
   Polymorphic properties:
 
     Properties that are defined in a given base class within a
-    hierarchy are stored in the datastore for all subclasses only.
+    hierarchy are stored in Cloud Datastore for all subclasses only.
     So, if the Feline class had a property called 'whiskers', the Cat
     and Panther enties would also have whiskers, but not Animal,
     Canine, Dog or Wolf.
 
   Polymorphic queries:
 
-    When written to the datastore, all polymorphic objects
+    When written to Cloud Datastore, all polymorphic objects
     automatically have a property called 'class' that you can query
     against.  Using this property it is possible to easily write a
     query against any sub-hierarchy.  For example, to fetch only
-    Canine objects, including all Dogs and Wolves:
+    Canine objects, including all Dogs and Wolves::
 
       Canine.query()
 
@@ -133,7 +150,7 @@ class PolyModel(model.Model):
     hierarchy inherits from.  Each hierarchy has a single root class.
     A class is a root class if it is an immediate child of PolyModel.
     The subclasses of the root class are all the same kind as the root
-    class. In other words:
+    class. In other words::
 
       Animal.kind() == Feline.kind() == Panther.kind() == 'Animal'
 

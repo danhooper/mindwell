@@ -22,6 +22,7 @@ from google.appengine._internal import antlr3
 from google.appengine._internal.antlr3 import tree
 from google.appengine.api.search import QueryLexer
 from google.appengine.api.search import QueryParser
+from google.appengine.api.search import unicode_util
 
 
 COMPARISON_TYPES = [
@@ -88,10 +89,9 @@ class QueryParserWithErrors(QueryParser.QueryParser):
     """
     raise QueryException(msg)
 
-
 def CreateParser(query):
   """Creates a Query Parser."""
-  input_string = antlr3.ANTLRStringStream(query)
+  input_string = antlr3.ANTLRStringStream(unicode_util.LimitUnicode(query))
   lexer = QueryLexerWithErrors(input_string)
   tokens = antlr3.CommonTokenStream(lexer)
   parser = QueryParserWithErrors(tokens)
@@ -244,15 +244,21 @@ def GetQueryNodeTextUnicode(node):
   return node.getText()
 
 
-def GetPhraseQueryNodeText(node):
-  """Returns the text from a query node."""
-  text = GetQueryNodeText(node)
+def RemoveSurroundingQuotes(text):
+  """Removes outer quotation marks, if present."""
   if text:
 
 
 
     if text[0] == '"' and text[-1] == '"':
       text = text[1:-1]
+  return text
+
+
+def GetPhraseQueryNodeText(node):
+  """Returns the text from a query node."""
+  text = GetQueryNodeText(node)
+  text = RemoveSurroundingQuotes(text)
   return text
 
 
