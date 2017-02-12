@@ -14,7 +14,7 @@ angular.module('mindwell').directive('mwClientForm', function(mindwellCache, $mo
                 if (scope.client && scope.client.id) {
                     scope.client.dob_year = moment(scope.client.dob).year();
                     scope.client.dob_month = moment(scope.client.dob).month() + 1;
-                    scope.client.dob_day = moment(scope.client.dob).day();
+                    scope.client.dob_day = moment(scope.client.dob).date();
                 } else if (scope.client) {
                     _.merge(scope.client, defaultClient);
                 } else {
